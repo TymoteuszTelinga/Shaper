@@ -1,0 +1,10 @@
+
+void setup()
+{
+    canvas(400, 400);
+}
+
+void draw()
+{
+    rectangle(50,50,300,300);
+}

@@ -1,0 +1,29 @@
+int gridSize = 40;
+int width = 640, height = 360;
+
+void setup()
+{
+    canvas(width, height); 
+    background(GRAY);
+}
+
+void draw()
+{
+
+    for (int x = gridSize; x <= width - gridSize; x += gridSize)
+    {
+        for (int y = gridSize; y <= height - gridSize; y += gridSize)
+        {
+            if( x%(2*gridSize) == 0 )
+            {
+                line(x, y, width/2, height/2, BLACK);
+            }
+            else
+            {
+                line(x, y, width/2, height/2, WHITE);
+            }
+        }
+    }
+
+    noLoop();
+}

@@ -1,0 +1,10 @@
+void draw()
+{
+    for(int x=0; x < 10; x++)
+    {
+        for(int y=0; y < 10; y++)
+        {
+            rectangle(x*10,y*10,8,8,BLACK);
+        }
+    }
+}
