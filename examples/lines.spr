@@ -16,11 +16,11 @@ void draw()
         {
             if( x%(2*gridSize) == 0 )
             {
-                line(x, y, width/2, height/2, BLACK);
+                paint line from (x,y) to (width/2, height/2) with BLACK;
             }
             else
             {
-                line(x, y, width/2, height/2, WHITE);
+                paint line from (x,y) to (width/2, height/2) with WHITE;
             }
         }
     }

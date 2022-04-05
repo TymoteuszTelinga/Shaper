@@ -131,6 +131,61 @@ bool checkForKeyWord(const string& word)
     {
         return true;
     }
+
+    if (word == "paint")
+    {
+        return true;
+    }
+
+    if (word == "line")
+    {
+        return true;
+    }
+
+    if (word == "triangle")
+    {
+        return true;
+    }
+
+    if (word == "rectangle")
+    {
+        return true;
+    }
+
+    if (word == "circle")
+    {
+        return true;
+    }
+
+    if (word == "at")
+    {
+        return true;
+    }
+
+    if (word == "of")
+    {
+        return true;
+    }
+
+    if (word == "from")
+    {
+        return true;
+    }
+
+    if (word == "through")
+    {
+        return true;
+    }
+
+    if (word == "to")
+    {
+        return true;
+    }
+
+    if (word == "with")
+    {
+        return true;
+    }
     
     return false;
 }

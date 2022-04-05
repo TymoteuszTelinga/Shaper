@@ -4,7 +4,7 @@ void draw()
     {
         for(int y=0; y < 10; y++)
         {
-            rectangle(x*10,y*10,8,8,BLACK);
+            paint rectangle at (x*10,y*10) of (8,8) with BLACK;
         }
     }
 }
