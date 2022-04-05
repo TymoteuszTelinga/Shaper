@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <ctype.h>
+#include <map>
 
 using std::cout;
 using std::cerr;
@@ -11,6 +12,32 @@ using std::string;
 
 const string single = ".,:;()[]{}&|";
 const string doubleOperators = "-+*/%=!<>";
+
+bool checkForKeyWord(const string&);
+
+//dodaje wystapienie slowa kluczowego do licznika
+void addToken(std::map<string,int>& counter, const string& keyword)
+{
+    auto search = counter.find(keyword);
+
+    if(search != counter.end())
+    {
+        ++search->second;
+    }
+    else
+    {
+        counter.emplace(std::pair{keyword,1});
+    }
+}
+
+void printCounter(std::map<string, int>& counter)
+{
+    for (const auto& keyword : counter)
+    {
+        std::cout<<keyword.first <<": " <<keyword.second<<"\n";
+    }
+}
+
 //zapisuje słowo do listy wyrażeń
 void saveToken(std::vector<string>& t,string& word)
 {
@@ -20,6 +47,7 @@ void saveToken(std::vector<string>& t,string& word)
     }
 
     t.push_back(word);
+
     word.clear();
 }
 //zapisuje znak do listy wyrażeń
@@ -37,10 +65,11 @@ char next(const string& line, const int pos)
 
     return line[pos+1];
 }
-//zwraca liste zawierającą poszczegulne "wyrażenia"
+//zwraca liste zawierającą poszczegolne "wyrażenia"
 std::vector<string> createTokensFromFile(const string& src)
 {
     std::vector<string> tokens;
+    std::map<string,int> counter;
 
     std::ifstream file(src);
     if (!file.is_open())
@@ -66,6 +95,12 @@ std::vector<string> createTokensFromFile(const string& src)
                 word+=c;
                 continue;
             }
+
+            if(checkForKeyWord(word))
+            {
+                addToken(counter, word);
+            }
+
             //zapis do tej pory utworzonego słowa
             saveToken(tokens,word);
             //spacja lub koniec lini
@@ -124,6 +159,9 @@ std::vector<string> createTokensFromFile(const string& src)
     }
 
     file.close();
+
+    printCounter(counter);
+
     return tokens;
 }
 //zwraca true jeśli podane słowo jest słowem kluczowym
@@ -131,6 +169,7 @@ bool checkForKeyWord(const string& word)
 {
     if (word == "void")
     {
+        
         return true;
     }
 
@@ -246,6 +285,8 @@ bool checkForKeyWord(const string& word)
     
     return false;
 }
+
+
 
 int main(int argc, char* argv[])
 {
