@@ -33,3 +33,6 @@
 
 # VSCode
 .vscode/*.*
+
+# out file
+out.txt
