@@ -275,11 +275,7 @@ TRIANGLE: 'triangle';
 
 RECTANGLE: 'rectangle';
 
-SQUARE: 'square';
-
 CIRCLE: 'circle';
-
-ELLIPSE: 'ellipse';
 
 AT: 'at';
 
