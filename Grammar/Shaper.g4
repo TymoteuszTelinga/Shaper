@@ -180,10 +180,67 @@ unaryOperator
 statement
     : compoundStatement 
     | expression SEMICOLON
+    | paintStatement SEMICOLON
     | selectionStatement 
     | labeledStatement 
     | iterationStatement
     | jumpStatement
+    ;
+
+paintStatement
+    : PAINT  shapeIndicator
+    ;
+
+shapeIndicator
+    : LINE lineParameters
+    | TRIANGLE triangleParameters
+    | RECTANGLE rectangleParameters
+    | CIRCLE circleParameters
+    ;
+
+lineParameters
+    : fromStatement toStatement (colorStatement)?
+    ;
+
+triangleParameters
+    : fromStatement throughStatement toStatement (colorStatement)?
+    ;
+
+rectangleParameters
+    : atStatement ofStatement (colorStatement)?
+    ;
+
+circleParameters
+    : atStatement ofStatement (colorStatement)?
+    ;
+
+atStatement
+    : AT posSizeParent
+    ;
+
+ofStatement
+    : OF posSizeParent
+    | OF expression
+    ;
+
+fromStatement
+    : FROM posSizeParent 
+    ;
+
+throughStatement
+    : THROUGH posSizeParent
+    ;
+
+toStatement
+    : TO posSizeParent
+    ;
+
+colorStatement
+    : WITH (Identifier|Constant)
+    ;
+
+posSizeParent
+    : LEFTPAREN expression COMMA expression RIGHTPAREN
     ;
 
 selectionStatement
@@ -209,6 +266,32 @@ jumpStatement
     | RETURN expression? SEMICOLON
     ;
 
+
+PAINT: 'paint';
+
+LINE: 'line';
+
+TRIANGLE: 'triangle';
+
+RECTANGLE: 'rectangle';
+
+SQUARE: 'square';
+
+CIRCLE: 'circle';
+
+ELLIPSE: 'ellipse';
+
+AT: 'at';
+
+OF: 'of';
+
+FROM: 'from';
+
+THROUGH: 'through';
+
+TO: 'to';
+
+WITH: 'with';
 
 LEFTPAREN: '(';
 
