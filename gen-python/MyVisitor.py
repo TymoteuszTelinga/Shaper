@@ -62,7 +62,19 @@ class MyVisitor(ShaperVisitor):
         pass
     
     def visitTriangleParameters(self, ctx: ShaperParser.TriangleParametersContext):
-        pass
+        print("Rectangle:")
+        
+        pos1 = self.visit(ctx.fromStatement())
+        pos2 = self.visit(ctx.throughStatement())
+        pos3 = self.visit(ctx.toStatement())
+
+        if(ctx.colorStatement() != None):
+            color = self.visit(ctx.colorStatement())  
+            trg = Shapes.Triangle(pos1, pos2, pos3, color)
+        else:
+            trg = Shapes.Triangle(pos1, pos2, pos3)
+        
+        trg.paint()
 
     def visitRectangleParameters(self, ctx: ShaperParser.RectangleParametersContext):
         print("Rectangle:")
@@ -81,6 +93,18 @@ class MyVisitor(ShaperVisitor):
 
     def visitAtStatement(self, ctx: ShaperParser.AtStatementContext):
         print("pos:")
+        return self.visitChildren(ctx)
+
+    def visitFromStatement(self, ctx: ShaperParser.FromStatementContext):
+        print("pos1:")
+        return self.visitChildren(ctx)
+
+    def visitThroughStatement(self, ctx: ShaperParser.ThroughStatementContext):
+        print("pos2:")
+        return self.visitChildren(ctx)
+
+    def visitToStatement(self, ctx: ShaperParser.ToStatementContext):
+        print("pos3:")
         return self.visitChildren(ctx)
 
     def visitOfStatement(self, ctx: ShaperParser.OfStatementContext):
@@ -180,7 +204,7 @@ class MyVisitor(ShaperVisitor):
         if ctx.expression() != None:
             return self.visit(ctx.expression())
         elif ctx.constant() != None:
-            return int(ctx.constant().getText())
+            return int(float(ctx.constant().getText()))
 
     
 
