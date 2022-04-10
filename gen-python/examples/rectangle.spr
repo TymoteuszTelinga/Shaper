@@ -1,5 +1,5 @@
 void draw()
 {
-    paint rectangle at ((10*30-50)/10,200) of (100,203);
+    paint rectangle at ((10*30-50)/10,200) of (100,203) with RED;
     paint rectangle at (490,340) of (-100,50);
 }

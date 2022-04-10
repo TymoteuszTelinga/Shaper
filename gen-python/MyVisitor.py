@@ -1,7 +1,8 @@
-from ShaperVisitor import ShaperVisitor
-from ShaperParser import ShaperParser
+from grammar.ShaperVisitor import ShaperVisitor
+from grammar.ShaperParser import ShaperParser
 from WindowMaker import WindowMaker
 import Shapes
+import Color
 from Types import Types
 
 
@@ -64,6 +65,8 @@ class MyVisitor(ShaperVisitor):
         pass
 
     def visitRectangleParameters(self, ctx: ShaperParser.RectangleParametersContext):
+        print("Rectangle:")
+        
         pos = self.visit(ctx.atStatement())
         size = self.visit(ctx.ofStatement())
 
@@ -75,10 +78,13 @@ class MyVisitor(ShaperVisitor):
         
         rect.paint() 
 
+
     def visitAtStatement(self, ctx: ShaperParser.AtStatementContext):
+        print("pos:")
         return self.visitChildren(ctx)
 
     def visitOfStatement(self, ctx: ShaperParser.OfStatementContext):
+        print("size:")
         return self.visitChildren(ctx)
 
     def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):
@@ -87,6 +93,24 @@ class MyVisitor(ShaperVisitor):
         pos_size_tulp = (self.visit(exprs[0]), self.visit(exprs[1]))
         print(pos_size_tulp)
         return pos_size_tulp
+
+    def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
+        if ctx.constant() != None:
+            colorStr = ctx.constant().getText()
+            if colorStr == 'BLACK':
+                return Color.BLACK
+            elif colorStr == 'WHITE':
+                return Color.WHITE
+            elif colorStr == 'RED':
+                return Color.RED
+            elif colorStr == 'GREEN':
+                return Color.GREEN
+            elif colorStr == 'BLUE':
+                return Color.BLUE
+            else:
+                return Color.WHITE
+        else:
+            return Color.WHITE
 
     def visitExpression(self, ctx: ShaperParser.ExpressionContext):
         return self.visitChildren(ctx)

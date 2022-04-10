@@ -4,7 +4,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 import MyVisitor
-from ShaperParser import ShaperParser
+from grammar.ShaperParser import ShaperParser
 
 
 

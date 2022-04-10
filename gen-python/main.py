@@ -1,9 +1,8 @@
-from ast import arg
 import sys
 import os.path
 from antlr4 import *
-from ShaperLexer import ShaperLexer
-from ShaperParser import ShaperParser
+from grammar.ShaperLexer import ShaperLexer
+from grammar.ShaperParser import ShaperParser
 from MyVisitor import MyVisitor
 from WindowMaker import WindowMaker
  

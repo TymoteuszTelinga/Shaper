@@ -27,7 +27,7 @@ typeSpecifier
     | FLOAT
     | DOUBLE
     | COLOR
-    | STRUCT Identifier
+    | STRUCT identifier
     | ARRAY functionSpecifier
     | LIST functionSpecifier
     ;
@@ -43,7 +43,7 @@ parameterList
     ;
 
 parameterDeclaration
-    : functionSpecifier Identifier
+    : functionSpecifier identifier
     ;
 
 compoundStatement
@@ -68,17 +68,17 @@ declarationType
     | FLOAT
     | DOUBLE
     | COLOR
-    | STRUCT Identifier
-    | ARRAY LEFTPAREN (Identifier | Constant)? RIGHTPAREN declarationSpecifier
+    | STRUCT identifier
+    | ARRAY LEFTPAREN (identifier | Constant)? RIGHTPAREN declarationSpecifier
     | LIST declarationSpecifier
     ;
 
 initDeclarator
-    : Identifier ( assignmentOperator assignmentExpression)?
+    : identifier ( assignmentOperator assignmentExpression)?
     ;
 
 structDeclarator
-    : STRUCT Identifier LEFTBRACKET structDeclarationList RIGHTBRACKET
+    : STRUCT identifier LEFTBRACKET structDeclarationList RIGHTBRACKET
     ;
 
 
@@ -134,7 +134,7 @@ unaryExpression
 
 postfixExpression
     : primaryExpression
-    | postfixExpression DOT Identifier
+    | postfixExpression DOT identifier
     | postfixExpression PLUSPLUS
     | postfixExpression MINUSMINUS
     | postfixExpression LEFTPAREN functionParameterList? RIGHTPAREN
@@ -168,14 +168,14 @@ relationalOperator
     ;
 
 additiveOperator
-    :   PLUS
-    |   MINUS
+    : PLUS
+    | MINUS
     ;
 
 multiplicativeOperator
-    :   MULTIPLY
-    |   DIVIDE
-    |   MODULO
+    : MULTIPLY
+    | DIVIDE
+    | MODULO
     ;
 
 unaryOperator
@@ -244,7 +244,7 @@ toStatement
     ;
 
 colorStatement
-    : WITH (Identifier|Constant)
+    : WITH (identifier|constant)
     ;
 
 posSizeParent
@@ -416,6 +416,7 @@ Constant
     : IntegerConstant
     | FloatingConstant
     | LogicalConstant
+    | ColorConstant
     ;
 
 fragment
@@ -438,6 +439,15 @@ fragment
 LogicalConstant
     : 'false'
     | 'true'
+    ;
+
+fragment
+ColorConstant
+    : 'BLACK'
+    | 'WHITE'
+    | 'RED'
+    | 'GREEN'
+    | 'BLUE'
     ;
 
 Identifier
