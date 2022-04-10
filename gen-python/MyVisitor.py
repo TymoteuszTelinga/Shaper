@@ -1,3 +1,5 @@
+from turtle import Shape
+from cv2 import circle
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 from WindowMaker import WindowMaker
@@ -108,7 +110,22 @@ class MyVisitor(ShaperVisitor):
         print("===\n")
 
     def visitCircleParameters(self, ctx: ShaperParser.CircleParametersContext):
-        pass
+        print("Circle:")
+        
+        pos = self.visit(ctx.atStatement())
+        size = self.visit(ctx.ofStatement())
+
+        if type(size) != tuple:
+            size = (size,size)
+
+        if(ctx.colorStatement() != None):
+            color = self.visit(ctx.colorStatement())  
+            cir = Shapes.Circle(pos, size, color)
+        else:
+            cir = Shapes.Circle(pos, size)
+        
+        cir.paint() 
+        print("===\n")
 
     def visitAtStatement(self, ctx: ShaperParser.AtStatementContext):
         print("pos:")

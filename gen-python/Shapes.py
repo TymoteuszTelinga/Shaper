@@ -1,5 +1,6 @@
 from OpenGL.GL import * 
 import Color
+import math
   
 
 class Rectangle:
@@ -58,4 +59,38 @@ class Line:
         glBegin(GL_LINES)
         glVertex2f(self.x1, self.y1)
         glVertex2f(self.x2, self.y2)
+        glEnd()
+
+class Circle:
+    num_seg = 80
+    PI = 3.14158
+
+    def __init__(self, pos, size, color = Color.Color(255, 255, 255, 255)):
+        self.x = pos[0]
+        self.y = pos[1]
+
+        self.width = size[0]
+        self.height = size[1]
+
+        self.color = color
+    def paint(self):
+
+        glColor4f(self.color.R, self.color.G, self.color.B, self.color.A)
+        glBegin(GL_TRIANGLES)
+
+        x1 = self.x + self.width
+        y1 = self.y
+        for i in range(self.num_seg):
+            theta = (2.0 * self.PI * (i+1)) / self.num_seg
+
+            x2 = self.x + self.width * math.cos(theta) 
+            y2 = self.y + self.height * math.sin(theta)
+
+            glVertex2f(x1, y1)
+            glVertex2f(self.x, self.y)
+            glVertex2f(x2, y2)
+
+            x1 = x2
+            y1 = y2
+
         glEnd()
