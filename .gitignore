@@ -31,10 +31,15 @@
 *.out
 *.app
 
+# python cache
 __pycache__
+
+#antlr cache
+.antlr
 
 # VSCode
 .vscode/*.*
 
 # out file
 out.txt
+

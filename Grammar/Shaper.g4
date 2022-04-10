@@ -10,7 +10,7 @@ externalDeclaration
     ;
 
 functionDefinition
-    : functionSpecifier Identifier declarator compoundStatement
+    : functionSpecifier identifier declarator compoundStatement
     ;
 
 functionSpecifier
@@ -119,15 +119,12 @@ relationalExpression
 
 additiveExpression
     : multiplicativeExpression
-    | additiveExpression PLUS multiplicativeExpression
-    | additiveExpression MINUS multiplicativeExpression
+    | additiveExpression additiveOperator multiplicativeExpression
     ;
 
 multiplicativeExpression
     : unaryExpression
-    | multiplicativeExpression MULTIPLY unaryExpression
-    | multiplicativeExpression DIVIDE unaryExpression
-    | multiplicativeExpression MODULO unaryExpression
+    | multiplicativeExpression multiplicativeOperator unaryExpression
     ;
 
 unaryExpression
@@ -144,8 +141,8 @@ postfixExpression
     ;
 
 primaryExpression
-    : Identifier
-    | Constant
+    : identifier
+    | constant
     | LEFTPAREN expression RIGHTPAREN
     ;
 
@@ -168,6 +165,17 @@ relationalOperator
     | MOREE
     | LESSEQUAL
     | MOREEQUAL
+    ;
+
+additiveOperator
+    :   PLUS
+    |   MINUS
+    ;
+
+multiplicativeOperator
+    :   MULTIPLY
+    |   DIVIDE
+    |   MODULO
     ;
 
 unaryOperator
@@ -264,6 +272,14 @@ jumpStatement
     : CONTINUE SEMICOLON
     | BREAK SEMICOLON
     | RETURN expression? SEMICOLON
+    ;
+
+identifier
+    : Identifier
+    ;
+
+constant
+    : Constant
     ;
 
 
