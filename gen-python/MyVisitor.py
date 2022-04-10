@@ -59,10 +59,22 @@ class MyVisitor(ShaperVisitor):
         self.visitChildren(ctx)
 
     def visitLineParameters(self, ctx: ShaperParser.LineParametersContext):
-        pass
+        print("Line:")
+
+        pos1 = self.visit(ctx.fromStatement())
+        pos2 = self.visit(ctx.toStatement())
+
+        if(ctx.colorStatement() != None):
+            color = self.visit(ctx.colorStatement())  
+            line = Shapes.Line(pos1, pos2, color)
+        else:
+            line = Shapes.Line(pos1, pos2, color)
+
+        line.paint()
+        print("===\n")
     
     def visitTriangleParameters(self, ctx: ShaperParser.TriangleParametersContext):
-        print("Rectangle:")
+        print("Triangle:")
         
         pos1 = self.visit(ctx.fromStatement())
         pos2 = self.visit(ctx.throughStatement())
@@ -75,12 +87,16 @@ class MyVisitor(ShaperVisitor):
             trg = Shapes.Triangle(pos1, pos2, pos3)
         
         trg.paint()
+        print("===\n")
 
     def visitRectangleParameters(self, ctx: ShaperParser.RectangleParametersContext):
         print("Rectangle:")
         
         pos = self.visit(ctx.atStatement())
         size = self.visit(ctx.ofStatement())
+
+        if type(size) != tuple:
+            size = (size,size)
 
         if(ctx.colorStatement() != None):
             color = self.visit(ctx.colorStatement())  
@@ -89,7 +105,10 @@ class MyVisitor(ShaperVisitor):
             rect = Shapes.Rectangle(pos, size)
         
         rect.paint() 
+        print("===\n")
 
+    def visitCircleParameters(self, ctx: ShaperParser.CircleParametersContext):
+        pass
 
     def visitAtStatement(self, ctx: ShaperParser.AtStatementContext):
         print("pos:")

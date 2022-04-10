@@ -42,3 +42,20 @@ class Triangle:
         glVertex2f(self.x2, self.y2)
         glVertex2f(self.x3, self.y3)
         glEnd()
+
+class Line:
+    def __init__(self, pos1, pos2, color = Color.Color(255,255,255,255)):
+        self.x1 = pos1[0]
+        self.y1 = pos1[1]
+
+        self.x2 = pos2[0]
+        self.y2 = pos2[1]
+    
+        self.color = color
+    
+    def paint(self):
+        glColor4f(self.color.R, self.color.G, self.color.B, self.color.A)
+        glBegin(GL_LINES)
+        glVertex2f(self.x1, self.y1)
+        glVertex2f(self.x2, self.y2)
+        glEnd()
