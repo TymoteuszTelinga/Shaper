@@ -12,7 +12,7 @@ class ShaperErrorListener(ErrorListener):
         super(ShaperErrorListener, self).__init__()
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        raise Exception("ERROR: when parsing line %d column %d: %s\n" (line, column, msg))
+        raise Exception(f"ERROR: when parsing line {line} column {column}: {msg}\n")
         
     def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs):
         raise Exception("Oh no!")
@@ -39,18 +39,16 @@ def main(argv):
         parser.removeErrorListeners()
         parser.addErrorListener(error_listener)
         
+
         try:
             tree = parser.programm()
-        except Exception:
-            print("samethink go wrong")
-            return
-
-        myVisitor = MyVisitor()
-        
-        myVisitor.visit(tree)
             
-
-        myVisitor.window.show()
+            myVisitor = MyVisitor()
+            myVisitor.visit(tree)
+            myVisitor.window.show()
+        except Exception as e:
+            print("somethink went wrong")
+            print(e)
 
     else:
         print("File doesn't exist!")
