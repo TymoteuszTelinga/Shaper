@@ -1,8 +1,14 @@
 grammar Shaper;
 
 programm 
-    : (externalDeclaration)*
+    : externalDeclarationList?
     ;
+
+externalDeclarationList
+    : externalDeclaration externalDeclarationList
+    | externalDeclaration 
+    ;
+
 
 externalDeclaration
     : functionDefinition
@@ -23,7 +29,6 @@ typeSpecifier
     | BOOL
     | INT
     | LONG
-    | CHAR
     | FLOAT
     | DOUBLE
     | COLOR
@@ -47,12 +52,25 @@ parameterDeclaration
     ;
 
 compoundStatement
-    : LEFTBRACKET ( (declaration SEMICOLON) | statement )* RIGHTBRACKET
+    : LEFTBRACKET instructionList? RIGHTBRACKET
+    ;
+
+instructionList
+    : instruction instructionList
+    | instruction
+    ;
+
+instruction
+    : (declaration SEMICOLON) | statement 
     ;
 
 declaration
-    : declarationSpecifier initDeclarator 
+    : initDeclarator 
     | structDeclarator 
+    ;
+
+initDeclarator
+    : declarationSpecifier identifier ( assignmentOperator assignmentExpression)?
     ;
 
 declarationSpecifier
@@ -64,17 +82,12 @@ declarationType
     : BOOL
     | INT
     | LONG
-    | CHAR
     | FLOAT
     | DOUBLE
     | COLOR
     | STRUCT identifier
-    | ARRAY LEFTPAREN (identifier | Constant)? RIGHTPAREN declarationSpecifier
+    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationSpecifier
     | LIST declarationSpecifier
-    ;
-
-initDeclarator
-    : identifier ( assignmentOperator assignmentExpression)?
     ;
 
 structDeclarator
@@ -108,8 +121,7 @@ logicalANDExpression
 
 equalityExpression
     : relationalExpression
-    | equalityExpression EQUAL relationalExpression
-    | equalityExpression NOTEQUAL relationalExpression
+    | equalityExpression equalityOperator relationalExpression
     ;
 
 relationalExpression
@@ -158,6 +170,11 @@ assignmentOperator
     | MULTIPLYASSIGN
     | DIVIDEASSIGN
     | MODULOASSIGN
+    ;
+
+equalityOperator
+    : EQUAL
+    | NOTEQUAL
     ;
 
 relationalOperator
@@ -228,7 +245,6 @@ atStatement
 
 ofStatement
     : OF posSizeParent
-    | OF expression
     ;
 
 fromStatement
@@ -248,7 +264,7 @@ colorStatement
     ;
 
 posSizeParent
-    : LEFTPAREN expression COMMA expression RIGHTPAREN
+    : LEFTPAREN left=expression (COMMA right=expression)? RIGHTPAREN
     ;
 
 selectionStatement
@@ -279,7 +295,10 @@ identifier
     ;
 
 constant
-    : Constant
+    : IntegerConstant
+    | FloatingConstant
+    | LogicalConstant
+    | ColorConstant
     ;
 
 
@@ -411,15 +430,6 @@ BREAK: 'break';
 
 RETURN: 'return';
 
-
-Constant
-    : IntegerConstant
-    | FloatingConstant
-    | LogicalConstant
-    | ColorConstant
-    ;
-
-fragment
 IntegerConstant
     : NonZeroDigit Digit*
     | [0]
@@ -430,18 +440,18 @@ NonZeroDigit
     : [1-9]
     ;
     
-fragment
+
 FloatingConstant
     : Digit+ '.' Digit+
     ;
 
-fragment
+
 LogicalConstant
     : 'false'
     | 'true'
     ;
 
-fragment
+
 ColorConstant
     : 'BLACK'
     | 'WHITE'
