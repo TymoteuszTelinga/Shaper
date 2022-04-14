@@ -272,7 +272,7 @@ class MyVisitor(ShaperVisitor):
             temp_var = Variable("temp", l_var.type)
             
             if l_var == r_var:
-                op = ctx.additiveOperator().getText()
+                op = ctx.multiplicativeOperator().getText()
                 if op == '*':
                     temp_var.val = l_var.val * r_var.val 
                 elif op == '/':

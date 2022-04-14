@@ -4,7 +4,6 @@ void draw()
 { 
     int z = 10;
     {
-        int y = x + z;
+        int y = (x + z)/2;
     }
-    z = y;
 }
