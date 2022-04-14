@@ -1,7 +1,4 @@
-from turtle import Shape
-from typing import Type
-from unittest.loader import VALID_MODULE_NAME
-from cv2 import circle
+from msilib.schema import Error
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 from WindowMaker import WindowMaker
@@ -10,6 +7,7 @@ import Color
 from Types import Type
 from Function import Function
 from Variable import Variable
+from Scope import Scope
 
 
 class MyVisitor(ShaperVisitor):
@@ -18,6 +16,7 @@ class MyVisitor(ShaperVisitor):
         self.window = WindowMaker()
         self.findFunctions = True
         self.funDict = {}
+        self.currentScope = Scope() # add start it is global
 
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):
         if ctx.externalDeclarationList() != None:
@@ -27,7 +26,6 @@ class MyVisitor(ShaperVisitor):
 
     def visitExternalDeclarationList(self, ctx: ShaperParser.ExternalDeclarationListContext):
         self.visit(ctx.externalDeclaration())
-
         # visits other declarations if exists
         if(ctx.externalDeclarationList()):
             self.visit(ctx.externalDeclarationList())
@@ -54,24 +52,15 @@ class MyVisitor(ShaperVisitor):
                 func.setParameters(f_param)
                 self.funDict[name] = func
             else:
-                raise Exception("Ambiguity Error: 2 functions of this same name has been declared")
-            
-            
+                raise Exception("Ambiguity Error: 2 functions of this same name has been declared") 
         else:
-
-            if self.visit(ctx.functionSpecifier()) == Type.VOID and self.visit(ctx.identifier())== 'draw' and self.visit(ctx.declarator()) == 0:
-                print("In draw")
-                self.window.setContext(self, ctx)
-
+            self.visit(ctx.compoundStatement())
 
     def visitFunctionSpecifier(self, ctx: ShaperParser.FunctionSpecifierContext):
-        return self.visitTypeSpecifier(ctx.typeSpecifier())
+        return self.visit(ctx.typeSpecifier())
 
     def visitTypeSpecifier(self, ctx: ShaperParser.TypeSpecifierContext):
         return Type.getType(ctx.getText())
-
-    def visitIdentifier(self, ctx: ShaperParser.IdentifierContext):
-        return ctx.getText()
 
     def visitDeclarator(self, ctx: ShaperParser.DeclaratorContext):
         if ctx.parameterList() == None:
@@ -80,7 +69,6 @@ class MyVisitor(ShaperVisitor):
             return self.visit(ctx.parameterList())
 
     def visitParameterList(self, ctx: ShaperParser.ParameterListContext):
-
         var = self.visit(ctx.parameterDeclaration())
 
         if ctx.parameterList() == None:
@@ -102,14 +90,234 @@ class MyVisitor(ShaperVisitor):
         var = Variable(name, type)
         return var
 
-
     def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
-        for st in ctx.statement():
-            self.visit(st)
+        oldScope = self.currentScope
+        self.currentScope = Scope()
+        self.currentScope.upper = oldScope
+        if ctx.instructionList() != None:
+            self.visit(ctx.instructionList())
+        
+        print("Ended scope with variables: " + repr(self.currentScope.variables))
+        self.currentScope = oldScope
+        print("Current Scope: " + repr(self.currentScope.variables))
+    
+    def visitInstructionList(self, ctx: ShaperParser.InstructionListContext):
+        self.visit(ctx.instruction())
+
+        if ctx.instructionList() != None:
+            self.visit(ctx.instructionList())
+    
+    def visitInstruction(self, ctx: ShaperParser.InstructionContext):
+        if ctx.declaration() != None:
+            self.visit(ctx.declaration())
+        else:
+            self.visit(ctx.statement())
+
+    def visitDeclaration(self, ctx: ShaperParser.DeclarationContext):
+        if (ctx.structDeclarator() != None):
+            return
+        else:
+            var = self.visit(ctx.initDeclarator())
+
+    def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
+        name = ctx.identifier().getText()
+        type = self.visit(ctx.declarationSpecifier())
+        var = Variable(name, type)
+
+        if self.currentScope.isDefined(var):
+            raise Exception("Variable \'" + name + "\' defined earlier in this scope")
+
+        if ctx.assignmentExpression() != None:
+            r_value = self.visit(ctx.assignmentExpression())
+            if var == r_value:
+                var.val = r_value.val;
+        
+        self.currentScope.addVariable(var)
+
+
+    def visitDeclarationSpecifier(self, ctx: ShaperParser.DeclarationSpecifierContext) -> Type:
+        return self.visit(ctx.declarationType())
+
+    def visitDeclarationType(self, ctx: ShaperParser.DeclarationTypeContext) -> Type:
+        return Type.getType(ctx.getText())
+    
+    def visitExpression(self, ctx: ShaperParser.ExpressionContext) -> Variable:
+        return self.visitChildren(ctx)
+
+    def visitAssignmentExpression(self, ctx: ShaperParser.AssignmentExpressionContext) -> Variable:
+        if ctx.unaryExpression() == None:
+            return self.visit(ctx.logicalORExpression())
+        else:
+            l_var = self.visit(ctx.unaryExpression())
+            r_var = self.visit(ctx.assignmentExpression())
+
+# TODO checking variable types
+            if l_var == r_var:
+                op = ctx.assignmentOperator().getText()
+
+                if op == '=':
+                    l_var.val =  r_var.val 
+                elif op == '+=':
+                    l_var.val += r_var.val
+                elif op == '-=':
+                    l_var.val -= r_var.val   
+                elif op == '*=':
+                    l_var.val *= r_var.val   
+                elif op == '/=':
+                    l_var.val /= r_var.val 
+                elif op == '%=':
+                    l_var.val %= r_var.val 
+
+            return l_var
+        
+        
+    def visitLogicalORExpression(self, ctx: ShaperParser.LogicalORExpressionContext) -> Variable:
+        if ctx.logicalORExpression() == None:
+            return self.visit(ctx.logicalANDExpression())
+        else:
+            l_var = self.visit(ctx.logicalORExpression())
+            r_var = self.visit(ctx.logicalANDExpression())
+
+            temp_var = Variable("temp", Type.BOOL)
+            if l_var == Type.BOOL and r_var == Type.BOOL:
+                temp_var.val = l_var.val or r_var.val 
+
+            return temp_var
+
+    def visitLogicalANDExpression(self, ctx: ShaperParser.LogicalANDExpressionContext) -> Variable:
+        if ctx.logicalANDExpression() == None:
+            return self.visit(ctx.equalityExpression())
+        else:
+            l_var = self.visit(ctx.logicalANDExpression())
+            r_var = self.visit(ctx.equalityExpression())
+
+            temp_var = Variable("temp", Type.BOOL)
+            if l_var == Type.BOOL and r_var == Type.BOOL:
+                temp_var.val = l_var.val and r_var.val 
+
+            return temp_var
+    
+    def visitEqualityExpression(self, ctx: ShaperParser.EqualityExpressionContext) -> Variable:
+        if ctx.equalityExpression() == None:
+            return self.visit(ctx.relationalExpression())
+        else:
+            l_var = self.visit(ctx.equalityExpression())
+            r_var = self.visit(ctx.relationalExpression())
+
+            temp_var = Variable("temp", l_var.type)
+
+            if l_var == r_var:
+                op = ctx.equalityOperator().getText()
+                if op == '==':
+                    temp_var.val = l_var.val == r_var.val 
+                elif op == '!=':
+                    temp_var.val = l_var.val != r_var.val
+
+            return temp_var
+    
+    def visitRelationalExpression(self, ctx: ShaperParser.RelationalExpressionContext) -> Variable:
+        if ctx.relationalExpression() == None:
+            return self.visit(ctx.additiveExpression())
+        else:
+            l_var = self.visit(ctx.relationalExpression())
+            r_var = self.visit(ctx.additiveExpression())
+
+            temp_var = Variable("temp", l_var.type)
+            
+            if l_var == r_var:
+                types = [Type.DOUBLE, Type.FLOAT, Type.INT, Type.LONG]
+                if l_var.type in types:
+                    op = ctx.relationalOperator().getText()
+                    if op == '<':
+                        temp_var.val = l_var.val < r_var.val 
+                    elif op == '>':
+                        temp_var.val = l_var.val > r_var.val 
+                    elif op == '<=':
+                        temp_var.val = l_var.val <= r_var.val
+                    elif op == '>=':
+                        temp_var.val = l_var.val >= r_var.val 
+                else:
+                    raise Exception("Type Error: Incorrect types, it should be one of: " + types)
+
+            return temp_var
+    
+    def visitAdditiveExpression(self, ctx: ShaperParser.AdditiveExpressionContext) -> Variable:
+        if ctx.additiveExpression() == None:
+            return self.visit(ctx.multiplicativeExpression())
+        else:
+            l_var = self.visit(ctx.additiveExpression())
+            r_var = self.visit(ctx.multiplicativeExpression())
+
+            temp_var = Variable("temp", l_var.type)
+            
+            if l_var == r_var:
+                op = ctx.additiveOperator().getText()
+                if op == '+':
+                    temp_var.val = l_var.val + r_var.val 
+                elif op == '-':
+                    temp_var.val = l_var.val - r_var.val 
+
+
+            return temp_var
+       
+
+
+    def visitMultiplicativeExpression(self, ctx: ShaperParser.MultiplicativeExpressionContext) -> Variable:
+        if ctx.multiplicativeExpression() == None:
+            return self.visit(ctx.unaryExpression())
+        else:
+            l_var = self.visit(ctx.multiplicativeExpression())
+            r_var = self.visit(ctx.unaryExpression())
+
+            temp_var = Variable("temp", l_var.type)
+            
+            if l_var == r_var:
+                op = ctx.additiveOperator().getText()
+                if op == '*':
+                    temp_var.val = l_var.val * r_var.val 
+                elif op == '/':
+                    temp_var.val = l_var.val / r_var.val 
+                elif op == '%':
+                    temp_var.val = l_var.val % r_var.val
+
+            return temp_var
+
+    def visitUnaryExpression(self, ctx: ShaperParser.UnaryExpressionContext):
+        if ctx.unaryOperator() != None and ctx.unaryOperator().getText() == '-':
+            var = self.visit(ctx.unaryExpression())
+            var.val *= -1
+            return var 
+
+        else:
+            return self.visit(ctx.postfixExpression())
+
+    def visitPostfixExpression(self, ctx: ShaperParser.PostfixExpressionContext):
+        return self.visit(ctx.primaryExpression())
+
+    def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
+        if ctx.expression() != None:
+            return self.visit(ctx.expression())
+        elif ctx.constant() != None:
+            var = Variable("temp", Type.INT)
+            var.val = int(float(ctx.constant().getText()))
+            return var
+        elif ctx.identifier() != None:
+            name = ctx.identifier().getText()
+            var = Variable(name, Type.VOID)
+            if self.currentScope.isAvailable(var):
+               return self.currentScope.getVariable(name)
+            else:
+                raise Exception("Variables Error: variable isn't defined")
+
+
 
     def visitStatement(self, ctx: ShaperParser.StatementContext):
         if ctx.paintStatement() != None:
             self.visit(ctx.paintStatement())
+        if ctx.compoundStatement() != None:
+            self.visit(ctx.compoundStatement())
+        if ctx.expression() != None:
+            self.visit(ctx.expression())
 
     def visitPaintStatement(self, ctx: ShaperParser.PaintStatementContext):
         self.visit(ctx.shapeIndicator())
@@ -229,81 +437,9 @@ class MyVisitor(ShaperVisitor):
         else:
             return Color.WHITE
 
-    def visitExpression(self, ctx: ShaperParser.ExpressionContext):
-        return self.visitChildren(ctx)
 
-    def visitAssignmentExpression(self, ctx: ShaperParser.AssignmentExpressionContext):
-        if ctx.unaryExpression() == None:
-            return self.visit(ctx.logicalORExpression())
-        
-    def visitLogicalORExpression(self, ctx: ShaperParser.LogicalORExpressionContext):
-        if ctx.logicalORExpression() == None:
-            return self.visit(ctx.logicalANDExpression())
-
-    def visitLogicalANDExpression(self, ctx: ShaperParser.LogicalANDExpressionContext):
-        if ctx.logicalANDExpression() == None:
-            return self.visit(ctx.equalityExpression())
-    
-    def visitEqualityExpression(self, ctx: ShaperParser.EqualityExpressionContext):
-        if ctx.equalityExpression() == None:
-            return self.visit(ctx.relationalExpression())
-    
-    def visitRelationalExpression(self, ctx: ShaperParser.RelationalExpressionContext):
-        if ctx.relationalExpression() == None:
-            return self.visit(ctx.additiveExpression())
-    
-    def visitAdditiveExpression(self, ctx: ShaperParser.AdditiveExpressionContext):
-        if ctx.additiveOperator() != None:
-            l = self.visit(ctx.additiveExpression())
-            r = self.visit(ctx.multiplicativeExpression())
-
-            op = ctx.additiveOperator().getText()
-
-            if op =='+' :
-                return l+r;
-            elif op =='-':
-                return l-r;
-        else:
-            return self.visit(ctx.multiplicativeExpression())
-    
-    def visitMultiplicativeExpression(self, ctx: ShaperParser.MultiplicativeExpressionContext):
-        if ctx.multiplicativeOperator() != None:
-            l = self.visit(ctx.multiplicativeExpression())
-            r = self.visit(ctx.unaryExpression())
-
-            op = ctx.multiplicativeOperator().getText()
-
-            if op == '*':
-                return l * r
-            elif op == '/':
-                if( r == 0):
-                    raise Exception("Semantic Error: Can't do division by 0!")
-                else:
-                    return l / r
-            elif op == '%':
-                if (r == 0):
-                    raise Exception("Semantic Error: Can't do modulo by 0!")
-                else:
-                    return l % r;
-
-        else:
-            return self.visit(ctx.unaryExpression())
-
-    def visitUnaryExpression(self, ctx: ShaperParser.UnaryExpressionContext):
-        if ctx.unaryOperator() != None and ctx.unaryOperator().getText() == '-':
-            return (-1) * self.visit(ctx.unaryExpression())
-
-        else:
-            return self.visit(ctx.postfixExpression())
-
-    def visitPostfixExpression(self, ctx: ShaperParser.PostfixExpressionContext):
-        return self.visit(ctx.primaryExpression())
-
-    def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
-        if ctx.expression() != None:
-            return self.visit(ctx.expression())
-        elif ctx.constant() != None:
-            return int(float(ctx.constant().getText()))
+    def visitIdentifier(self, ctx: ShaperParser.IdentifierContext):
+        return ctx.getText()
 
     
 

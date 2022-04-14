@@ -19,6 +19,8 @@ class Type(enum.Enum):
     def getType(str):
         if str == 'void':
             return Type.VOID
+        elif str =='bool':
+            return Type.BOOL
         elif str == 'int':
             return Type.INT
         elif str == 'long':
@@ -35,6 +37,8 @@ class Type(enum.Enum):
     def __repr__(self) -> str:
         if self == Type.VOID:
             return "\'void\'"
+        elif self == Type.BOOL:
+            return "\'bool\'"
         elif self == Type.INT:
             return "\'int\'"
         elif self == Type.LONG:

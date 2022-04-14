@@ -1,12 +1,12 @@
 from Types import Type
 
 class Function:
-    def __init__(self, f_name : str):
+    def __init__(self, f_name : str) -> None:
         self.name : str = f_name 
         self.return_type : Type = Type.VOID
         self.parameters = []
 
-    def setReturnType(self, type) -> None:
+    def setReturnType(self, type : Type) -> None:
         self.return_type = type
     
     def setParameters(self, par_list) -> None:

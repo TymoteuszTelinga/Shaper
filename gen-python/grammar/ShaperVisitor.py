@@ -59,8 +59,23 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#instructionList.
+    def visitInstructionList(self, ctx:ShaperParser.InstructionListContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#instruction.
+    def visitInstruction(self, ctx:ShaperParser.InstructionContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#declaration.
     def visitDeclaration(self, ctx:ShaperParser.DeclarationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#initDeclarator.
+    def visitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
         return self.visitChildren(ctx)
 
 
@@ -71,11 +86,6 @@ class ShaperVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ShaperParser#declarationType.
     def visitDeclarationType(self, ctx:ShaperParser.DeclarationTypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by ShaperParser#initDeclarator.
-    def visitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
         return self.visitChildren(ctx)
 
 
@@ -146,6 +156,11 @@ class ShaperVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ShaperParser#functionParameterList.
     def visitFunctionParameterList(self, ctx:ShaperParser.FunctionParameterListContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#equalityOperator.
+    def visitEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
         return self.visitChildren(ctx)
 
 

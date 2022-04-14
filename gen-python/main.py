@@ -46,8 +46,9 @@ def main(argv):
             myVisitor = MyVisitor()
             try:
                 myVisitor.visit(tree)
-                #myVisitor.window.show()
                 print(myVisitor.funDict)
+                myVisitor.visit(tree)
+                #myVisitor.window.show()
             except Exception as e:
                 print(e)
                 

@@ -1,6 +1,6 @@
 void init(int t, color c)
 {
-
+ int x;
 }
 
 void draw()

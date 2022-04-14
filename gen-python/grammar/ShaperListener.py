@@ -98,12 +98,39 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#instructionList.
+    def enterInstructionList(self, ctx:ShaperParser.InstructionListContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#instructionList.
+    def exitInstructionList(self, ctx:ShaperParser.InstructionListContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#instruction.
+    def enterInstruction(self, ctx:ShaperParser.InstructionContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#instruction.
+    def exitInstruction(self, ctx:ShaperParser.InstructionContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#declaration.
     def enterDeclaration(self, ctx:ShaperParser.DeclarationContext):
         pass
 
     # Exit a parse tree produced by ShaperParser#declaration.
     def exitDeclaration(self, ctx:ShaperParser.DeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#initDeclarator.
+    def enterInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#initDeclarator.
+    def exitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
         pass
 
 
@@ -122,15 +149,6 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#declarationType.
     def exitDeclarationType(self, ctx:ShaperParser.DeclarationTypeContext):
-        pass
-
-
-    # Enter a parse tree produced by ShaperParser#initDeclarator.
-    def enterInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#initDeclarator.
-    def exitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
         pass
 
 
@@ -257,6 +275,15 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#functionParameterList.
     def exitFunctionParameterList(self, ctx:ShaperParser.FunctionParameterListContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#equalityOperator.
+    def enterEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#equalityOperator.
+    def exitEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
         pass
 
 
