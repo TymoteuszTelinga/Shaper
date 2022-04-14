@@ -14,6 +14,11 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#externalDeclarationList.
+    def visitExternalDeclarationList(self, ctx:ShaperParser.ExternalDeclarationListContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#externalDeclaration.
     def visitExternalDeclaration(self, ctx:ShaperParser.ExternalDeclarationContext):
         return self.visitChildren(ctx)

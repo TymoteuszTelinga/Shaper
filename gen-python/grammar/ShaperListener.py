@@ -17,6 +17,15 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#externalDeclarationList.
+    def enterExternalDeclarationList(self, ctx:ShaperParser.ExternalDeclarationListContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#externalDeclarationList.
+    def exitExternalDeclarationList(self, ctx:ShaperParser.ExternalDeclarationListContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#externalDeclaration.
     def enterExternalDeclaration(self, ctx:ShaperParser.ExternalDeclarationContext):
         pass

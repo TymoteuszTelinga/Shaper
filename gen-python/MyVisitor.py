@@ -1,50 +1,107 @@
 from turtle import Shape
+from typing import Type
+from unittest.loader import VALID_MODULE_NAME
 from cv2 import circle
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 from WindowMaker import WindowMaker
 import Shapes
 import Color
-from Types import Types
+from Types import Type
+from Function import Function
+from Variable import Variable
 
 
 class MyVisitor(ShaperVisitor):
 
-    window = WindowMaker()
-    
+    def __init__(self) -> None:
+        self.window = WindowMaker()
+        self.findFunctions = True
+        self.funDict = {}
+
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):
-        for extDec in ctx.externalDeclaration():
-            self.visit(extDec)
+        if ctx.externalDeclarationList() != None:
+            self.visit(ctx.externalDeclarationList())
+
+        self.findFunctions = False
+
+    def visitExternalDeclarationList(self, ctx: ShaperParser.ExternalDeclarationListContext):
+        self.visit(ctx.externalDeclaration())
+
+        # visits other declarations if exists
+        if(ctx.externalDeclarationList()):
+            self.visit(ctx.externalDeclarationList())
 
     def visitExternalDeclaration(self, ctx: ShaperParser.ExternalDeclarationContext):
-        if ctx.functionDefinition is not None:
-            self.visit(ctx.functionDefinition())
+        if self.findFunctions == True: # first tree walking 
+            if ctx.functionDefinition() is not None:
+                self.visit(ctx.functionDefinition())
+        else:
+            if ctx.functionDefinition() is not None:
+                self.visit(ctx.functionDefinition())
+            else:
+                self.visit(ctx.declaration())
 
     def visitFunctionDefinition(self, ctx: ShaperParser.FunctionDefinitionContext):
-        
-        
-        if self.visit(ctx.functionSpecifier()) == Types.VOID and self.visit(ctx.identifier())== 'draw' and self.visit(ctx.declarator()) == 0:
-           print("In draw")
-           self.window.setContext(self, ctx)
+        if self.findFunctions == True:
+            r_type = self.visit(ctx.functionSpecifier())
+            name = ctx.identifier().getText()
+            f_param = self.visit(ctx.declarator())
+            if name not in self.funDict.keys():
+                print("success")
+                func = Function(name)
+                func.setReturnType(r_type)
+                func.setParameters(f_param)
+                self.funDict[name] = func
+            else:
+                raise Exception("Ambiguity Error: 2 functions of this same name has been declared")
+            
+            
+        else:
+
+            if self.visit(ctx.functionSpecifier()) == Type.VOID and self.visit(ctx.identifier())== 'draw' and self.visit(ctx.declarator()) == 0:
+                print("In draw")
+                self.window.setContext(self, ctx)
 
 
     def visitFunctionSpecifier(self, ctx: ShaperParser.FunctionSpecifierContext):
         return self.visitTypeSpecifier(ctx.typeSpecifier())
 
     def visitTypeSpecifier(self, ctx: ShaperParser.TypeSpecifierContext):
-        if ctx.getText() == 'void':
-            return Types.VOID
-        else:
-            return Types.INT
+        return Type.getType(ctx.getText())
 
     def visitIdentifier(self, ctx: ShaperParser.IdentifierContext):
         return ctx.getText()
 
     def visitDeclarator(self, ctx: ShaperParser.DeclaratorContext):
         if ctx.parameterList() == None:
-            return 0
+            return []
         else:
-            return 1
+            return self.visit(ctx.parameterList())
+
+    def visitParameterList(self, ctx: ShaperParser.ParameterListContext):
+
+        var = self.visit(ctx.parameterDeclaration())
+
+        if ctx.parameterList() == None:
+            par_list = [var]
+        else:
+            par_list = self.visit(ctx.parameterList())
+            for param in par_list:
+                if var.name == param.name:
+                    raise Exception("Ambiguity Error: Two or more parameters of this same name in one function")
+            
+            par_list.append(var)
+            
+        return par_list
+
+    def visitParameterDeclaration(self, ctx: ShaperParser.ParameterDeclarationContext):
+        name = ctx.identifier().getText()
+        type = self.visit(ctx.functionSpecifier())
+
+        var = Variable(name, type)
+        return var
+
 
     def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
         for st in ctx.statement():
@@ -219,9 +276,15 @@ class MyVisitor(ShaperVisitor):
             if op == '*':
                 return l * r
             elif op == '/':
-                return l / r
+                if( r == 0):
+                    raise Exception("Semantic Error: Can't do division by 0!")
+                else:
+                    return l / r
             elif op == '%':
-                return l % r;
+                if (r == 0):
+                    raise Exception("Semantic Error: Can't do modulo by 0!")
+                else:
+                    return l % r;
 
         else:
             return self.visit(ctx.unaryExpression())

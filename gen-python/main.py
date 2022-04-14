@@ -15,20 +15,20 @@ class ShaperErrorListener(ErrorListener):
         raise Exception(f"ERROR: when parsing line {line} column {column}: {msg}\n")
         
     def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs):
-        raise Exception("Oh no!")
+        raise Exception("Ambiguity ERROR")
 
     def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
-        raise Exception("Oh no!!")
+        raise Exception("Attempting full Context ERROR")
 
     def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
-        raise Exception("Oh no!!!")
+        raise Exception("ContextSensitivity ERROR")
  
 def main(argv):
 
     if len(argv)>1 and os.path.isfile(argv[1]):
         input_stream = FileStream(argv[1])
 
-        error_listener =    ShaperErrorListener()
+        error_listener = ShaperErrorListener()
         lexer = ShaperLexer(input_stream)
         lexer.removeErrorListeners()
         lexer.addErrorListener(error_listener)
@@ -44,10 +44,15 @@ def main(argv):
             tree = parser.programm()
             
             myVisitor = MyVisitor()
-            myVisitor.visit(tree)
-            myVisitor.window.show()
+            try:
+                myVisitor.visit(tree)
+                #myVisitor.window.show()
+                print(myVisitor.funDict)
+            except Exception as e:
+                print(e)
+                
         except Exception as e:
-            print("somethink went wrong")
+            print("something went wrong")
             print(e)
 
     else:
