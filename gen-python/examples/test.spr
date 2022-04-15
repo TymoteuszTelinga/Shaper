@@ -3,7 +3,8 @@ int x = 10;
 void draw()
 { 
     int z = 10;
+    color c = BLACK; 
     {
-        int y = (x + z)/2;
+        int y = z / 2;
     }
 }

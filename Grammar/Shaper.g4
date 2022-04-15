@@ -149,13 +149,17 @@ postfixExpression
     | postfixExpression DOT identifier
     | postfixExpression PLUSPLUS
     | postfixExpression MINUSMINUS
-    | postfixExpression LEFTPAREN functionParameterList? RIGHTPAREN
     ;
 
 primaryExpression
     : identifier
     | constant
-    | LEFTPAREN expression RIGHTPAREN
+    | LEFTPAREN expression RIGHTPAREN                        
+    | functionCall
+    ;
+
+functionCall
+    : identifier LEFTPAREN functionParameterList? RIGHTPAREN 
     ;
 
 functionParameterList
@@ -196,10 +200,10 @@ multiplicativeOperator
     ;
 
 unaryOperator
-    : MINUS
-    | EXCLAMATION
+    : MINUSMINUS
     | PLUSPLUS
-    | MINUSMINUS
+    | MINUS
+    | EXCLAMATION
     ;
 
 statement
@@ -295,10 +299,10 @@ identifier
     ;
 
 constant
-    : IntegerConstant
-    | FloatingConstant
-    | LogicalConstant
-    | ColorConstant
+    : integer = IntegerConstant
+    | floating = FloatingConstant
+    | logical = LogicalConstant
+    | color = ColorConstant
     ;
 
 

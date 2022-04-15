@@ -5,6 +5,7 @@ class Function:
         self.name : str = f_name 
         self.return_type : Type = Type.VOID
         self.parameters = []
+        self.ctx = None
 
     def setReturnType(self, type : Type) -> None:
         self.return_type = type

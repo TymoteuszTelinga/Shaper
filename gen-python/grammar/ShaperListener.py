@@ -269,6 +269,15 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#functionCall.
+    def enterFunctionCall(self, ctx:ShaperParser.FunctionCallContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#functionCall.
+    def exitFunctionCall(self, ctx:ShaperParser.FunctionCallContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#functionParameterList.
     def enterFunctionParameterList(self, ctx:ShaperParser.FunctionParameterListContext):
         pass
@@ -278,21 +287,21 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by ShaperParser#equalityOperator.
-    def enterEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#equalityOperator.
-    def exitEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
-        pass
-
-
     # Enter a parse tree produced by ShaperParser#assignmentOperator.
     def enterAssignmentOperator(self, ctx:ShaperParser.AssignmentOperatorContext):
         pass
 
     # Exit a parse tree produced by ShaperParser#assignmentOperator.
     def exitAssignmentOperator(self, ctx:ShaperParser.AssignmentOperatorContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#equalityOperator.
+    def enterEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#equalityOperator.
+    def exitEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
         pass
 
 

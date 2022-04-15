@@ -1,4 +1,7 @@
-from msilib.schema import Error
+from ctypes.wintypes import ATOM
+from cv2 import readOpticalFlow
+
+from idna import valid_contextj
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 from WindowMaker import WindowMaker
@@ -6,7 +9,7 @@ import Shapes
 import Color
 from Types import Type
 from Function import Function
-from Variable import Variable
+from Atoms import Variable, Constant
 from Scope import Scope
 
 
@@ -124,13 +127,15 @@ class MyVisitor(ShaperVisitor):
         type = self.visit(ctx.declarationSpecifier())
         var = Variable(name, type)
 
-        if self.currentScope.isDefined(var):
+        if not self.currentScope.isAvailable(name):
             raise Exception("Variable \'" + name + "\' defined earlier in this scope")
 
         if ctx.assignmentExpression() != None:
             r_value = self.visit(ctx.assignmentExpression())
-            if var == r_value:
+            if var.type == r_value.type:
                 var.val = r_value.val;
+            else:
+                raise Exception(f"Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
         
         self.currentScope.addVariable(var)
 
@@ -148,117 +153,166 @@ class MyVisitor(ShaperVisitor):
         if ctx.unaryExpression() == None:
             return self.visit(ctx.logicalORExpression())
         else:
-            l_var = self.visit(ctx.unaryExpression())
-            r_var = self.visit(ctx.assignmentExpression())
+            l = self.visit(ctx.unaryExpression())
+            r = self.visit(ctx.assignmentExpression())
+            op = ctx.assignmentOperator().getText()
 
-# TODO checking variable types
-            if l_var == r_var:
-                op = ctx.assignmentOperator().getText()
+            if(type(l) is Constant):
+                raise Exception("Can't assign value to a non-variable atom")
 
-                if op == '=':
-                    l_var.val =  r_var.val 
-                elif op == '+=':
-                    l_var.val += r_var.val
-                elif op == '-=':
-                    l_var.val -= r_var.val   
-                elif op == '*=':
-                    l_var.val *= r_var.val   
-                elif op == '/=':
-                    l_var.val /= r_var.val 
-                elif op == '%=':
-                    l_var.val %= r_var.val 
+            if l.type != r.type :
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
 
-            return l_var
+            if op == '=':
+                l.val  =  r.val 
+            elif op == '+=':
+                if l.type not in [Type.FLOAT, Type.INT]:
+                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                else: 
+                    l.val += r.val
+            elif op == '-=':
+                if l.type not in [Type.FLOAT, Type.INT]:
+                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                else: 
+                    l.val -= r.val  
+            elif op == '*=':
+                if l.type not in [Type.FLOAT, Type.INT]:
+                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                else: 
+                    l.val *= r.val  
+            elif op == '/=':
+                if l.type not in [Type.FLOAT, Type.INT]:
+                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                else: 
+                    l.val /= r.val 
+            elif op == '%=':
+                if l.type not in [Type.INT]:
+                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                else: 
+                    l.val %= r.val 
+
+            return l
         
+        raise Exception("(visitAssignmentExpression): It shouldn't be raised")
         
     def visitLogicalORExpression(self, ctx: ShaperParser.LogicalORExpressionContext) -> Variable:
         if ctx.logicalORExpression() == None:
             return self.visit(ctx.logicalANDExpression())
         else:
-            l_var = self.visit(ctx.logicalORExpression())
-            r_var = self.visit(ctx.logicalANDExpression())
+            l = self.visit(ctx.logicalORExpression())
+            r = self.visit(ctx.logicalANDExpression())
+            
+            if l.type not in [Type.BOOL]:
+                raise Exception(f"Can't use  binary operator \'|\' to type " + repr(l.type))
+            
+            if r.type not in [Type.BOOL]:
+                raise Exception(f"Can't use  binary operator \'|\' to type " + repr(r.type))
 
-            temp_var = Variable("temp", Type.BOOL)
-            if l_var == Type.BOOL and r_var == Type.BOOL:
-                temp_var.val = l_var.val or r_var.val 
+            ret = Constant(Type.BOOL, l.val or r.val)
 
-            return temp_var
+            return ret
+
+        raise Exception("(visitLogicalORExpression): It shouldn't be raised")
 
     def visitLogicalANDExpression(self, ctx: ShaperParser.LogicalANDExpressionContext) -> Variable:
         if ctx.logicalANDExpression() == None:
             return self.visit(ctx.equalityExpression())
         else:
-            l_var = self.visit(ctx.logicalANDExpression())
-            r_var = self.visit(ctx.equalityExpression())
+            l = self.visit(ctx.logicalANDExpression())
+            r = self.visit(ctx.equalityExpression())
+            
+            if l.type not in [Type.BOOL]:
+                raise Exception(f"Can't use  binary operator \'&\' to type " + repr(l.type))
+            
+            if r.type not in [Type.BOOL]:
+                raise Exception(f"Can't use  binary operator \'&\' to type " + repr(r.type))
 
-            temp_var = Variable("temp", Type.BOOL)
-            if l_var == Type.BOOL and r_var == Type.BOOL:
-                temp_var.val = l_var.val and r_var.val 
+            ret = Constant(Type.BOOL, l.val and r.val)
 
-            return temp_var
+            return ret
+
+        raise Exception("(visitLogicalANDExpression): It shouldn't be raised")
     
     def visitEqualityExpression(self, ctx: ShaperParser.EqualityExpressionContext) -> Variable:
         if ctx.equalityExpression() == None:
             return self.visit(ctx.relationalExpression())
         else:
-            l_var = self.visit(ctx.equalityExpression())
-            r_var = self.visit(ctx.relationalExpression())
+            l = self.visit(ctx.equalityExpression())
+            r = self.visit(ctx.relationalExpression())
+            op = ctx.equalityOperator().getText()
 
-            temp_var = Variable("temp", l_var.type)
+            if l.type not in [Type.INT, Type.FLOAT, Type.BOOL, Type.COLOR]:
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type))
+            
+            if r.type not in [Type.INT, Type.FLOAT, Type.BOOL, Type.COLOR]:
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
-            if l_var == r_var:
-                op = ctx.equalityOperator().getText()
-                if op == '==':
-                    temp_var.val = l_var.val == r_var.val 
-                elif op == '!=':
-                    temp_var.val = l_var.val != r_var.val
+            if l.type != r.type and (Type.BOOL in [l.type, r.type] or Type.Color in [l.type, r.type]):
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+            
+            if op == '==':
+                ret = Constant(Type.BOOL, l.val == r.val)
+            elif op == '!=':
+                ret = Constant(Type.BOOL, l.val != r.val)
 
-            return temp_var
+            return ret
+        
+        raise Exception("(visitEqualityExpression): It shouldn't be raised")
     
     def visitRelationalExpression(self, ctx: ShaperParser.RelationalExpressionContext) -> Variable:
         if ctx.relationalExpression() == None:
             return self.visit(ctx.additiveExpression())
         else:
-            l_var = self.visit(ctx.relationalExpression())
-            r_var = self.visit(ctx.additiveExpression())
+            l = self.visit(ctx.relationalExpression())
+            r = self.visit(ctx.additiveExpression())
+            op = ctx.relationalOperator().getText()
 
-            temp_var = Variable("temp", l_var.type)
+            if l.type not in [Type.INT, Type.FLOAT]:
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type))
             
-            if l_var == r_var:
-                types = [Type.DOUBLE, Type.FLOAT, Type.INT, Type.LONG]
-                if l_var.type in types:
-                    op = ctx.relationalOperator().getText()
-                    if op == '<':
-                        temp_var.val = l_var.val < r_var.val 
-                    elif op == '>':
-                        temp_var.val = l_var.val > r_var.val 
-                    elif op == '<=':
-                        temp_var.val = l_var.val <= r_var.val
-                    elif op == '>=':
-                        temp_var.val = l_var.val >= r_var.val 
-                else:
-                    raise Exception("Type Error: Incorrect types, it should be one of: " + types)
+            if r.type not in [Type.INT, Type.FLOAT]:
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
-            return temp_var
+            if op == '<':
+                ret = Constant(Type.BOOL,l.val < r.val)
+            elif op == '>':
+                ret = Constant(Type.BOOL,l.val > r.val)
+            elif op == '<=':
+                ret = Constant(Type.BOOL,l.val <= r.val)
+            elif op == '>=':
+                ret = Constant(Type.BOOL,l.val >= r.val)
+
+            return ret
+
+        raise Exception("(visitRelationalExpression): It shouldn't be raised")
     
     def visitAdditiveExpression(self, ctx: ShaperParser.AdditiveExpressionContext) -> Variable:
         if ctx.additiveExpression() == None:
             return self.visit(ctx.multiplicativeExpression())
         else:
-            l_var = self.visit(ctx.additiveExpression())
-            r_var = self.visit(ctx.multiplicativeExpression())
+            l = self.visit(ctx.additiveExpression())
+            r = self.visit(ctx.multiplicativeExpression())
+            op = ctx.additiveOperator().getText()
 
-            temp_var = Variable("temp", l_var.type)
+            if l.type not in [Type.INT, Type.FLOAT]:
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type))
             
-            if l_var == r_var:
-                op = ctx.additiveOperator().getText()
-                if op == '+':
-                    temp_var.val = l_var.val + r_var.val 
-                elif op == '-':
-                    temp_var.val = l_var.val - r_var.val 
+            if r.type not in [Type.INT, Type.FLOAT]:
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
+            
+            ret_type = Type.INT    
+            if r.type == Type.FLOAT or l.type == Type.FLOAT:
+                ret_type = Type.FLOAT
+            
+            if op == '+':
+                ret = Constant(ret_type, l.val + r.val)
+            elif op == '/':
+                ret = Constant(ret_type, l.val - r.val)
 
 
-            return temp_var
+            return ret
+
+        raise Exception("(visitAdditiveExpression): It shouldn't be raised")
        
 
 
@@ -266,50 +320,135 @@ class MyVisitor(ShaperVisitor):
         if ctx.multiplicativeExpression() == None:
             return self.visit(ctx.unaryExpression())
         else:
-            l_var = self.visit(ctx.multiplicativeExpression())
-            r_var = self.visit(ctx.unaryExpression())
 
-            temp_var = Variable("temp", l_var.type)
+            l = self.visit(ctx.multiplicativeExpression())
+            r = self.visit(ctx.unaryExpression())
+            op = ctx.multiplicativeOperator().getText()
             
-            if l_var == r_var:
-                op = ctx.multiplicativeOperator().getText()
-                if op == '*':
-                    temp_var.val = l_var.val * r_var.val 
-                elif op == '/':
-                    temp_var.val = l_var.val / r_var.val 
-                elif op == '%':
-                    temp_var.val = l_var.val % r_var.val
+            if l.type not in [Type.INT, Type.FLOAT]:
+                raise Exception(f"Can't use  multiplicative operator \'{op}\' to type " + repr(l.type))
+            
+            if r.type not in [Type.INT, Type.FLOAT]:
+                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
-            return temp_var
+            ret_type = Type.INT    
+            if r.type == Type.FLOAT or l.type == Type.FLOAT:
+                ret_type = Type.FLOAT
+            
+            if op == '*':
+                ret = Constant(ret_type, l.val * r.val)
+            elif op == '/':
+                ret = Constant(ret_type, l.val / r.val)
+            elif op == '%':
+                if ret_type != Type.INT:
+                    raise Exception(f"Can't use  binary operator \'{op}\' to type \'float\'" )
+                else:
+                    ret = Constant(ret_type, l.val % r.val)
+
+            return ret
+
+        raise Exception("(visitMultiplicativeExpression): It shouldn't be raised")
 
     def visitUnaryExpression(self, ctx: ShaperParser.UnaryExpressionContext):
-        if ctx.unaryOperator() != None and ctx.unaryOperator().getText() == '-':
-            var = self.visit(ctx.unaryExpression())
-            var.val *= -1
-            return var 
-
-        else:
+        if ctx.postfixExpression() != None:
             return self.visit(ctx.postfixExpression())
 
+        else:
+            ret = self.visit(ctx.unaryExpression)
+            op = ctx.unaryOperator().getText()
+
+            if  op == '-':
+                if ret.type not in [Type.INT, Type.FLOAT]:
+                    raise Exception("Can't use unary operator \'-\' to type " + repr(ret.type))
+                else:
+                    new_ret = Constant(ret.type, -ret.val)
+                    return new_ret
+            elif op == '!':
+                if ret.type not in [Type.BOOL]:
+                    raise Exception("Can't use unary operator \'!\' to type " + repr(ret.type))
+                else:
+                    new_ret = Constant(ret.type, not ret.val)
+                    return new_ret
+            elif op == '++':
+                if type(ret) == Constant:
+                    raise Exception("Can't use operator \'++\' to a non-variable atom")
+                elif ret.type not in [Type.INT, Type.FLOAT]:
+                    raise Exception("Can't use operator \'++\' to type " + repr(ret.type))
+                else:
+                    ret.val += 1
+                    return ret
+            elif op == '--':
+                if type(ret) == Constant:
+                    raise Exception("Can't use operator \'--\' to a non-variable atom")
+                elif ret.type not in [Type.INT, Type.FLOAT]:
+                    raise Exception("Can't use operator \'--\' to type " + repr(ret.type))
+                else:
+                    ret.val -= 1
+                    return ret
+
+        raise Exception("(visitUnaryExpression): It shouldn't be raised")
+
     def visitPostfixExpression(self, ctx: ShaperParser.PostfixExpressionContext):
-        return self.visit(ctx.primaryExpression())
+        if ctx.primaryExpression() != None:
+            return self.visit(ctx.primaryExpression())
+
+        else:
+            ret = self.visit(ctx.postfixExpression())
+
+            if type(ret) == Constant:
+                if ctx.DOT() != None:
+                     raise Exception("Can't use operator \'.\' to a non-variable atom")
+                elif ctx.PLUSPLUS() != None:
+                     raise Exception("Can't use operator \'++\' to a non-variable atom")
+                elif ctx.MINUSMINUS() != None:
+                     raise Exception("Can't use operator \'--\' to a non-variable atom")
+            
+            if ctx.DOT() != None:
+                if ret.type in [Type.BOOL, Type.INT, Type.FLOAT, Type.VOID]:
+                    raise Exception("Can't use operator \'.\' to type " + repr(ret.type))
+                else:
+                    return ret
+
+            elif ctx.PLUSPLUS() != None:
+                if ret.type not in [Type.INT, Type.FLOAT]:
+                    raise Exception("Can't use operator \'++\' to type " + repr(ret.type))
+                else:
+                    new_ret = Constant(ret.type, ret.val)
+                    ret.val += 1
+                    return new_ret
+            elif ctx.MINUSMINUS() != None:
+                if ret.type not in [Type.INT, Type.FLOAT]:
+                    raise Exception("Can't use operator \'--\' to type " + repr(ret.type))
+                else:
+                    new_ret = Constant(ret.type, ret.val)
+                    ret.val -= 1
+                    return new_ret
+        
+        raise Exception("(visitPostfixExpression): It shouldn't be raised")
+
+             
+
 
     def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
-        if ctx.expression() != None:
-            return self.visit(ctx.expression())
+        if ctx.identifier() != None: 
+            name = self.visit(ctx.identifier())
+            var = self.currentScope.getVariable(name)
+
+            if var == None:
+                raise Exception("Variable " + name + "doesn't exist")
+            else: 
+                return var
+
         elif ctx.constant() != None:
-            var = Variable("temp", Type.INT)
-            var.val = int(float(ctx.constant().getText()))
-            return var
-        elif ctx.identifier() != None:
-            name = ctx.identifier().getText()
-            var = Variable(name, Type.VOID)
-            if self.currentScope.isAvailable(var):
-               return self.currentScope.getVariable(name)
-            else:
-                raise Exception("Variables Error: variable isn't defined")
-
-
+            return self.visit(ctx.constant())
+        
+        elif ctx.expression() != None:
+            return self.visit(ctx.expression())
+        
+        elif ctx.functionCall() != None:
+            raise Exception("#TODO: functions calling")
+        
+        raise Exception("(visitPrimaryExpression): It shouldn't be raised")
 
     def visitStatement(self, ctx: ShaperParser.StatementContext):
         if ctx.paintStatement() != None:
@@ -438,8 +577,25 @@ class MyVisitor(ShaperVisitor):
             return Color.WHITE
 
 
-    def visitIdentifier(self, ctx: ShaperParser.IdentifierContext):
+    def visitIdentifier(self, ctx: ShaperParser.IdentifierContext) -> str:
         return ctx.getText()
+
+    def visitConstant(self, ctx: ShaperParser.ConstantContext) -> Constant:
+        const = None
+        if ctx.integer != None:
+            const = Constant(Type.INT, int(ctx.getText()))
+        elif ctx.floating != None:
+            const = Constant(Type.FLOAT, float(ctx.getText()))
+        elif ctx.logical != None:
+            if ctx.getText() == 'true':
+                const = Constant(Type.BOOL, True)
+            else:
+                const = Constant(Type.BOOL, False)
+        elif ctx.color != None:
+            const = Constant(Type.COLOR, Color.Color.getColor(ctx.getText()))
+        
+        return const
+
 
     
 

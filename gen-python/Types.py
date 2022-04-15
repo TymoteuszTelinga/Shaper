@@ -5,9 +5,9 @@ class Type(enum.Enum):
     BOOL = 1;
 
     INT = 2;
-    LONG = 3;
+    # LONG = 3;
     FLOAT = 4;
-    DOUBLE = 5;
+    # DOUBLE = 5;
 
     COLOR = 6;
 
@@ -23,12 +23,12 @@ class Type(enum.Enum):
             return Type.BOOL
         elif str == 'int':
             return Type.INT
-        elif str == 'long':
-            return Type.LONG
+        # elif str == 'long':
+            # return Type.LONG
         elif str == 'float':
             return Type.FLOAT
-        elif str == 'double':
-            return Type.DOUBLE
+        # elif str == 'double':
+            # return Type.DOUBLE
         elif str == 'color':
             return Type.COLOR
         else:
@@ -41,12 +41,12 @@ class Type(enum.Enum):
             return "\'bool\'"
         elif self == Type.INT:
             return "\'int\'"
-        elif self == Type.LONG:
-            return "\'long\'"
+        # elif self == Type.LONG:
+            # return "\'long\'"
         elif self == Type.FLOAT:
             return "\'float\'"
-        elif self == Type.DOUBLE:
-            return "\'double\'"
+        # elif self == Type.DOUBLE:
+            # return "\'double\'"
         elif self == Type.COLOR:
             return "\'color\'"
         else:
