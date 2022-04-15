@@ -1,31 +1,30 @@
-from ctypes.wintypes import ATOM
-from cv2 import readOpticalFlow
-
-from idna import valid_contextj
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
-from WindowMaker import WindowMaker
 import Shapes
 import Color
 from Types import Type
 from Function import Function
 from Atoms import Variable, Constant
-from Scope import Scope
+from Manager import Manager
 
 
 class MyVisitor(ShaperVisitor):
 
     def __init__(self) -> None:
-        self.window = WindowMaker()
         self.findFunctions = True
+        self.globalVars = True
         self.funDict = {}
-        self.currentScope = Scope() # add start it is global
+        self.manager = Manager(self)
 
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):
         if ctx.externalDeclarationList() != None:
             self.visit(ctx.externalDeclarationList())
-
+        
         self.findFunctions = False
+
+        self.visit(ctx.externalDeclarationList())
+
+        self.manager.start()
 
     def visitExternalDeclarationList(self, ctx: ShaperParser.ExternalDeclarationListContext):
         self.visit(ctx.externalDeclaration())
@@ -34,28 +33,25 @@ class MyVisitor(ShaperVisitor):
             self.visit(ctx.externalDeclarationList())
 
     def visitExternalDeclaration(self, ctx: ShaperParser.ExternalDeclarationContext):
-        if self.findFunctions == True: # first tree walking 
-            if ctx.functionDefinition() is not None:
+        if self.findFunctions: # first tree walking 
+            if ctx.functionDefinition() != None:
                 self.visit(ctx.functionDefinition())
         else:
-            if ctx.functionDefinition() is not None:
-                self.visit(ctx.functionDefinition())
-            else:
+            if ctx.functionDefinition() == None:
                 self.visit(ctx.declaration())
+            # else:
+            #     self.visit(ctx.functionDefinition())
 
     def visitFunctionDefinition(self, ctx: ShaperParser.FunctionDefinitionContext):
-        if self.findFunctions == True:
+        if self.findFunctions:
             r_type = self.visit(ctx.functionSpecifier())
             name = ctx.identifier().getText()
             f_param = self.visit(ctx.declarator())
-            if name not in self.funDict.keys():
-                print("success")
-                func = Function(name)
-                func.setReturnType(r_type)
-                func.setParameters(f_param)
-                self.funDict[name] = func
-            else:
-                raise Exception("Ambiguity Error: 2 functions of this same name has been declared") 
+            func = Function(name)
+            func.setReturnType(r_type)
+            func.setParameters(f_param)
+            func.ctx = ctx
+            self.manager.addFunction(func)
         else:
             self.visit(ctx.compoundStatement())
 
@@ -94,15 +90,8 @@ class MyVisitor(ShaperVisitor):
         return var
 
     def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
-        oldScope = self.currentScope
-        self.currentScope = Scope()
-        self.currentScope.upper = oldScope
         if ctx.instructionList() != None:
             self.visit(ctx.instructionList())
-        
-        print("Ended scope with variables: " + repr(self.currentScope.variables))
-        self.currentScope = oldScope
-        print("Current Scope: " + repr(self.currentScope.variables))
     
     def visitInstructionList(self, ctx: ShaperParser.InstructionListContext):
         self.visit(ctx.instruction())
@@ -127,7 +116,7 @@ class MyVisitor(ShaperVisitor):
         type = self.visit(ctx.declarationSpecifier())
         var = Variable(name, type)
 
-        if not self.currentScope.isAvailable(name):
+        if not self.manager.isVariableAvailable(name):
             raise Exception("Variable \'" + name + "\' defined earlier in this scope")
 
         if ctx.assignmentExpression() != None:
@@ -136,8 +125,8 @@ class MyVisitor(ShaperVisitor):
                 var.val = r_value.val;
             else:
                 raise Exception(f"Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
-        
-        self.currentScope.addVariable(var)
+
+        self.manager.addVariable(var)
 
 
     def visitDeclarationSpecifier(self, ctx: ShaperParser.DeclarationSpecifierContext) -> Type:
@@ -426,16 +415,13 @@ class MyVisitor(ShaperVisitor):
         
         raise Exception("(visitPostfixExpression): It shouldn't be raised")
 
-             
-
-
     def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
         if ctx.identifier() != None: 
             name = self.visit(ctx.identifier())
-            var = self.currentScope.getVariable(name)
+            var = self.manager.getVariable(name)
 
             if var == None:
-                raise Exception("Variable " + name + "doesn't exist")
+                raise Exception("Variable " + name + " doesn't exist")
             else: 
                 return var
 
@@ -453,8 +439,16 @@ class MyVisitor(ShaperVisitor):
     def visitStatement(self, ctx: ShaperParser.StatementContext):
         if ctx.paintStatement() != None:
             self.visit(ctx.paintStatement())
+
         if ctx.compoundStatement() != None:
+            oldScope =  self.manager.createNewScope(True)
+
             self.visit(ctx.compoundStatement())
+
+            print("Ended scope with variables: " + repr(self.manager.curr_scope.variables))
+            self.manager.curr_scope = oldScope
+            print("Current Scope: " + repr(self.manager.curr_scope.variables))
+
         if ctx.expression() != None:
             self.visit(ctx.expression())
 
@@ -501,9 +495,6 @@ class MyVisitor(ShaperVisitor):
         pos = self.visit(ctx.atStatement())
         size = self.visit(ctx.ofStatement())
 
-        if type(size) != tuple:
-            size = (size,size)
-
         if(ctx.colorStatement() != None):
             color = self.visit(ctx.colorStatement())  
             rect = Shapes.Rectangle(pos, size, color)
@@ -518,9 +509,6 @@ class MyVisitor(ShaperVisitor):
         
         pos = self.visit(ctx.atStatement())
         size = self.visit(ctx.ofStatement())
-
-        if type(size) != tuple:
-            size = (size,size)
 
         if(ctx.colorStatement() != None):
             color = self.visit(ctx.colorStatement())  
@@ -551,30 +539,43 @@ class MyVisitor(ShaperVisitor):
         print("size:")
         return self.visitChildren(ctx)
 
-    def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):
-        exprs = ctx.expression() 
+    def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):        
+        if ctx.right != None:
+
+            pos_size_tulp = (self.visit(ctx.left), self.visit(ctx.right))
+
+        else:
+            var = self.visit(ctx.left)
+            pos_size_tulp = (var, var)
         
-        pos_size_tulp = (self.visit(exprs[0]), self.visit(exprs[1]))
+        if pos_size_tulp[0].type not in [Type.INT, Type.FLOAT]:
+            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+
+        if pos_size_tulp[1].type not in [Type.INT, Type.FLOAT]:
+            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+
         print(pos_size_tulp)
         return pos_size_tulp
 
     def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
-        if ctx.constant() != None:
-            colorStr = ctx.constant().getText()
-            if colorStr == 'BLACK':
-                return Color.BLACK
-            elif colorStr == 'WHITE':
-                return Color.WHITE
-            elif colorStr == 'RED':
-                return Color.RED
-            elif colorStr == 'GREEN':
-                return Color.GREEN
-            elif colorStr == 'BLUE':
-                return Color.BLUE
-            else:
-                return Color.WHITE
+        if ctx.constant != None:
+            const = self.visit(ctx.constant())
+
+            if const.type != Type.COLOR:
+                raise Exception("Incorrect type, expected 'color', got " + repr(const.type))
+
+            return const
         else:
-            return Color.WHITE
+            name = self.visit(ctx.identifier())
+            var = self.manager.getVariable(name)
+
+            if var == None:
+                raise Exception("Variable " + name + " doesn't exist")
+            elif var.type != Type.COLOR: 
+                raise Exception("Incorrect type, expected 'color', got " + repr(var.type))
+            
+            return var
+        
 
 
     def visitIdentifier(self, ctx: ShaperParser.IdentifierContext) -> str:
@@ -595,10 +596,3 @@ class MyVisitor(ShaperVisitor):
             const = Constant(Type.COLOR, Color.Color.getColor(ctx.getText()))
         
         return const
-
-
-    
-
-
-    
-    

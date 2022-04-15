@@ -1,6 +1,3 @@
-from numpy import true_divide
-
-
 class Color:
     def __init__(self,R: int,G: int,B: int,A: int):
         self.R = R / 255.0

@@ -2,9 +2,10 @@ int x = 10;
 
 void draw()
 { 
-    int z = 10;
-    color c = BLACK; 
-    {
-        int y = z / 2;
-    }
+
+}
+
+void test()
+{
+    int f  =10;
 }

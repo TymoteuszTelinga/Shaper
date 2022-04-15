@@ -4,7 +4,6 @@ from antlr4 import *
 from grammar.ShaperLexer import ShaperLexer
 from grammar.ShaperParser import ShaperParser
 from MyVisitor import MyVisitor
-from WindowMaker import WindowMaker
 from antlr4.error.ErrorListener import ErrorListener
 
 class ShaperErrorListener(ErrorListener):
