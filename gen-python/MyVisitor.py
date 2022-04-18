@@ -1,3 +1,4 @@
+from ast import Expression
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 import Shapes
@@ -78,7 +79,7 @@ class MyVisitor(ShaperVisitor):
                 if var.name == param.name:
                     raise Exception("Ambiguity Error: Two or more parameters of this same name in one function")
             
-            par_list.append(var)
+            par_list.insert(0,var)
             
         return par_list
 
@@ -343,7 +344,7 @@ class MyVisitor(ShaperVisitor):
             return self.visit(ctx.postfixExpression())
 
         else:
-            ret = self.visit(ctx.unaryExpression)
+            ret = self.visit(ctx.unaryExpression())
             op = ctx.unaryOperator().getText()
 
             if  op == '-':
@@ -432,9 +433,26 @@ class MyVisitor(ShaperVisitor):
             return self.visit(ctx.expression())
         
         elif ctx.functionCall() != None:
-            raise Exception("#TODO: functions calling")
+            return self.visit(ctx.functionCall())
         
         raise Exception("(visitPrimaryExpression): It shouldn't be raised")
+
+    def visitFunctionCall(self, ctx: ShaperParser.FunctionCallContext):
+        name = self.visit(ctx.identifier())
+        params = []
+        if ctx.functionParameterList() != None:
+            params = self.visit(ctx.functionParameterList())
+        
+        return self.manager.enterFunction(name, params)
+
+    def visitFunctionParameterList(self, ctx: ShaperParser.FunctionParameterListContext):
+
+        if ctx.functionParameterList() != None:
+            params = self.visit(ctx.functionParameterList())
+            params.insert(0,self.visit(ctx.expression()))
+            return params
+        else:
+            return [self.visit(ctx.expression())]
 
     def visitStatement(self, ctx: ShaperParser.StatementContext):
         if ctx.paintStatement() != None:

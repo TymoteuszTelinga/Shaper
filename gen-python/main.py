@@ -17,11 +17,14 @@ class ShaperErrorListener(ErrorListener):
         raise Exception("Ambiguity ERROR")
 
     def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
-        raise Exception("Attempting full Context ERROR")
+        #raise Exception(f"Attempting full Context ERROR")
+        pass
 
     def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
-        raise Exception("ContextSensitivity ERROR")
- 
+        #raise Exception("ContextSensitivity ERROR")
+        pass
+
+
 def main(argv):
 
     if len(argv)>1 and os.path.isfile(argv[1]):
