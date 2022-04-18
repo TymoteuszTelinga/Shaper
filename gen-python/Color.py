@@ -26,6 +26,8 @@ class Color:
             return GREEN
         elif colorStr == 'BLUE':
             return BLUE
+        elif colorStr == 'YELLOW':
+            return YELLOW
         else:
             return WHITE
 
@@ -35,3 +37,4 @@ WHITE = Color(255, 255, 255, 255)
 RED = Color(255, 0, 0, 255)
 GREEN = Color(0, 255, 0, 255)
 BLUE = Color(0, 0, 255, 255)
+YELLOW = Color(255, 255, 0, 255)

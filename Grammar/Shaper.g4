@@ -44,7 +44,7 @@ declarator
 
 parameterList
     : parameterDeclaration
-    | parameterList COMMA parameterDeclaration
+    | parameterDeclaration COMMA parameterList
     ;
 
 parameterDeclaration
@@ -164,7 +164,7 @@ functionCall
 
 functionParameterList
     : expression
-    | functionParameterList COMMA expression
+    | expression COMMA functionParameterList
     ;
 
 assignmentOperator
@@ -462,6 +462,7 @@ ColorConstant
     | 'RED'
     | 'GREEN'
     | 'BLUE'
+    | 'YELLOW'
     ;
 
 Identifier
