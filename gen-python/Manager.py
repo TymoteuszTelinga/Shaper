@@ -1,4 +1,4 @@
-
+from Types import Type
 from Scope import Scope
 from Function import Function
 from WindowMaker import WindowMaker
@@ -95,8 +95,12 @@ class Manager:
         
         
         ret_val = self.visitor.visit(func.ctx)
-        self.curr_scope = oldScope
+        if ret_val == None and func.return_type == Type.VOID:
+            ret_val = Constant(Type.VOID, None)
+        elif ret_val.type != func.return_type:
+            raise Exception(f"Incorrect return type, expected { func.return_type}, but got type {ret_val.type}")
 
+        self.curr_scope = oldScope
         return ret_val
             
             

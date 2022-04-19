@@ -54,7 +54,7 @@ class MyVisitor(ShaperVisitor):
             func.ctx = ctx
             self.manager.addFunction(func)
         else:
-            self.visit(ctx.compoundStatement())
+            return self.visit(ctx.compoundStatement())
 
     def visitFunctionSpecifier(self, ctx: ShaperParser.FunctionSpecifierContext):
         return self.visit(ctx.typeSpecifier())
@@ -92,19 +92,27 @@ class MyVisitor(ShaperVisitor):
 
     def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
         if ctx.instructionList() != None:
-            self.visit(ctx.instructionList())
+            return self.visit(ctx.instructionList())
+        else:
+            return None
     
     def visitInstructionList(self, ctx: ShaperParser.InstructionListContext):
-        self.visit(ctx.instruction())
+        ret_val = self.visit(ctx.instruction())
+
+        if ret_val != None:
+            return ret_val
 
         if ctx.instructionList() != None:
-            self.visit(ctx.instructionList())
+            ret_val = self.visit(ctx.instructionList())
+        
+        return ret_val
     
     def visitInstruction(self, ctx: ShaperParser.InstructionContext):
         if ctx.declaration() != None:
             self.visit(ctx.declaration())
+            return None
         else:
-            self.visit(ctx.statement())
+            return self.visit(ctx.statement())
 
     def visitDeclaration(self, ctx: ShaperParser.DeclarationContext):
         if (ctx.structDeclarator() != None):
@@ -457,18 +465,25 @@ class MyVisitor(ShaperVisitor):
     def visitStatement(self, ctx: ShaperParser.StatementContext):
         if ctx.paintStatement() != None:
             self.visit(ctx.paintStatement())
+            return None
 
         if ctx.compoundStatement() != None:
             oldScope =  self.manager.createNewScope(True)
 
-            self.visit(ctx.compoundStatement())
+            ret_val = self.visit(ctx.compoundStatement())
 
             print("Ended scope with variables: " + repr(self.manager.curr_scope.variables))
             self.manager.curr_scope = oldScope
             print("Current Scope: " + repr(self.manager.curr_scope.variables))
 
+            return ret_val
+
         if ctx.expression() != None:
             self.visit(ctx.expression())
+            return None
+
+        if ctx.jumpStatement() != None:
+            return self.visit(ctx.jumpStatement())
 
     def visitPaintStatement(self, ctx: ShaperParser.PaintStatementContext):
         self.visit(ctx.shapeIndicator())
@@ -594,7 +609,10 @@ class MyVisitor(ShaperVisitor):
             
             return var
         
-
+    def visitJumpStatement(self, ctx: ShaperParser.JumpStatementContext):
+        if ctx.expression() != None:
+            return self.visit(ctx.expression())
+        return None
 
     def visitIdentifier(self, ctx: ShaperParser.IdentifierContext) -> str:
         return ctx.getText()
