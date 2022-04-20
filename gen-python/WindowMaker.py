@@ -3,9 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-import MyVisitor
 from grammar.ShaperParser import ShaperParser
-
 
 
 class WindowMaker:
@@ -15,27 +13,40 @@ class WindowMaker:
         self.width = width
         self.height = height
         self.ctx = None
+        self.manager = None
         self.visitor = None
         self.color = 0
+
+        self.isCorrect = True
 
     def setBackground(self, color):
         self.color = color
 
-    def setContext(self, visitor: MyVisitor, ctx: ShaperParser.FunctionDefinitionContext):
+    def setContext(self, manager, visitor, ctx: ShaperParser.FunctionDefinitionContext):
+        self.manager = manager
         self.visitor = visitor
         self.ctx = ctx
 
     def loop(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
-        
-        glViewport(0, 0, self.width, self.height)
-        glOrtho(0, self.width, 0, self.height, 0, 1)
+        if self.isCorrect:
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            glLoadIdentity()
+            
+            glViewport(0, 0, self.width, self.height)
+            glOrtho(0, self.width, 0, self.height, 0, 1)
 
 
-        self.visitor.visit(self.ctx.compoundStatement())
+            oldScope = self.manager.createNewScope(True)
 
-        glutSwapBuffers()
+            try:
+                self.visitor.visit(self.ctx.compoundStatement())
+            except Exception as e:
+                print("Error: ", e) 
+                self.isCorrect = False
+
+            self.manager.curr_scope = oldScope
+
+            glutSwapBuffers()
 
     def show(self):
         glutInit()

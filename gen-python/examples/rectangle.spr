@@ -1,7 +1,0 @@
-void draw()
-{
-    paint rectangle at ((10*3.0), 200) of 100 with RED;
-    paint triangle from (0,0) through (400,600) to (800,0) with GREEN;
-    paint line from (0,600) to (600,0) with WHITE;
-    paint circle at (400,300) of 100 with BLUE;
-}

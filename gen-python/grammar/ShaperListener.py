@@ -17,6 +17,15 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#externalDeclarationList.
+    def enterExternalDeclarationList(self, ctx:ShaperParser.ExternalDeclarationListContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#externalDeclarationList.
+    def exitExternalDeclarationList(self, ctx:ShaperParser.ExternalDeclarationListContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#externalDeclaration.
     def enterExternalDeclaration(self, ctx:ShaperParser.ExternalDeclarationContext):
         pass
@@ -89,12 +98,39 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#instructionList.
+    def enterInstructionList(self, ctx:ShaperParser.InstructionListContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#instructionList.
+    def exitInstructionList(self, ctx:ShaperParser.InstructionListContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#instruction.
+    def enterInstruction(self, ctx:ShaperParser.InstructionContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#instruction.
+    def exitInstruction(self, ctx:ShaperParser.InstructionContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#declaration.
     def enterDeclaration(self, ctx:ShaperParser.DeclarationContext):
         pass
 
     # Exit a parse tree produced by ShaperParser#declaration.
     def exitDeclaration(self, ctx:ShaperParser.DeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#initDeclarator.
+    def enterInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#initDeclarator.
+    def exitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
         pass
 
 
@@ -113,15 +149,6 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#declarationType.
     def exitDeclarationType(self, ctx:ShaperParser.DeclarationTypeContext):
-        pass
-
-
-    # Enter a parse tree produced by ShaperParser#initDeclarator.
-    def enterInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#initDeclarator.
-    def exitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
         pass
 
 
@@ -242,6 +269,15 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#functionCall.
+    def enterFunctionCall(self, ctx:ShaperParser.FunctionCallContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#functionCall.
+    def exitFunctionCall(self, ctx:ShaperParser.FunctionCallContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#functionParameterList.
     def enterFunctionParameterList(self, ctx:ShaperParser.FunctionParameterListContext):
         pass
@@ -257,6 +293,15 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#assignmentOperator.
     def exitAssignmentOperator(self, ctx:ShaperParser.AssignmentOperatorContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#equalityOperator.
+    def enterEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#equalityOperator.
+    def exitEqualityOperator(self, ctx:ShaperParser.EqualityOperatorContext):
         pass
 
 

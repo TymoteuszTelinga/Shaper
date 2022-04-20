@@ -1,8 +1,14 @@
 grammar Shaper;
 
 programm 
-    : (externalDeclaration)*
+    : externalDeclarationList?
     ;
+
+externalDeclarationList
+    : externalDeclaration externalDeclarationList
+    | externalDeclaration 
+    ;
+
 
 externalDeclaration
     : functionDefinition
@@ -23,7 +29,6 @@ typeSpecifier
     | BOOL
     | INT
     | LONG
-    | CHAR
     | FLOAT
     | DOUBLE
     | COLOR
@@ -39,7 +44,7 @@ declarator
 
 parameterList
     : parameterDeclaration
-    | parameterList COMMA parameterDeclaration
+    | parameterDeclaration COMMA parameterList
     ;
 
 parameterDeclaration
@@ -47,12 +52,25 @@ parameterDeclaration
     ;
 
 compoundStatement
-    : LEFTBRACKET ( (declaration SEMICOLON) | statement )* RIGHTBRACKET
+    : LEFTBRACKET instructionList? RIGHTBRACKET
+    ;
+
+instructionList
+    : instruction instructionList
+    | instruction
+    ;
+
+instruction
+    : (declaration SEMICOLON) | statement 
     ;
 
 declaration
-    : declarationSpecifier initDeclarator 
+    : initDeclarator 
     | structDeclarator 
+    ;
+
+initDeclarator
+    : declarationSpecifier identifier ( assignmentOperator assignmentExpression)?
     ;
 
 declarationSpecifier
@@ -64,17 +82,12 @@ declarationType
     : BOOL
     | INT
     | LONG
-    | CHAR
     | FLOAT
     | DOUBLE
     | COLOR
     | STRUCT identifier
-    | ARRAY LEFTPAREN (identifier | Constant)? RIGHTPAREN declarationSpecifier
+    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationSpecifier
     | LIST declarationSpecifier
-    ;
-
-initDeclarator
-    : identifier ( assignmentOperator assignmentExpression)?
     ;
 
 structDeclarator
@@ -108,8 +121,7 @@ logicalANDExpression
 
 equalityExpression
     : relationalExpression
-    | equalityExpression EQUAL relationalExpression
-    | equalityExpression NOTEQUAL relationalExpression
+    | equalityExpression equalityOperator relationalExpression
     ;
 
 relationalExpression
@@ -137,18 +149,22 @@ postfixExpression
     | postfixExpression DOT identifier
     | postfixExpression PLUSPLUS
     | postfixExpression MINUSMINUS
-    | postfixExpression LEFTPAREN functionParameterList? RIGHTPAREN
     ;
 
 primaryExpression
     : identifier
     | constant
-    | LEFTPAREN expression RIGHTPAREN
+    | LEFTPAREN expression RIGHTPAREN                        
+    | functionCall
+    ;
+
+functionCall
+    : identifier LEFTPAREN functionParameterList? RIGHTPAREN 
     ;
 
 functionParameterList
     : expression
-    | functionParameterList COMMA expression
+    | expression COMMA functionParameterList
     ;
 
 assignmentOperator
@@ -158,6 +174,11 @@ assignmentOperator
     | MULTIPLYASSIGN
     | DIVIDEASSIGN
     | MODULOASSIGN
+    ;
+
+equalityOperator
+    : EQUAL
+    | NOTEQUAL
     ;
 
 relationalOperator
@@ -179,10 +200,10 @@ multiplicativeOperator
     ;
 
 unaryOperator
-    : MINUS
-    | EXCLAMATION
+    : MINUSMINUS
     | PLUSPLUS
-    | MINUSMINUS
+    | MINUS
+    | EXCLAMATION
     ;
 
 statement
@@ -228,7 +249,6 @@ atStatement
 
 ofStatement
     : OF posSizeParent
-    | OF expression
     ;
 
 fromStatement
@@ -248,7 +268,7 @@ colorStatement
     ;
 
 posSizeParent
-    : LEFTPAREN expression COMMA expression RIGHTPAREN
+    : LEFTPAREN left=expression (COMMA right=expression)? RIGHTPAREN
     ;
 
 selectionStatement
@@ -279,7 +299,10 @@ identifier
     ;
 
 constant
-    : Constant
+    : integer = IntegerConstant
+    | floating = FloatingConstant
+    | logical = LogicalConstant
+    | color = ColorConstant
     ;
 
 
@@ -411,15 +434,6 @@ BREAK: 'break';
 
 RETURN: 'return';
 
-
-Constant
-    : IntegerConstant
-    | FloatingConstant
-    | LogicalConstant
-    | ColorConstant
-    ;
-
-fragment
 IntegerConstant
     : NonZeroDigit Digit*
     | [0]
@@ -430,24 +444,25 @@ NonZeroDigit
     : [1-9]
     ;
     
-fragment
+
 FloatingConstant
     : Digit+ '.' Digit+
     ;
 
-fragment
+
 LogicalConstant
     : 'false'
     | 'true'
     ;
 
-fragment
+
 ColorConstant
     : 'BLACK'
     | 'WHITE'
     | 'RED'
     | 'GREEN'
     | 'BLUE'
+    | 'YELLOW'
     ;
 
 Identifier

@@ -6,5 +6,5 @@ void setup()
 
 void draw()
 {
-    paint rectangle at (50,50) of 300;
+    paint rectangle at 50,50 of 300;
 }

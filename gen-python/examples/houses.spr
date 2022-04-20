@@ -1,0 +1,35 @@
+int x = 100;
+int y =200;
+void draw()
+{
+    domek(x,y);
+    int y = 10;
+    int x = 10;
+    domek(x, y);
+    domek(500, 90);
+}
+
+void domek(int x, int y)
+{
+
+    int width = 200;
+    int height = 160;
+    
+    paint rectangle at (x, y) of (width,height) with YELLOW;
+    paint triangle from (x, y + height) through (x + width/2, y + 3*height/2) to (x+ width,y+ height) with RED;
+
+}
+
+void domek2(int x,int y)
+{
+        int width = 200;
+    int height = 160;
+    paint rectangle at (x + width/4, y) of (width/5, 3*height/5) with BLACK;
+    paint rectangle at (x+ 3*width/5, y + 2*height/5) of (height/3) with BLUE;
+    domek(x+10, y+10);
+}
+
+void foo()
+{
+    paint rectangle at (x, y) of (width,height) with YELLOW;
+}

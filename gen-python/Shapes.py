@@ -1,18 +1,20 @@
 from OpenGL.GL import * 
 import Color
 import math
+
+from Atoms import * 
   
 
 class Rectangle:
 
-    def __init__(self, pos, size, color = Color.Color(255,255,255,255)):
-        self.x = pos[0]
-        self.y = pos[1]
+    def __init__(self, pos, size, color = Constant(Type.COLOR, Color.WHITE)):
+        self.x = pos[0].val
+        self.y = pos[1].val
 
-        self.width = size[0]
-        self.height = size[1]
+        self.width = size[0].val
+        self.height = size[1].val
 
-        self.color = color
+        self.color = color.val
 
     def paint(self):
         glColor4f(self.color.R, self.color.G, self.color.B, self.color.A)
@@ -24,17 +26,17 @@ class Rectangle:
         glEnd()
 
 class Triangle:
-    def __init__(self, pos1, pos2, pos3, color = Color.Color(255,255,255,255)):
-        self.x1 = pos1[0]
-        self.y1 = pos1[1]
+    def __init__(self, pos1, pos2, pos3, color = Constant(Type.COLOR, Color.WHITE)):
+        self.x1 = pos1[0].val
+        self.y1 = pos1[1].val
 
-        self.x2 = pos2[0]
-        self.y2 = pos2[1]
+        self.x2 = pos2[0].val
+        self.y2 = pos2[1].val
     
-        self.x3 = pos3[0]
-        self.y3 = pos3[1]  
+        self.x3 = pos3[0].val
+        self.y3 = pos3[1].val
 
-        self.color = color
+        self.color = color.val
 
     def paint(self):
         glColor4f(self.color.R, self.color.G, self.color.B, self.color.A)
@@ -45,14 +47,14 @@ class Triangle:
         glEnd()
 
 class Line:
-    def __init__(self, pos1, pos2, color = Color.Color(255,255,255,255)):
-        self.x1 = pos1[0]
-        self.y1 = pos1[1]
+    def __init__(self, pos1, pos2, color = Constant(Type.COLOR, Color.WHITE)):
+        self.x1 = pos1[0].val
+        self.y1 = pos1[1].val
 
-        self.x2 = pos2[0]
-        self.y2 = pos2[1]
+        self.x2 = pos2[0].val
+        self.y2 = pos2[1].val
     
-        self.color = color
+        self.color = color.val
     
     def paint(self):
         glColor4f(self.color.R, self.color.G, self.color.B, self.color.A)
@@ -65,14 +67,14 @@ class Circle:
     num_seg = 80
     PI = 3.14158
 
-    def __init__(self, pos, size, color = Color.Color(255, 255, 255, 255)):
-        self.x = pos[0]
-        self.y = pos[1]
+    def __init__(self, pos, size, color = Constant(Type.COLOR, Color.WHITE)):
+        self.x = pos[0].val
+        self.y = pos[1].val
 
-        self.width = size[0]
-        self.height = size[1]
+        self.width = size[0].val
+        self.height = size[1].val
 
-        self.color = color
+        self.color = color.val
     def paint(self):
 
         glColor4f(self.color.R, self.color.G, self.color.B, self.color.A)

@@ -11,7 +11,7 @@ python interpeter used for running this code must have installed this packages:
 First and second package install by command:
 
 ```bash
-pip install antlr4-python3-runtime PyOpenGL_accelerate
+pip install antlr4-python3-runtime==4.9.3 PyOpenGL_accelerate
 ```
 
 then get to directory with third package downloaded and write:
