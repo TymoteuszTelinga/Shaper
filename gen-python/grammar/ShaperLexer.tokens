@@ -69,6 +69,7 @@ ColorConstant=68
 Identifier=69
 WS=70
 WhiteSpace=71
+LINE_COMMENT=72
 'paint'=1
 'line'=2
 'triangle'=3

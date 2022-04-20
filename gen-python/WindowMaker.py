@@ -41,7 +41,7 @@ class WindowMaker:
             try:
                 self.visitor.visit(self.ctx.compoundStatement())
             except Exception as e:
-                print(e) 
+                print("Error: ", e) 
                 self.isCorrect = False
 
             self.manager.curr_scope = oldScope
