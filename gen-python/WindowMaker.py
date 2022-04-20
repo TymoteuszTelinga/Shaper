@@ -6,7 +6,6 @@ from OpenGL.GLUT import *
 from grammar.ShaperParser import ShaperParser
 
 
-
 class WindowMaker:
 
 
@@ -18,6 +17,8 @@ class WindowMaker:
         self.visitor = None
         self.color = 0
 
+        self.isCorrect = True
+
     def setBackground(self, color):
         self.color = color
 
@@ -27,18 +28,25 @@ class WindowMaker:
         self.ctx = ctx
 
     def loop(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
-        
-        glViewport(0, 0, self.width, self.height)
-        glOrtho(0, self.width, 0, self.height, 0, 1)
+        if self.isCorrect:
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            glLoadIdentity()
+            
+            glViewport(0, 0, self.width, self.height)
+            glOrtho(0, self.width, 0, self.height, 0, 1)
 
 
-        oldScope = self.manager.createNewScope(True)
-        self.visitor.visit(self.ctx.compoundStatement())
-        self.manager.curr_scope = oldScope
+            oldScope = self.manager.createNewScope(True)
 
-        glutSwapBuffers()
+            try:
+                self.visitor.visit(self.ctx.compoundStatement())
+            except Exception as e:
+                print(e) 
+                self.isCorrect = False
+
+            self.manager.curr_scope = oldScope
+
+            glutSwapBuffers()
 
     def show(self):
         glutInit()
