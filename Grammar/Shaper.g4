@@ -489,3 +489,7 @@ WS
 WhiteSpace
     : [ \t]+ -> skip
     ;
+
+LINE_COMMENT
+    :   '//' ~[\r\n]* -> skip
+    ;
