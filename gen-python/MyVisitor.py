@@ -49,7 +49,7 @@ class MyVisitor(ShaperVisitor):
             name = ctx.identifier().getText()
             f_param = self.visit(ctx.declarator())
             func = Function(name)
-            func.setReturnType(r_type)
+            func.setReturnVar(r_type)
             func.setParameters(f_param)
             func.ctx = ctx
             self.manager.addFunction(func)
