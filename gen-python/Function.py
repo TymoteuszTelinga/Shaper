@@ -15,4 +15,4 @@ class Function:
         self.parameters = par_list
 
     def __repr__(self) -> str:
-        return repr(self.return_type) + " " +  self.name + ": " + str(self.parameters)
+        return repr(self.return_atom) + " " +  self.name + ": " + str(self.parameters)

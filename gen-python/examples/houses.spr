@@ -25,7 +25,6 @@ void domek2(int x,int y)
         int width = 200;
     int height = 160;
     x +=4;
-    pritf(x);
     paint rectangle at (x + width/4, y) of (width/5, 3*height/5) with BLACK;
     paint rectangle at (x+ 3*width/5, y + 2*height/5) of (height/3) with BLUE;
     domek(x+10, y+10);

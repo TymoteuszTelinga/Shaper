@@ -22,7 +22,7 @@ class WindowMaker:
     def setBackground(self, color):
         self.color = color
 
-    def setContext(self, manager, visitor, ctx: ShaperParser.FunctionDefinitionContext):
+    def setContext(self, manager, visitor, ctx: ShaperParser.CompoundStatementContext):
         self.manager = manager
         self.visitor = visitor
         self.ctx = ctx
@@ -36,10 +36,10 @@ class WindowMaker:
             glOrtho(0, self.width, 0, self.height, 0, 1)
 
 
-            oldScope = self.manager.createNewScope(True)
+            oldScope = self.manager.createNewScope(False)
 
             try:
-                self.visitor.visit(self.ctx.compoundStatement())
+                self.visitor.visit(self.ctx)
             except Exception as e:
                 print("Error: ", e) 
                 self.isCorrect = False

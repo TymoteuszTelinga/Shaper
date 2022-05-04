@@ -1,10 +1,15 @@
 import sys
 import os.path
+
 from antlr4 import *
+from antlr4.error.ErrorListener import ErrorListener
+
 from grammar.ShaperLexer import ShaperLexer
 from grammar.ShaperParser import ShaperParser
+
 from MyVisitor import MyVisitor
-from antlr4.error.ErrorListener import ErrorListener
+from CheckVisitor import CheckVisitor
+from Manager import Manager
 
 class ShaperErrorListener(ErrorListener):
     def __init__(self):
@@ -45,12 +50,20 @@ def main(argv):
         try:
             tree = parser.programm()
             
-            myVisitor = MyVisitor()
+            manager = Manager()
+            
+            checkVisitor = CheckVisitor(manager)
+
+
+            # myVisitor = MyVisitor()
             try:
-                myVisitor.visit(tree)
-                print(myVisitor.funDict)
-                myVisitor.visit(tree)
-                #myVisitor.window.show()
+                checkVisitor.visit(tree)
+                checkVisitor.checkFunctionsBody()
+
+                # myVisitor.visit(tree)
+                # print(myVisitor.funDict)
+                # myVisitor.visit(tree)
+                # #myVisitor.window.show()
             except Exception as e:
                 print(e)
                 

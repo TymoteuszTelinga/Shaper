@@ -7,23 +7,27 @@ from Atoms import *
 class Manager:
 
 
-    def __init__(self, visitor) -> None:
-        self.visitor = visitor
-        self.window = WindowMaker()
+    def __init__(self) -> None:
+        self.visitor = None
+        self.window: WindowMaker = WindowMaker()
 
         #variables
-        self.curr_scope = Scope()
-        self.global_scope = self.curr_scope
+        self.curr_scope: Scope = Scope()
+        self.global_scope: Scope = self.curr_scope
+        self.return_var = None
 
         # functions
+        self.curr_function: function = None
         self.user_func : dict(str, Function) = {} 
         self.built_in_func: dict(str, Function) = {}
-        self.draw_func = None
-        self.setup_func = None
+        self.draw_func: function = None
+        self.setup_func: function = None
 
     def start(self):
         if self.setup_func != None:
-            self.visitor.visit(self.setup_func.ctx.compoundStatement())
+            oldScope = self.createNewScope(False)
+            self.visitor.visit(self.setup_func.ctx)
+            self.curr_scope = oldScope
         
         if self.draw_func != None:
             self.window.setContext(self, self.visitor, self.draw_func.ctx)
@@ -63,22 +67,19 @@ class Manager:
 
         self.user_func[fun.name] = fun
 
-    def enterFunction(self, name: str, params: list):
+    def functionExists(self,name:str, params:list):
         #check if function with this name exists
         if name in self.user_func.keys():
             func = self.user_func[name]
         elif name in self.built_in_func.keys():
             func = self.built_in_func[name]
         elif name in ['setup', 'draw']:
-            raise Exception("Functions 'setup' and 'draw' can't be called directly!")
+            return (None, 1)
         else:
-            raise Exception(f"Function {name} doesn't exist!") 
-        
+            return (None, 2)
+            
         if len(params) != len(func.parameters):
-            raise Exception(f"Called function has {len(params)} parameters, but was declared with {len(func.parameters)}")
-
-        #create new scope
-        oldScope = self.createNewScope(False)
+            return (func, 3)
 
         # add function's call parameters to new scope
         for i in range(len(params)):
@@ -86,22 +87,42 @@ class Manager:
             expected = func.parameters[i]
 
             if got.type != expected.type:
-                raise Exception(f"At {i} parameter expected type {expected.type}, but got type {got.type}")
-            
-            var = Variable(expected.name, expected.type)
+                return ([i, expected], 4)
+                
+        return(func, 0)
+
+    def enterFunction(self, name: str, params: list):
+        oldFunction = self.curr_function
+
+        if name in self.user_func.keys():
+            self.curr_function = self.user_func[name]
+        elif name in self.built_in_func.keys():
+            self.curr_function = self.built_in_func[name]
+
+        #create new scope
+        oldScope = self.createNewScope(False)
+
+        # add function's call parameters to new scope
+        for i in range(len(params)):
+            got = params[i]
+            var = Variable(got.name, got.type)
             var.val = got.val
 
             self.addVariable(var)
         
         
-        ret_val = self.visitor.visit(func.ctx)
-        if ret_val == None and func.return_type == Type.VOID:
-            ret_val = Constant(Type.VOID, None)
-        elif ret_val.type != func.return_type:
-            raise Exception(f"Incorrect return type, expected { func.return_type}, but got type {ret_val.type}")
-
+        self.visitor.visit(self.curr_function.ctx)
         self.curr_scope = oldScope
-        return ret_val
+        self.curr_function = oldFunction
+
+        temp = self.return_var
+        self.return_var = None
+
+        if temp == None:
+            
+            temp = Constant(Type.VOID, None)
+        
+        return temp
             
             
     
@@ -113,6 +134,7 @@ class Manager:
         else:
             return self.global_scope.getVariable(name)
 
+    # checks if variable can be created in current scope
     def isVariableAvailable(self, name):
         if name in ['draw', 'setup'] or name in self.built_in_func.keys() or name in self.user_func.keys():
             raise Exception("Can't create variable with the same name as declared function")
@@ -129,6 +151,9 @@ class Manager:
 
     def fillBuitInFunctions():
         print("#TODO fill built in functions")
+
+    def setVisitor(self, visitor):
+        self.visitor = visitor
 
 
         

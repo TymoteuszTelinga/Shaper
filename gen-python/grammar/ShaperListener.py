@@ -44,15 +44,6 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by ShaperParser#functionSpecifier.
-    def enterFunctionSpecifier(self, ctx:ShaperParser.FunctionSpecifierContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#functionSpecifier.
-    def exitFunctionSpecifier(self, ctx:ShaperParser.FunctionSpecifierContext):
-        pass
-
-
     # Enter a parse tree produced by ShaperParser#typeSpecifier.
     def enterTypeSpecifier(self, ctx:ShaperParser.TypeSpecifierContext):
         pass
@@ -131,15 +122,6 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#initDeclarator.
     def exitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
-        pass
-
-
-    # Enter a parse tree produced by ShaperParser#declarationSpecifier.
-    def enterDeclarationSpecifier(self, ctx:ShaperParser.DeclarationSpecifierContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#declarationSpecifier.
-    def exitDeclarationSpecifier(self, ctx:ShaperParser.DeclarationSpecifierContext):
         pass
 
 

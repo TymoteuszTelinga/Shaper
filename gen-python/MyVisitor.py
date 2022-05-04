@@ -1,4 +1,4 @@
-from ast import Expression
+
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 import Shapes
@@ -21,9 +21,9 @@ class MyVisitor(ShaperVisitor):
         if ctx.externalDeclarationList() != None:
             self.visit(ctx.externalDeclarationList())
         
-        self.findFunctions = False
+            self.findFunctions = False
 
-        self.visit(ctx.externalDeclarationList())
+            self.visit(ctx.externalDeclarationList())
 
         self.manager.start()
 
@@ -45,7 +45,7 @@ class MyVisitor(ShaperVisitor):
 
     def visitFunctionDefinition(self, ctx: ShaperParser.FunctionDefinitionContext):
         if self.findFunctions:
-            r_type = self.visit(ctx.functionSpecifier())
+            r_type = self.visit(ctx.typeSpecifier())
             name = ctx.identifier().getText()
             f_param = self.visit(ctx.declarator())
             func = Function(name)
@@ -55,9 +55,6 @@ class MyVisitor(ShaperVisitor):
             self.manager.addFunction(func)
         else:
             return self.visit(ctx.compoundStatement())
-
-    def visitFunctionSpecifier(self, ctx: ShaperParser.FunctionSpecifierContext):
-        return self.visit(ctx.typeSpecifier())
 
     def visitTypeSpecifier(self, ctx: ShaperParser.TypeSpecifierContext):
         return Type.getType(ctx.getText())
@@ -122,7 +119,7 @@ class MyVisitor(ShaperVisitor):
 
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
         name = ctx.identifier().getText()
-        type = self.visit(ctx.declarationSpecifier())
+        type = self.visit(ctx.declarationType())
         var = Variable(name, type)
 
         if not self.manager.isVariableAvailable(name):
@@ -138,8 +135,6 @@ class MyVisitor(ShaperVisitor):
         self.manager.addVariable(var)
 
 
-    def visitDeclarationSpecifier(self, ctx: ShaperParser.DeclarationSpecifierContext) -> Type:
-        return self.visit(ctx.declarationType())
 
     def visitDeclarationType(self, ctx: ShaperParser.DeclarationTypeContext) -> Type:
         return Type.getType(ctx.getText())
@@ -556,6 +551,10 @@ class MyVisitor(ShaperVisitor):
         print("pos:")
         return self.visitChildren(ctx)
 
+    def visitOfStatement(self, ctx: ShaperParser.OfStatementContext):
+        print("size:")
+        return self.visitChildren(ctx)
+
     def visitFromStatement(self, ctx: ShaperParser.FromStatementContext):
         print("pos1:")
         return self.visitChildren(ctx)
@@ -567,28 +566,6 @@ class MyVisitor(ShaperVisitor):
     def visitToStatement(self, ctx: ShaperParser.ToStatementContext):
         print("pos3:")
         return self.visitChildren(ctx)
-
-    def visitOfStatement(self, ctx: ShaperParser.OfStatementContext):
-        print("size:")
-        return self.visitChildren(ctx)
-
-    def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):        
-        if ctx.right != None:
-
-            pos_size_tulp = (self.visit(ctx.left), self.visit(ctx.right))
-
-        else:
-            var = self.visit(ctx.left)
-            pos_size_tulp = (var, var)
-        
-        if pos_size_tulp[0].type not in [Type.INT, Type.FLOAT]:
-            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
-
-        if pos_size_tulp[1].type not in [Type.INT, Type.FLOAT]:
-            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
-
-        print(pos_size_tulp)
-        return pos_size_tulp
 
     def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
         if ctx.constant != None:
@@ -608,6 +585,25 @@ class MyVisitor(ShaperVisitor):
                 raise Exception("Incorrect type, expected 'color', got " + repr(var.type))
             
             return var
+
+    def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):        
+        if ctx.right != None:
+
+            pos_size_tulp = (self.visit(ctx.left), self.visit(ctx.right))
+
+        else:
+            var = self.visit(ctx.left)
+            pos_size_tulp = (var, var)
+        
+        if pos_size_tulp[0].type not in [Type.INT, Type.FLOAT]:
+            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+
+        if pos_size_tulp[1].type not in [Type.INT, Type.FLOAT]:
+            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+
+        print(pos_size_tulp)
+        return pos_size_tulp
+
         
     def visitJumpStatement(self, ctx: ShaperParser.JumpStatementContext):
         if ctx.expression() != None:

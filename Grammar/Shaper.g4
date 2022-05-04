@@ -16,13 +16,9 @@ externalDeclaration
     ;
 
 functionDefinition
-    : functionSpecifier identifier declarator compoundStatement
+    : typeSpecifier identifier declarator compoundStatement
     ;
 
-functionSpecifier
-    : typeSpecifier
-    | CONST typeSpecifier
-    ;
 
 typeSpecifier
     : VOID
@@ -33,8 +29,8 @@ typeSpecifier
     | DOUBLE
     | COLOR
     | STRUCT identifier
-    | ARRAY functionSpecifier
-    | LIST functionSpecifier
+    | ARRAY typeSpecifier
+    | LIST typeSpecifier
     ;
 
 declarator
@@ -48,7 +44,7 @@ parameterList
     ;
 
 parameterDeclaration
-    : functionSpecifier identifier
+    : typeSpecifier identifier
     ;
 
 compoundStatement
@@ -70,13 +66,9 @@ declaration
     ;
 
 initDeclarator
-    : declarationSpecifier identifier ( assignmentOperator assignmentExpression)?
+    : declarationType identifier ( assignmentOperator assignmentExpression)?
     ;
 
-declarationSpecifier
-    : declarationType
-    | CONST declarationType
-    ;
 
 declarationType
     : BOOL
@@ -86,8 +78,8 @@ declarationType
     | DOUBLE
     | COLOR
     | STRUCT identifier
-    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationSpecifier
-    | LIST declarationSpecifier
+    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationType
+    | LIST declarationType
     ;
 
 structDeclarator
@@ -363,8 +355,6 @@ STRUCT: 'struct';
 ARRAY: 'array';
 
 LIST: 'list';
-
-CONST: 'const';
 
 OR: '|';
 
