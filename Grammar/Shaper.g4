@@ -144,7 +144,7 @@ postfixExpression
     ;
 
 primaryExpression
-    : identifier
+    : scopeIdentifier
     | constant
     | LEFTPAREN expression RIGHTPAREN                        
     | functionCall
@@ -256,7 +256,7 @@ toStatement
     ;
 
 colorStatement
-    : WITH (identifier|constant)
+    : WITH ( scopeIdentifier|constant)
     ;
 
 posSizeParent
@@ -286,8 +286,17 @@ jumpStatement
     | RETURN expression? SEMICOLON
     ;
 
+
+scopeIdentifier
+    : globalScope? identifier
+    ;
+
 identifier
     : Identifier
+    ;
+
+globalScope
+    : GLOBAL
     ;
 
 constant
@@ -423,6 +432,8 @@ CONTINUE: 'continue';
 BREAK: 'break';
 
 RETURN: 'return';
+
+GLOBAL: 'global:';
 
 IntegerConstant
     : NonZeroDigit Digit*

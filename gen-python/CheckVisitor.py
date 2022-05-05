@@ -500,14 +500,9 @@ class CheckVisitor(ShaperVisitor):
 #     | functionCall
 #     ;
     def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
-        if ctx.identifier() != None: # get existing variable
-            name = self.visit(ctx.identifier())
-            var = self.manager.getVariable(name)
-
-            if var == None:
-                raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist")
-            else: 
-                return var
+        if ctx.scopeIdentifier() != None: # get existing variable
+            var = self.visit(ctx.scopeIdentifier())
+            return var
 
         elif ctx.constant() != None:
             return self.visit(ctx.constant())
@@ -685,18 +680,16 @@ class CheckVisitor(ShaperVisitor):
 #     : WITH (identifier|constant)
 #     ;
     def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
-        if ctx.constant != None:
+        if ctx.constant() != None:
             const = self.visit(ctx.constant())
 
             if const.type != Type.COLOR:
                 raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(const.type))
         else:
-            name = self.visit(ctx.identifier())
-            var = self.manager.getVariable(name)
+            var = self.visit(ctx.scopeIdentifier())
 
-            if var == None:
-                raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist")
-            elif var.type != Type.COLOR: 
+
+            if var.type != Type.COLOR: 
                 raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(var.type))
 
 
@@ -733,6 +726,21 @@ class CheckVisitor(ShaperVisitor):
         if self.manager.return_var.type != self.manager.curr_function.return_atom.type:
             raise Exception(f"line {ctx.start.line} Incorrect return type, expected {self.manager.curr_function.return_atom.type}, but got type {self.manager.return_var.type}")
 
+
+    def visitScopeIdentifier(self, ctx: ShaperParser.ScopeIdentifierContext):
+        name = self.visit(ctx.identifier())
+        if ctx.globalScope() != None:
+            var = self.manager.global_scope.getVariable(name)
+
+            if var == None:
+                raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist in global scope")
+        else: 
+            var = self.manager.getVariable(name)
+
+            if var == None:
+                raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist")
+            
+        return var
 
 # identifier
 #     : Identifier

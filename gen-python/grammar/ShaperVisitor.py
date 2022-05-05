@@ -274,8 +274,18 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#scopeIdentifier.
+    def visitScopeIdentifier(self, ctx:ShaperParser.ScopeIdentifierContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#identifier.
     def visitIdentifier(self, ctx:ShaperParser.IdentifierContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#globalScope.
+    def visitGlobalScope(self, ctx:ShaperParser.GlobalScopeContext):
         return self.visitChildren(ctx)
 
 

@@ -485,12 +485,30 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#scopeIdentifier.
+    def enterScopeIdentifier(self, ctx:ShaperParser.ScopeIdentifierContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#scopeIdentifier.
+    def exitScopeIdentifier(self, ctx:ShaperParser.ScopeIdentifierContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#identifier.
     def enterIdentifier(self, ctx:ShaperParser.IdentifierContext):
         pass
 
     # Exit a parse tree produced by ShaperParser#identifier.
     def exitIdentifier(self, ctx:ShaperParser.IdentifierContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#globalScope.
+    def enterGlobalScope(self, ctx:ShaperParser.GlobalScopeContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#globalScope.
+    def exitGlobalScope(self, ctx:ShaperParser.GlobalScopeContext):
         pass
 
 

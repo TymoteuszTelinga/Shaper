@@ -4,6 +4,7 @@ void draw()
 {
     int y = 10;
     int x = 10;
+    domek(global:x,global:y);
     domek(x,y);
 }
 
@@ -15,10 +16,9 @@ void domek(int x, int y)
     
     paint rectangle at (x, y) of (width,height) with YELLOW;
     paint triangle from (x, y + height) through (x + width/2, y + 3*height/2) to (x+ width,y+ height) with RED;
-    domek(2*x,2*y);
 }
 
-int domek2(int x,int y)
+void domek2(int x,int y)
 {
     int width = 200;
     int height = 160;

@@ -268,10 +268,8 @@ class MyVisitor(ShaperVisitor):
         raise Exception("(visitPostfixExpression): It shouldn't be raised")
 
     def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
-        if ctx.identifier() != None: 
-            name = self.visit(ctx.identifier())
-            var = self.manager.getVariable(name)
-
+        if ctx.scopeIdentifier() != None: 
+            var = self.visit(ctx.scopeIdentifier())
             return var
 
         elif ctx.constant() != None:
@@ -396,9 +394,7 @@ class MyVisitor(ShaperVisitor):
 
             return const
         else:
-            name = self.visit(ctx.identifier())
-            var = self.manager.getVariable(name)
-            
+            var = self.visit(ctx.scopeIdentifier())
             return var
 
     def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):        
@@ -418,6 +414,16 @@ class MyVisitor(ShaperVisitor):
             self.manager.return_var = self.visit(ctx.expression())
         else:   
             self.manager.return_var = Constant(Type.VOID, None)
+
+
+    def visitScopeIdentifier(self, ctx: ShaperParser.ScopeIdentifierContext):
+        name = self.visit(ctx.identifier())
+        if ctx.globalScope() != None:
+            var = self.manager.global_scope.getVariable(name)
+        else: 
+            var = self.manager.getVariable(name)
+            
+        return var
 
     def visitIdentifier(self, ctx: ShaperParser.IdentifierContext) -> str:
         return ctx.getText()
