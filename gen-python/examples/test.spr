@@ -2,10 +2,10 @@ int x = 10;
 
 void draw()
 { 
-
+    test();
 }
 
 void test()
 {
-    int f  =10;
+    test();
 }

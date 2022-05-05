@@ -1,3 +1,4 @@
+from re import S
 from Types import Type
 from Scope import Scope
 from Function import Function
@@ -6,6 +7,7 @@ from Atoms import *
 
 class Manager:
 
+    max_recursion = 15
 
     def __init__(self) -> None:
         self.visitor = None
@@ -23,6 +25,10 @@ class Manager:
         self.built_in_func: dict(str, Function) = {}
         self.draw_func: Function = None
         self.setup_func: Function = None
+
+        # for limiting recursion
+        self.called_func: dict(str, int) = {}
+
 
     def start(self):
         if self.setup_func != None:
@@ -119,7 +125,12 @@ class Manager:
             self.addVariable(var)
         
         
+        if not self.addToHeap(self.curr_function.name):
+             raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
+
         self.visitor.visit(self.curr_function.ctx)
+
+        self.deleteFromHeap(self.curr_function.name)
 
         temp = self.return_var
 
@@ -135,12 +146,8 @@ class Manager:
         self.curr_scope = oldScope
         self.curr_function = oldFunction
         
-
-        
         return temp
             
-            
-    
     def getVariable(self, name: str):
         var = self.curr_scope.getVariable(name) 
 
@@ -170,5 +177,15 @@ class Manager:
     def setVisitor(self, visitor):
         self.visitor = visitor
 
+    def addToHeap(self, name : str):
+        self.called_func[name] = self.called_func.get(name, 0) + 1
 
+        if self.called_func[name] > self.max_recursion:
+            return False
+        
+        return True
+
+    def deleteFromHeap(self, name : str):
+        self.called_func[name] = self.called_func.get(name) - 1
+ 
         

@@ -31,6 +31,7 @@ class ShaperErrorListener(ErrorListener):
 
 
 def main(argv):
+    sys.setrecursionlimit(10000)
 
     if len(argv)>1 and os.path.isfile(argv[1]):
         input_stream = FileStream(argv[1])
