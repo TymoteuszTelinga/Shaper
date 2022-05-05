@@ -55,12 +55,13 @@ def main(argv):
             checkVisitor = CheckVisitor(manager)
 
 
-            # myVisitor = MyVisitor()
+            myVisitor = MyVisitor(manager)
             try:
                 checkVisitor.visit(tree)
                 checkVisitor.checkFunctionsBody()
 
-                # myVisitor.visit(tree)
+
+                myVisitor.start(tree)
                 # print(myVisitor.funDict)
                 # myVisitor.visit(tree)
                 # #myVisitor.window.show()

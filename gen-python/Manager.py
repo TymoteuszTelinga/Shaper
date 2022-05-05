@@ -11,25 +11,32 @@ class Manager:
         self.visitor = None
         self.window: WindowMaker = WindowMaker()
 
-        #variables
+        #scopes
         self.curr_scope: Scope = Scope()
         self.global_scope: Scope = self.curr_scope
+
         self.return_var = None
+        self.curr_function: Function = None
 
         # functions
-        self.curr_function: function = None
         self.user_func : dict(str, Function) = {} 
         self.built_in_func: dict(str, Function) = {}
-        self.draw_func: function = None
-        self.setup_func: function = None
+        self.draw_func: Function = None
+        self.setup_func: Function = None
 
     def start(self):
         if self.setup_func != None:
+            self.curr_function = self.setup_func
             oldScope = self.createNewScope(False)
+
             self.visitor.visit(self.setup_func.ctx)
+
+            self.return_var = None
             self.curr_scope = oldScope
         
         if self.draw_func != None:
+            self.curr_function = self.draw_func
+
             self.window.setContext(self, self.visitor, self.draw_func.ctx)
             self.window.show()
 
@@ -105,22 +112,30 @@ class Manager:
         # add function's call parameters to new scope
         for i in range(len(params)):
             got = params[i]
-            var = Variable(got.name, got.type)
+            expected = self.curr_function.parameters[i]
+            var = Variable(expected.name, expected.type)
             var.val = got.val
 
             self.addVariable(var)
         
         
         self.visitor.visit(self.curr_function.ctx)
-        self.curr_scope = oldScope
-        self.curr_function = oldFunction
 
         temp = self.return_var
-        self.return_var = None
+
+        if temp == None and self.curr_function.return_atom.type != Type.VOID:
+             raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} returning non-void value doesn't have 'return' statement") 
 
         if temp == None:
             
             temp = Constant(Type.VOID, None)
+
+        self.return_var = None
+
+        self.curr_scope = oldScope
+        self.curr_function = oldFunction
+        
+
         
         return temp
             

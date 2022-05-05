@@ -38,11 +38,11 @@ class WindowMaker:
 
             oldScope = self.manager.createNewScope(False)
 
-            try:
-                self.visitor.visit(self.ctx)
-            except Exception as e:
-                print("Error: ", e) 
-                self.isCorrect = False
+            # try:
+            self.visitor.visit(self.ctx)
+            # except Exception as e:
+            #     print("Error: ", e) 
+            #     self.isCorrect = False
 
             self.manager.curr_scope = oldScope
 

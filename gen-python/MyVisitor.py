@@ -7,25 +7,36 @@ from Types import Type
 from Function import Function
 from Atoms import Variable, Constant
 from Manager import Manager
+from Scope import Scope
 
 
 class MyVisitor(ShaperVisitor):
 
-    def __init__(self) -> None:
+    def __init__(self, manager) -> None:
         self.findFunctions = True
         self.globalVars = True
         self.funDict = {}
-        self.manager = Manager(self)
+        self.manager: Manager = manager
 
-    def visitProgramm(self, ctx: ShaperParser.ProgrammContext):
-        if ctx.externalDeclarationList() != None:
-            self.visit(ctx.externalDeclarationList())
-        
-            self.findFunctions = False
+    def start(self, tree):
+        # restarting state
+        self.manager.setVisitor(self)
+        self.manager.curr_scope = Scope()
+        self.manager.global_scope = self.manager.curr_scope
+        self.manager.curr_function = None
+        self.manager.return_var = None
 
-            self.visit(ctx.externalDeclarationList())
+        # global variables initializing
+        self.visit(tree)
 
+        #running function setup, then draw
         self.manager.start()
+
+    def visitProgramm(self, ctx: ShaperParser.ProgrammContext):   
+        #file is not empty
+        if ctx.externalDeclarationList() != None: 
+            #gather functions
+            self.visit(ctx.externalDeclarationList()) 
 
     def visitExternalDeclarationList(self, ctx: ShaperParser.ExternalDeclarationListContext):
         self.visit(ctx.externalDeclaration())
@@ -34,103 +45,45 @@ class MyVisitor(ShaperVisitor):
             self.visit(ctx.externalDeclarationList())
 
     def visitExternalDeclaration(self, ctx: ShaperParser.ExternalDeclarationContext):
-        if self.findFunctions: # first tree walking 
-            if ctx.functionDefinition() != None:
-                self.visit(ctx.functionDefinition())
-        else:
-            if ctx.functionDefinition() == None:
-                self.visit(ctx.declaration())
-            # else:
-            #     self.visit(ctx.functionDefinition())
+        if ctx.declaration() != None:
+            self.visit(ctx.declaration())
 
-    def visitFunctionDefinition(self, ctx: ShaperParser.FunctionDefinitionContext):
-        if self.findFunctions:
-            r_type = self.visit(ctx.typeSpecifier())
-            name = ctx.identifier().getText()
-            f_param = self.visit(ctx.declarator())
-            func = Function(name)
-            func.setReturnVar(r_type)
-            func.setParameters(f_param)
-            func.ctx = ctx
-            self.manager.addFunction(func)
-        else:
-            return self.visit(ctx.compoundStatement())
-
-    def visitTypeSpecifier(self, ctx: ShaperParser.TypeSpecifierContext):
-        return Type.getType(ctx.getText())
-
-    def visitDeclarator(self, ctx: ShaperParser.DeclaratorContext):
-        if ctx.parameterList() == None:
-            return []
-        else:
-            return self.visit(ctx.parameterList())
-
-    def visitParameterList(self, ctx: ShaperParser.ParameterListContext):
-        var = self.visit(ctx.parameterDeclaration())
-
-        if ctx.parameterList() == None:
-            par_list = [var]
-        else:
-            par_list = self.visit(ctx.parameterList())
-            for param in par_list:
-                if var.name == param.name:
-                    raise Exception("Ambiguity Error: Two or more parameters of this same name in one function")
-            
-            par_list.insert(0,var)
-            
-        return par_list
-
-    def visitParameterDeclaration(self, ctx: ShaperParser.ParameterDeclarationContext):
-        name = ctx.identifier().getText()
-        type = self.visit(ctx.functionSpecifier())
-
-        var = Variable(name, type)
-        return var
+    
+    def visitDeclaration(self, ctx: ShaperParser.DeclarationContext):
+        if (ctx.initDeclarator() != None): 
+            self.visit(ctx.initDeclarator())
 
     def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
         if ctx.instructionList() != None:
-            return self.visit(ctx.instructionList())
-        else:
-            return None
-    
-    def visitInstructionList(self, ctx: ShaperParser.InstructionListContext):
-        ret_val = self.visit(ctx.instruction())
+            self.visit(ctx.instructionList())
 
-        if ret_val != None:
-            return ret_val
+
+    def visitInstructionList(self, ctx: ShaperParser.InstructionListContext):
+        self.visit(ctx.instruction())
+
+        if self.manager.return_var != None:
+            return
 
         if ctx.instructionList() != None:
-            ret_val = self.visit(ctx.instructionList())
+            self.visit(ctx.instructionList())
         
-        return ret_val
     
     def visitInstruction(self, ctx: ShaperParser.InstructionContext):
         if ctx.declaration() != None:
             self.visit(ctx.declaration())
-            return None
         else:
-            return self.visit(ctx.statement())
+            self.visit(ctx.statement())
 
-    def visitDeclaration(self, ctx: ShaperParser.DeclarationContext):
-        if (ctx.structDeclarator() != None):
-            return
-        else:
-            var = self.visit(ctx.initDeclarator())
 
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
         name = ctx.identifier().getText()
         type = self.visit(ctx.declarationType())
         var = Variable(name, type)
 
-        if not self.manager.isVariableAvailable(name):
-            raise Exception("Variable \'" + name + "\' defined earlier in this scope")
-
         if ctx.assignmentExpression() != None:
             r_value = self.visit(ctx.assignmentExpression())
-            if var.type == r_value.type:
-                var.val = r_value.val;
-            else:
-                raise Exception(f"Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
+            var.val = r_value.val;
+
 
         self.manager.addVariable(var)
 
@@ -150,43 +103,22 @@ class MyVisitor(ShaperVisitor):
             r = self.visit(ctx.assignmentExpression())
             op = ctx.assignmentOperator().getText()
 
-            if(type(l) is Constant):
-                raise Exception("Can't assign value to a non-variable atom")
-
-            if l.type != r.type :
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
 
             if op == '=':
                 l.val  =  r.val 
             elif op == '+=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                else: 
-                    l.val += r.val
+                l.val += r.val
             elif op == '-=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                else: 
-                    l.val -= r.val  
+                l.val -= r.val  
             elif op == '*=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                else: 
-                    l.val *= r.val  
+                l.val *= r.val  
             elif op == '/=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                else: 
-                    l.val /= r.val 
+                l.val /= r.val 
             elif op == '%=':
-                if l.type not in [Type.INT]:
-                    raise Exception(f"Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                else: 
-                    l.val %= r.val 
+                l.val %= r.val 
 
             return l
-        
-        raise Exception("(visitAssignmentExpression): It shouldn't be raised")
+
         
     def visitLogicalORExpression(self, ctx: ShaperParser.LogicalORExpressionContext) -> Variable:
         if ctx.logicalORExpression() == None:
@@ -195,17 +127,9 @@ class MyVisitor(ShaperVisitor):
             l = self.visit(ctx.logicalORExpression())
             r = self.visit(ctx.logicalANDExpression())
             
-            if l.type not in [Type.BOOL]:
-                raise Exception(f"Can't use  binary operator \'|\' to type " + repr(l.type))
-            
-            if r.type not in [Type.BOOL]:
-                raise Exception(f"Can't use  binary operator \'|\' to type " + repr(r.type))
-
             ret = Constant(Type.BOOL, l.val or r.val)
 
             return ret
-
-        raise Exception("(visitLogicalORExpression): It shouldn't be raised")
 
     def visitLogicalANDExpression(self, ctx: ShaperParser.LogicalANDExpressionContext) -> Variable:
         if ctx.logicalANDExpression() == None:
@@ -213,19 +137,11 @@ class MyVisitor(ShaperVisitor):
         else:
             l = self.visit(ctx.logicalANDExpression())
             r = self.visit(ctx.equalityExpression())
-            
-            if l.type not in [Type.BOOL]:
-                raise Exception(f"Can't use  binary operator \'&\' to type " + repr(l.type))
-            
-            if r.type not in [Type.BOOL]:
-                raise Exception(f"Can't use  binary operator \'&\' to type " + repr(r.type))
 
             ret = Constant(Type.BOOL, l.val and r.val)
 
             return ret
 
-        raise Exception("(visitLogicalANDExpression): It shouldn't be raised")
-    
     def visitEqualityExpression(self, ctx: ShaperParser.EqualityExpressionContext) -> Variable:
         if ctx.equalityExpression() == None:
             return self.visit(ctx.relationalExpression())
@@ -234,23 +150,12 @@ class MyVisitor(ShaperVisitor):
             r = self.visit(ctx.relationalExpression())
             op = ctx.equalityOperator().getText()
 
-            if l.type not in [Type.INT, Type.FLOAT, Type.BOOL, Type.COLOR]:
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type))
-            
-            if r.type not in [Type.INT, Type.FLOAT, Type.BOOL, Type.COLOR]:
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
-
-            if l.type != r.type and (Type.BOOL in [l.type, r.type] or Type.Color in [l.type, r.type]):
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
-            
             if op == '==':
                 ret = Constant(Type.BOOL, l.val == r.val)
             elif op == '!=':
                 ret = Constant(Type.BOOL, l.val != r.val)
 
             return ret
-        
-        raise Exception("(visitEqualityExpression): It shouldn't be raised")
     
     def visitRelationalExpression(self, ctx: ShaperParser.RelationalExpressionContext) -> Variable:
         if ctx.relationalExpression() == None:
@@ -259,12 +164,6 @@ class MyVisitor(ShaperVisitor):
             l = self.visit(ctx.relationalExpression())
             r = self.visit(ctx.additiveExpression())
             op = ctx.relationalOperator().getText()
-
-            if l.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type))
-            
-            if r.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
             if op == '<':
                 ret = Constant(Type.BOOL,l.val < r.val)
@@ -276,8 +175,6 @@ class MyVisitor(ShaperVisitor):
                 ret = Constant(Type.BOOL,l.val >= r.val)
 
             return ret
-
-        raise Exception("(visitRelationalExpression): It shouldn't be raised")
     
     def visitAdditiveExpression(self, ctx: ShaperParser.AdditiveExpressionContext) -> Variable:
         if ctx.additiveExpression() == None:
@@ -287,11 +184,6 @@ class MyVisitor(ShaperVisitor):
             r = self.visit(ctx.multiplicativeExpression())
             op = ctx.additiveOperator().getText()
 
-            if l.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(l.type))
-            
-            if r.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
             
             ret_type = Type.INT    
             if r.type == Type.FLOAT or l.type == Type.FLOAT:
@@ -305,9 +197,6 @@ class MyVisitor(ShaperVisitor):
 
             return ret
 
-        raise Exception("(visitAdditiveExpression): It shouldn't be raised")
-       
-
 
     def visitMultiplicativeExpression(self, ctx: ShaperParser.MultiplicativeExpressionContext) -> Variable:
         if ctx.multiplicativeExpression() == None:
@@ -318,11 +207,6 @@ class MyVisitor(ShaperVisitor):
             r = self.visit(ctx.unaryExpression())
             op = ctx.multiplicativeOperator().getText()
             
-            if l.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"Can't use  multiplicative operator \'{op}\' to type " + repr(l.type))
-            
-            if r.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
             ret_type = Type.INT    
             if r.type == Type.FLOAT or l.type == Type.FLOAT:
@@ -333,14 +217,10 @@ class MyVisitor(ShaperVisitor):
             elif op == '/':
                 ret = Constant(ret_type, l.val / r.val)
             elif op == '%':
-                if ret_type != Type.INT:
-                    raise Exception(f"Can't use  binary operator \'{op}\' to type \'float\'" )
-                else:
-                    ret = Constant(ret_type, l.val % r.val)
+                ret = Constant(ret_type, l.val % r.val)
 
             return ret
 
-        raise Exception("(visitMultiplicativeExpression): It shouldn't be raised")
 
     def visitUnaryExpression(self, ctx: ShaperParser.UnaryExpressionContext):
         if ctx.postfixExpression() != None:
@@ -351,33 +231,17 @@ class MyVisitor(ShaperVisitor):
             op = ctx.unaryOperator().getText()
 
             if  op == '-':
-                if ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception("Can't use unary operator \'-\' to type " + repr(ret.type))
-                else:
-                    new_ret = Constant(ret.type, -ret.val)
-                    return new_ret
+                new_ret = Constant(ret.type, -ret.val)
+                return new_ret
             elif op == '!':
-                if ret.type not in [Type.BOOL]:
-                    raise Exception("Can't use unary operator \'!\' to type " + repr(ret.type))
-                else:
-                    new_ret = Constant(ret.type, not ret.val)
-                    return new_ret
+                new_ret = Constant(ret.type, not ret.val)
+                return new_ret
             elif op == '++':
-                if type(ret) == Constant:
-                    raise Exception("Can't use operator \'++\' to a non-variable atom")
-                elif ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception("Can't use operator \'++\' to type " + repr(ret.type))
-                else:
-                    ret.val += 1
-                    return ret
+                ret.val += 1
+                return ret
             elif op == '--':
-                if type(ret) == Constant:
-                    raise Exception("Can't use operator \'--\' to a non-variable atom")
-                elif ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception("Can't use operator \'--\' to type " + repr(ret.type))
-                else:
-                    ret.val -= 1
-                    return ret
+                ret.val -= 1
+                return ret
 
         raise Exception("(visitUnaryExpression): It shouldn't be raised")
 
@@ -387,35 +251,19 @@ class MyVisitor(ShaperVisitor):
 
         else:
             ret = self.visit(ctx.postfixExpression())
-
-            if type(ret) == Constant:
-                if ctx.DOT() != None:
-                     raise Exception("Can't use operator \'.\' to a non-variable atom")
-                elif ctx.PLUSPLUS() != None:
-                     raise Exception("Can't use operator \'++\' to a non-variable atom")
-                elif ctx.MINUSMINUS() != None:
-                     raise Exception("Can't use operator \'--\' to a non-variable atom")
             
             if ctx.DOT() != None:
-                if ret.type in [Type.BOOL, Type.INT, Type.FLOAT, Type.VOID]:
-                    raise Exception("Can't use operator \'.\' to type " + repr(ret.type))
-                else:
-                    return ret
+                return ret
 
             elif ctx.PLUSPLUS() != None:
-                if ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception("Can't use operator \'++\' to type " + repr(ret.type))
-                else:
-                    new_ret = Constant(ret.type, ret.val)
-                    ret.val += 1
-                    return new_ret
+                new_ret = Constant(ret.type, ret.val)
+                ret.val += 1
+                return new_ret
+
             elif ctx.MINUSMINUS() != None:
-                if ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception("Can't use operator \'--\' to type " + repr(ret.type))
-                else:
-                    new_ret = Constant(ret.type, ret.val)
-                    ret.val -= 1
-                    return new_ret
+                new_ret = Constant(ret.type, ret.val)
+                ret.val -= 1
+                return new_ret
         
         raise Exception("(visitPostfixExpression): It shouldn't be raised")
 
@@ -424,10 +272,7 @@ class MyVisitor(ShaperVisitor):
             name = self.visit(ctx.identifier())
             var = self.manager.getVariable(name)
 
-            if var == None:
-                raise Exception("Variable " + name + " doesn't exist")
-            else: 
-                return var
+            return var
 
         elif ctx.constant() != None:
             return self.visit(ctx.constant())
@@ -457,28 +302,23 @@ class MyVisitor(ShaperVisitor):
         else:
             return [self.visit(ctx.expression())]
 
+
     def visitStatement(self, ctx: ShaperParser.StatementContext):
         if ctx.paintStatement() != None:
             self.visit(ctx.paintStatement())
-            return None
 
         if ctx.compoundStatement() != None:
             oldScope =  self.manager.createNewScope(True)
 
-            ret_val = self.visit(ctx.compoundStatement())
+            self.visit(ctx.compoundStatement())
 
-            print("Ended scope with variables: " + repr(self.manager.curr_scope.variables))
             self.manager.curr_scope = oldScope
-            print("Current Scope: " + repr(self.manager.curr_scope.variables))
-
-            return ret_val
 
         if ctx.expression() != None:
             self.visit(ctx.expression())
-            return None
 
         if ctx.jumpStatement() != None:
-            return self.visit(ctx.jumpStatement())
+            self.visit(ctx.jumpStatement())
 
     def visitPaintStatement(self, ctx: ShaperParser.PaintStatementContext):
         self.visit(ctx.shapeIndicator())
@@ -487,8 +327,6 @@ class MyVisitor(ShaperVisitor):
         self.visitChildren(ctx)
 
     def visitLineParameters(self, ctx: ShaperParser.LineParametersContext):
-        print("Line:")
-
         pos1 = self.visit(ctx.fromStatement())
         pos2 = self.visit(ctx.toStatement())
 
@@ -499,11 +337,8 @@ class MyVisitor(ShaperVisitor):
             line = Shapes.Line(pos1, pos2, color)
 
         line.paint()
-        print("===\n")
     
     def visitTriangleParameters(self, ctx: ShaperParser.TriangleParametersContext):
-        print("Triangle:")
-        
         pos1 = self.visit(ctx.fromStatement())
         pos2 = self.visit(ctx.throughStatement())
         pos3 = self.visit(ctx.toStatement())
@@ -515,11 +350,8 @@ class MyVisitor(ShaperVisitor):
             trg = Shapes.Triangle(pos1, pos2, pos3)
         
         trg.paint()
-        print("===\n")
 
     def visitRectangleParameters(self, ctx: ShaperParser.RectangleParametersContext):
-        print("Rectangle:")
-        
         pos = self.visit(ctx.atStatement())
         size = self.visit(ctx.ofStatement())
 
@@ -530,11 +362,8 @@ class MyVisitor(ShaperVisitor):
             rect = Shapes.Rectangle(pos, size)
         
         rect.paint() 
-        print("===\n")
 
-    def visitCircleParameters(self, ctx: ShaperParser.CircleParametersContext):
-        print("Circle:")
-        
+    def visitCircleParameters(self, ctx: ShaperParser.CircleParametersContext): 
         pos = self.visit(ctx.atStatement())
         size = self.visit(ctx.ofStatement())
 
@@ -545,44 +374,30 @@ class MyVisitor(ShaperVisitor):
             cir = Shapes.Circle(pos, size)
         
         cir.paint() 
-        print("===\n")
 
     def visitAtStatement(self, ctx: ShaperParser.AtStatementContext):
-        print("pos:")
         return self.visitChildren(ctx)
 
     def visitOfStatement(self, ctx: ShaperParser.OfStatementContext):
-        print("size:")
         return self.visitChildren(ctx)
 
     def visitFromStatement(self, ctx: ShaperParser.FromStatementContext):
-        print("pos1:")
         return self.visitChildren(ctx)
 
     def visitThroughStatement(self, ctx: ShaperParser.ThroughStatementContext):
-        print("pos2:")
         return self.visitChildren(ctx)
 
     def visitToStatement(self, ctx: ShaperParser.ToStatementContext):
-        print("pos3:")
         return self.visitChildren(ctx)
 
     def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
         if ctx.constant != None:
             const = self.visit(ctx.constant())
 
-            if const.type != Type.COLOR:
-                raise Exception("Incorrect type, expected 'color', got " + repr(const.type))
-
             return const
         else:
             name = self.visit(ctx.identifier())
             var = self.manager.getVariable(name)
-
-            if var == None:
-                raise Exception("Variable " + name + " doesn't exist")
-            elif var.type != Type.COLOR: 
-                raise Exception("Incorrect type, expected 'color', got " + repr(var.type))
             
             return var
 
@@ -595,20 +410,14 @@ class MyVisitor(ShaperVisitor):
             var = self.visit(ctx.left)
             pos_size_tulp = (var, var)
         
-        if pos_size_tulp[0].type not in [Type.INT, Type.FLOAT]:
-            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
-
-        if pos_size_tulp[1].type not in [Type.INT, Type.FLOAT]:
-            raise Exception("Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
-
-        print(pos_size_tulp)
         return pos_size_tulp
 
         
     def visitJumpStatement(self, ctx: ShaperParser.JumpStatementContext):
         if ctx.expression() != None:
-            return self.visit(ctx.expression())
-        return None
+            self.manager.return_var = self.visit(ctx.expression())
+        else:   
+            self.manager.return_var = Constant(Type.VOID, None)
 
     def visitIdentifier(self, ctx: ShaperParser.IdentifierContext) -> str:
         return ctx.getText()

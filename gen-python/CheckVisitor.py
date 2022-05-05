@@ -21,14 +21,25 @@ class CheckVisitor(ShaperVisitor):
 
         if self.manager.setup_func != None:
             oldScope = self.manager.createNewScope(False)
+
+            self.manager.curr_function = self.manager.setup_func
+            self.manager.return_var = None
+
             self.visit(self.manager.setup_func.ctx)
             self.manager.curr_scope = oldScope
 
         if self.manager.draw_func != None:
             oldScope = self.manager.createNewScope(False)
+
+            self.manager.curr_function = self.manager.draw_func
+            self.manager.return_var = None
+
             self.visit(self.manager.draw_func.ctx)
+
             self.manager.curr_scope = oldScope
 
+        self.manager.curr_function = None
+        self.manager.return_var = None
         for func in self.manager.user_func.values():
             self.manager.enterFunction(func.name, func.parameters)
 
@@ -716,8 +727,8 @@ class CheckVisitor(ShaperVisitor):
     def visitJumpStatement(self, ctx: ShaperParser.JumpStatementContext):
         if ctx.expression() != None:
             self.manager.return_var = self.visit(ctx.expression())
-        
-        self.manager.return_var = Constant(Type.VOID, None)
+        else: 
+            self.manager.return_var = Constant(Type.VOID, None)
 
         if self.manager.return_var.type != self.manager.curr_function.return_atom.type:
             raise Exception(f"line {ctx.start.line} Incorrect return type, expected {self.manager.curr_function.return_atom.type}, but got type {self.manager.return_var.type}")
