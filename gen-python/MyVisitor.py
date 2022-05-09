@@ -289,7 +289,7 @@ class MyVisitor(ShaperVisitor):
         if ctx.functionParameterList() != None:
             params = self.visit(ctx.functionParameterList())
         
-        return self.manager.enterFunction(name, params)
+        return self.manager.enterFunction(name, params, ctx)
 
     def visitFunctionParameterList(self, ctx: ShaperParser.FunctionParameterListContext):
 

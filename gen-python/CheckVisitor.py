@@ -41,7 +41,7 @@ class CheckVisitor(ShaperVisitor):
         self.manager.curr_function = None
         self.manager.return_var = None
         for func in self.manager.user_func.values():
-            self.manager.enterFunction(func.name, func.parameters)
+            self.manager.enterFunction(func.name, func.parameters, None)
 
 # programm 
 #     : externalDeclarationList?

@@ -1,10 +1,11 @@
 import enum
 
 class Type(enum.Enum):
-    VOID = 0;
-    BOOL = 1;
+    ANY = 0;
+    VOID = 1;
+    BOOL = 2;
 
-    INT = 2;
+    INT = 3;
     # LONG = 3;
     FLOAT = 4;
     # DOUBLE = 5;

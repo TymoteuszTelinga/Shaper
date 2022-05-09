@@ -6,6 +6,7 @@ class Function:
         self.name : str = f_name 
         self.return_atom: Constant = Constant(Type.VOID, None)
         self.parameters = []
+        self.kind = 0 # 0 - user 1 - built in
         self.ctx = None
 
     def setReturnVar(self, type: Type) -> None:

@@ -13,10 +13,10 @@ void domek(int x, int y)
 
     int width = 200;
     int height = 160;
-    
+    print(y);
     paint rectangle at (x, y) of (width,height) with YELLOW;
     paint triangle from (x, y + height) through (x + width/2, y + 3*height/2) to (x+ width,y+ height) with RED;
-    domek2(x,y);
+ //   domek2(x,y);
     domek(x+10, y+10);
     
 }

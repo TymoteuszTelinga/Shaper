@@ -58,6 +58,7 @@ def main(argv):
 
             myVisitor = MyVisitor(manager)
             try:
+
                 checkVisitor.visit(tree)
                 checkVisitor.checkFunctionsBody()
 

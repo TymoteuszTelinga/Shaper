@@ -1,4 +1,4 @@
-from re import S
+import types
 from Types import Type
 from Scope import Scope
 from Function import Function
@@ -7,7 +7,7 @@ from Atoms import *
 
 class Manager:
 
-    max_recursion = 15
+    max_recursion: int = 15
 
     def __init__(self) -> None:
         self.visitor = None
@@ -27,14 +27,15 @@ class Manager:
         self.setup_func: Function = None
 
         # for limiting recursion
-        self.called_func: dict(str, int) = {}
+        self.called_func: int = 0
+
+        self.fillBuitInFunctions()
 
 
     def start(self):
         if self.setup_func != None:
             self.curr_function = self.setup_func
             oldScope = self.createNewScope(False)
-
             self.visitor.visit(self.setup_func.ctx)
 
             self.return_var = None
@@ -99,12 +100,13 @@ class Manager:
             got = params[i]
             expected = func.parameters[i]
 
-            if got.type != expected.type:
+            
+            if expected.type != Type.ANY and got.type != expected.type:
                 return ([i, expected], 4)
                 
         return(func, 0)
 
-    def enterFunction(self, name: str, params: list):
+    def enterFunction(self, name: str, params: list, ctx):
         oldFunction = self.curr_function
 
         if name in self.user_func.keys():
@@ -119,23 +121,31 @@ class Manager:
         for i in range(len(params)):
             got = params[i]
             expected = self.curr_function.parameters[i]
-            var = Variable(expected.name, expected.type)
+            var = Variable(expected.name, got.type)
             var.val = got.val
 
             self.addVariable(var)
         
         
-        if not self.addToHeap(self.curr_function.name):
-             raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
+        if not self.addToHeap():
+            if self.curr_function.kind == 0:
+                raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
+            else:
+                raise Exception(f"line {ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
+        
+        if self.curr_function.kind == 0:
+           self.visitor.visit(self.curr_function.ctx)
+        else:
+            print(self.getVariable("x").val)
 
-        self.visitor.visit(self.curr_function.ctx)
 
-        self.deleteFromHeap(self.curr_function.name)
+        self.deleteFromHeap()
 
         temp = self.return_var
 
         if temp == None and self.curr_function.return_atom.type != Type.VOID:
-             raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} returning non-void value doesn't have 'return' statement") 
+            print("fsgfd")
+            raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} returning non-void value doesn't have 'return' statement") 
 
         if temp == None:
             
@@ -171,21 +181,26 @@ class Manager:
         self.curr_scope.addVariable(var)
         
 
-    def fillBuitInFunctions():
-        print("#TODO fill built in functions")
+    def fillBuitInFunctions(self):
+        temp = Function("print")
+        temp.kind = 1
+        temp.setParameters([Variable("x", Type.ANY)])
+
+        self.built_in_func[temp.name] = temp
+
 
     def setVisitor(self, visitor):
         self.visitor = visitor
 
-    def addToHeap(self, name : str):
-        self.called_func[name] = self.called_func.get(name, 0) + 1
+    def addToHeap(self):
+        self.called_func +=1
 
-        if self.called_func[name] > self.max_recursion:
+        if self.called_func > self.max_recursion:
             return False
         
         return True
 
-    def deleteFromHeap(self, name : str):
-        self.called_func[name] = self.called_func.get(name) - 1
+    def deleteFromHeap(self):
+        self.called_func -=1
  
         
