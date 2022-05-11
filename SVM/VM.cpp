@@ -50,6 +50,11 @@ void VM::showStack() const
 
 void VM::execute()
 {
+    if(!code)
+    {
+        return;
+    }
+    
     for (;;)
     {
         int instrucion = next();
