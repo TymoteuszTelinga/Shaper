@@ -60,32 +60,51 @@ void VM::execute()
         int instrucion = next();
         switch (instrucion)
         {
-        case ADD:
+        case ADD_I:
             {
                 int b = pop();
                 int a = pop();
                 push(a+b);
             }
             break;
-        case SUB:
+        case SUB_I:
             {
                 int b = pop();
                 int a = pop();
                 push(a-b);
             }
             break;
-        case MUL:
+        case MUL_I:
             {
                 int b = pop();
                 int a = pop();
                 push(a*b);
             }
             break;
-        case DIV:
+        case DIV_I:
             {
                 int b = pop();
                 int a = pop();
                 push(a/b);
+            }
+            break;
+        case MOD_I:
+            {
+                int b = pop();
+                int a = pop();
+                push(a%b);
+            }
+            break;
+        case I2S:
+            {
+                short s = pop();
+                push(s);
+            }
+            break;
+        case I2C:
+            {
+                char c = pop();
+                push (c);
             }
             break;
         case LT:
@@ -125,7 +144,7 @@ void VM::execute()
                 }
             }
             break;
-        case CONST:
+        case CONST_I:
             {
                 push(next());
             }
