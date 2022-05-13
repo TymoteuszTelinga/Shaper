@@ -34,6 +34,11 @@ enum {
     DIV_L    ,  // long divde -
     MOD_L    ,  // long modulo -
 
+    ADD_D    ,  // double add -
+    SUB_D    ,  // double substracion -
+    MUL_D    ,  // double multyply -
+    DIV_D    ,  // double divde -
+
     CONST_I  ,  // push constant -
 
     I2S ,       // cast int to short
@@ -58,17 +63,13 @@ enum {
     PRINT_I  ,  // ? print value on top of the stack
     PRINT_F,  // print value as float
     PRINT_L,  // print long value
+    PRINT_D,  // print double value
 
     POP    ,  // ? throw away top of the stack
     HALT   ,  // stop program -
     CALL   ,  // call procedure -
     RET       // return from procedure -
 };
-
-/*
-data type control by compilator or VM
-create specifik instruction like ADD_I , ADD_F ...
-*/
 
 class VM
 {

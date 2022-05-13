@@ -6,6 +6,8 @@ const int STACK_SIZE = 100;
 
 #define asfloat *(float*)&
 #define asint *(int*)&
+#define asdouble *(double*)&
+#define aslong *(long long*)&
 
 VM::VM(const int* code, const int PC, const unsigned int memSize):code(code)
 {
@@ -59,6 +61,7 @@ void VM::execute()
     }
     
     int x;
+    long long X;
     for (;;)
     {
         int instrucion = next();
@@ -174,6 +177,46 @@ void VM::execute()
                 pushL(a%b);
             }
             break;
+        case ADD_D:
+            {
+                X = popL();
+                double b = asdouble X;
+                X = popL();
+                double a = asdouble X;
+                double c = a+b;
+                pushL(aslong c);
+            }
+            break;
+        case SUB_D:
+            {
+                X = popL();
+                double b = asdouble X;
+                X = popL();
+                double a = asdouble X;
+                double c = a-b;
+                pushL(aslong c);
+            }
+            break;
+        case MUL_D:
+            {
+                X = popL();
+                double b = asdouble X;
+                X = popL();
+                double a = asdouble X;
+                double c = a*b;
+                pushL(aslong c);
+            }
+            break;
+        case DIV_D:
+            {
+                X = popL();
+                double b = asdouble X;
+                X = popL();
+                double a = asdouble X;
+                double c = a/b;
+                pushL(aslong c);
+            }
+            break;
         case I2S:
             {
                 short s = pop();
@@ -275,6 +318,12 @@ void VM::execute()
         case PRINT_L:
             {
                 std::cout<<popL()<<'\n';
+            }
+            break;
+        case PRINT_D:
+            {
+                X = popL();
+                std::cout<<asdouble X<<'\n';
             }
             break;
         case HALT:
