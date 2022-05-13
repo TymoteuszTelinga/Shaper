@@ -64,12 +64,20 @@ int main(int argc, char *argv[])
         GLOAD, 0x2,
         I2C,
         PRINT,
+        CONST_I, 5,
+        I2F,
+        CONST_I, 2,
+        I2F,
+        DIV_F,
+        GSTORE, 0x3,
+        GLOAD, 0x3,
+        PRINT_F,
         HALT          
         };
     VM svm(program,0);
     // svm.showCode();
     svm.execute();
-    // svm.showMemory(254,256);
+    svm.showMemory(0,4);
     
     cout<<"END\n";
     return 0;

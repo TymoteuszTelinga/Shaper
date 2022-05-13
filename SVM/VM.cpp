@@ -4,6 +4,9 @@
 
 const int STACK_SIZE = 100;
 
+#define asfloat *(float*)&
+#define asint *(int*)&
+
 VM::VM(const int* code, const int PC, const unsigned int memSize):code(code)
 {
     memory = new int[memSize];
@@ -55,6 +58,7 @@ void VM::execute()
         return;
     }
     
+    int x;
     for (;;)
     {
         int instrucion = next();
@@ -95,6 +99,46 @@ void VM::execute()
                 push(a%b);
             }
             break;
+        case ADD_F:
+            {
+                x = pop();
+                float b = asfloat x;
+                x = pop();
+                float a = asfloat x;
+                float c = a+b;
+                push(asint c);
+            }
+            break;
+        case SUB_F:
+            {
+                x = pop();
+                float b = asfloat x;
+                x = pop();
+                float a = asfloat x;
+                float c = a-b;
+                push(asint c);
+            }
+            break;
+        case MUL_F:
+            {
+                x = pop();
+                float b = asfloat x;
+                x = pop();
+                float a = asfloat x;
+                float c = a*b;
+                push(asint c);
+            }
+            break;
+        case DIV_F:
+            {
+                x = pop();
+                float b = asfloat x;
+                x = pop();
+                float a = asfloat x;
+                float c = a/b;
+                push(asint c);
+            }
+            break;
         case I2S:
             {
                 short s = pop();
@@ -105,6 +149,13 @@ void VM::execute()
             {
                 char c = pop();
                 push (c);
+            }
+            break;
+        case I2F:
+            {
+                x = pop();
+                float f = x; // value cast to float
+                push(asint f);
             }
             break;
         case LT:
@@ -178,6 +229,12 @@ void VM::execute()
         case PRINT:
             {
                 std::cout<<pop()<<'\n';
+            }
+            break;
+        case PRINT_F:
+            {
+                x = pop();
+                std::cout<<asfloat x<<'\n';
             }
             break;
         case HALT:

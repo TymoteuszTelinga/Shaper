@@ -23,10 +23,16 @@ enum {
     DIV_I    ,  // int divde -
     MOD_I    ,  // int modulo
 
+    ADD_F    ,  // float add -
+    SUB_F    ,  // float substracion -
+    MUL_F    ,  // float multyply -
+    DIV_F    ,  // float divde -
+
     CONST_I  ,  // push constant -
 
     I2S ,       // cast int to short
     I2C ,       // cast int to char
+    I2F ,       // cast int to float
 
     LT     ,  // int less than -
     GT     ,  // int greater than
@@ -44,6 +50,7 @@ enum {
     GSTORE ,  // store in global memory (memory) -
     
     PRINT  ,  // ? print value on top of the stack
+    PRINT_F,  // print value as float
     POP    ,  // ? throw away top of the stack
     HALT   ,  // stop program -
     CALL   ,  // call procedure -
