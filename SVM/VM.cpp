@@ -139,6 +139,41 @@ void VM::execute()
                 push(asint c);
             }
             break;
+        case ADD_L:
+            {
+                long long b = popL();
+                long long a = popL();
+                pushL(a+b);
+            }
+            break;
+        case SUB_L:
+            {
+                long long b = popL();
+                long long a = popL();
+                pushL(a-b);
+            }
+            break;
+        case MUL_L:
+            {
+                long long b = popL();
+                long long a = popL();
+                pushL(a*b);
+            }
+            break;
+        case DIV_L:
+            {
+                long long b = popL();
+                long long a = popL();
+                pushL(a/b);
+            }
+            break;
+        case MOD_L:
+            {
+                long long b = popL();
+                long long a = popL();
+                pushL(a%b);
+            }
+            break;
         case I2S:
             {
                 short s = pop();
@@ -226,7 +261,7 @@ void VM::execute()
                 memory[addr] = v;
             }
             break;
-        case PRINT:
+        case PRINT_I:
             {
                 std::cout<<pop()<<'\n';
             }
@@ -235,6 +270,11 @@ void VM::execute()
             {
                 x = pop();
                 std::cout<<asfloat x<<'\n';
+            }
+            break;
+        case PRINT_L:
+            {
+                std::cout<<popL()<<'\n';
             }
             break;
         case HALT:
@@ -274,6 +314,19 @@ void VM::execute()
     }
 }
 
+void VM::displayMode(const char c) const
+{
+    switch (c)
+    {
+    case 'h':
+        std::cout<<std::hex;
+        break;
+    case 'd':
+        std::cout<<std::dec;
+        break;
+    }
+}
+
 void VM::push(int value)
 {
     if (sp >= STACK_SIZE)
@@ -286,9 +339,22 @@ void VM::push(int value)
     stack[++sp] = value;
 }
 
+void VM::pushL(long long value)
+{
+    push(value);
+    push((value>>32));
+}
+
 int VM::pop()
 {
     return stack[sp--];
+}
+
+long long VM::popL()
+{
+    long long x = pop();
+    // long long y = pop(); 
+    return (x<<32) | (pop() & 0xffffffff);
 }
 
 int VM::next()

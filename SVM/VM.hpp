@@ -28,6 +28,12 @@ enum {
     MUL_F    ,  // float multyply -
     DIV_F    ,  // float divde -
 
+    ADD_L    ,  // long add -
+    SUB_L    ,  // long substracion -
+    MUL_L    ,  // long multyply -
+    DIV_L    ,  // long divde -
+    MOD_L    ,  // long modulo -
+
     CONST_I  ,  // push constant -
 
     I2S ,       // cast int to short
@@ -49,8 +55,10 @@ enum {
     STORE  ,  // store in local (stack) -
     GSTORE ,  // store in global memory (memory) -
     
-    PRINT  ,  // ? print value on top of the stack
+    PRINT_I  ,  // ? print value on top of the stack
     PRINT_F,  // print value as float
+    PRINT_L,  // print long value
+
     POP    ,  // ? throw away top of the stack
     HALT   ,  // stop program -
     CALL   ,  // call procedure -
@@ -82,11 +90,15 @@ public:
     void showMemory(unsigned int start = 0, unsigned int end = 300) const;
     void execute();
 
+    void displayMode(const char c) const;
+
 private:
-    void showStack() const; //debug
-    void push(int value);   // add to stack
-    int pop ();             // remove from stack
-    int next();             // load next instruction
+    void showStack() const;      //debug
+    void push(int value);        // int to stack
+    void pushL(long long value); // long to stack
+    int pop ();                  // int from stack
+    long long popL();            // long from stack
+    int next();                  // load next instruction
 };
 
 #endif // __VM_H__

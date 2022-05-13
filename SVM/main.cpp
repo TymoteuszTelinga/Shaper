@@ -39,45 +39,19 @@ int main(int argc, char *argv[])
 
     // int *program = loadProgram("fib.txt");
     int program[] = {
+        CONST_I, 0x55667788,
         CONST_I, 0x11223344,
-        GSTORE, 0x0, // store 0x11223344 to i
-        GLOAD, 0x0, // load i
-        PRINT,      //print i
-        GLOAD, 0x0, //load i
-        I2S,        // cast int to short
-        GSTORE, 0x1,// store s
-        GLOAD, 0x1, // load s
-        PRINT,      //print s
-        GLOAD, 0x1,
-        PRINT,
-        GLOAD, 0x1,
-        GLOAD, 0x1,
-        ADD_I,
-        PRINT,
-        CONST_I, 0xFFAA,
-        CONST_I, 0xFFAA,
-        ADD_I,
-        I2S,
-        GSTORE, 0x2,
-        GLOAD, 0x2,
-        PRINT,
-        GLOAD, 0x2,
-        I2C,
-        PRINT,
-        CONST_I, 5,
-        I2F,
-        CONST_I, 2,
-        I2F,
-        DIV_F,
-        GSTORE, 0x3,
-        GLOAD, 0x3,
-        PRINT_F,
+        CONST_I, 0x33221100,
+        CONST_I, 0x77765544,
+        ADD_L,
+        PRINT_L,
         HALT          
         };
     VM svm(program,0);
+    svm.displayMode('h');
     // svm.showCode();
     svm.execute();
-    svm.showMemory(0,4);
+    // svm.showMemory(0,4);
     
     cout<<"END\n";
     return 0;
