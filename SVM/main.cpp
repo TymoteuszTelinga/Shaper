@@ -39,12 +39,15 @@ int main(int argc, char *argv[])
 
     // int *program = loadProgram("fib.txt");
     int program[] = {
-        CONST_I, 0x55667788,
-        CONST_I, 0x11223344,
-        CONST_I, 0x33221100,
-        CONST_I, 0x77765544,
-        ADD_L,
-        PRINT_L,
+        CONST_I, 0x40800000,
+        GSTORE, 0,
+        GLOAD, 0,
+        PRINT_F,
+        GLOAD, 0,
+        PRINT_I,
+        GLOAD, 0,
+        F2I,
+        PRINT_F,
         HALT          
         };
     VM svm(program,0);

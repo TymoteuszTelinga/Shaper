@@ -41,14 +41,28 @@ enum {
 
     CONST_I  ,  // push constant -
 
-    I2S ,       // cast int to short
-    I2C ,       // cast int to char
-    I2F ,       // cast int to float
+    I2S ,       // cast int to short -
+    I2C ,       // cast int to char -
+    I2F ,       // cast int to float -
+    I2L ,       // cast int to long -
+    I2D ,       // cast int to double -
+
+    F2I ,       // cast float to int -
+    F2L ,       // cast float to long -
+    F2D ,       // cast float to double -
+
+    L2I ,       // cast long to int -
+    L2F ,       // cast long to float -
+    L2D ,       // cast long to double -
+
+    D2I ,       // cast double to int -
+    D2F ,       // cast double to float -
+    D2L ,       // cast double to long -
 
     LT     ,  // int less than -
-    GT     ,  // int greater than
-    LE     ,  // int less equal
-    GE     ,  // int greater equal
+    GT     ,  // int greater than -
+    LE     ,  // int less equal -
+    GE     ,  // int greater equal -
     EQ     ,  // int equal -
 
     JMP    ,  // branch -
@@ -60,10 +74,10 @@ enum {
     STORE  ,  // store in local (stack) -
     GSTORE ,  // store in global memory (memory) -
     
-    PRINT_I  ,  // ? print value on top of the stack
-    PRINT_F,  // print value as float
-    PRINT_L,  // print long value
-    PRINT_D,  // print double value
+    PRINT_I  ,  // ? print value on top of the stack -
+    PRINT_F,  // ? print value as float -
+    PRINT_L,  // ? print long value -
+    PRINT_D,  // ? print double value -
 
     POP    ,  // ? throw away top of the stack
     HALT   ,  // stop program -
@@ -87,11 +101,11 @@ public:
     VM(const int* code, const int PC, const unsigned int memSize = 300);
     ~VM();
 
+    void execute();
+    // debug
+    void displayMode(const char c) const;
     void showCode() const;
     void showMemory(unsigned int start = 0, unsigned int end = 300) const;
-    void execute();
-
-    void displayMode(const char c) const;
 
 private:
     void showStack() const;      //debug

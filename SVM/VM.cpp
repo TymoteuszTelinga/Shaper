@@ -236,6 +236,77 @@ void VM::execute()
                 push(asint f);
             }
             break;
+        case I2L:
+            {
+                x = pop();
+                pushL(x);
+            }
+            break;
+        case I2D:
+            {
+                x = pop();
+                double d = x;
+                pushL(aslong d);
+            }
+            break;
+        case F2I:
+            {
+                x = pop();
+                push(asfloat x);
+            }
+            break;
+        case F2L:
+            {
+                x = pop();
+                pushL(asfloat x);
+            }
+            break;
+        case F2D:
+            {
+                x = pop();
+                double d = asfloat x;
+                pushL( aslong d);
+            }
+            break;
+        case L2I:
+            {
+                X = popL();
+                push(X);
+            }
+            break;
+        case L2F:
+            {
+                X = popL();
+                float f = X;
+                push(asint f);
+            }
+            break;
+        case L2D:
+            {
+                X = popL();
+                double d = X;
+                pushL(aslong d);
+            }
+            break;
+        case D2I:
+            {
+                X = popL();
+                push(asdouble X);
+            }
+            break;
+        case D2F:
+            {
+                X = popL();
+                float f = asdouble X;
+                push(asint f);
+            }
+            break;
+        case D2L:
+            {
+                X = popL();
+                pushL(asdouble X);
+            }
+            break;
         case LT:
             {
                 int b = pop();
