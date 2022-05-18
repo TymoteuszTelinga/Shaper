@@ -307,6 +307,18 @@ void VM::execute()
                 pushL(asdouble X);
             }
             break;
+        case INC:
+            {
+                int offset = next();
+                stack[fp+offset]++;
+            }
+            break;
+        case DEC:
+            {
+                int offset = next();
+                stack[fp+offset]--;
+            }
+            break;
         case LT:
             {
                 int b = pop();
@@ -314,11 +326,52 @@ void VM::execute()
                 push(a<b);
             }
             break;
+        case GT:
+            {
+                int b = pop();
+                int a = pop();
+                push(a>b);
+            }
+            break;
+        case LE:
+            {
+                int b = pop();
+                int a = pop();
+                push(a<=b);
+            }
+            break;
+        case GE:
+            {
+                int b = pop();
+                int a = pop();
+                push(a>=b);
+            }
+            break;
         case EQ:
             {
                 int b = pop();
                 int a = pop();
                 push(a==b);
+            }
+            break;
+        case AND:
+            {
+                int b = pop();
+                int a = pop();
+                push(a&&b);
+            }
+            break;
+        case OR:
+            {
+                int b = pop();
+                int a = pop();
+                push(a||b);
+            }
+            break;
+        case NEG:
+            {
+                int a = pop();
+                push(!(bool)a);
             }
             break;
         case JMP:
@@ -426,6 +479,8 @@ void VM::execute()
             }
             return;
         }
+
+        // showStack();
 
         if (bDied)
         {

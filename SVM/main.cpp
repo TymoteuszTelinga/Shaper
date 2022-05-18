@@ -38,20 +38,34 @@ int main(int argc, char *argv[])
     cout<<"Hello\n";
 
     // int *program = loadProgram("fib.txt");
+
+    // int x = 4;
+    // int y = 10;
+    // for (int i = x; i <= y; i++)
+    // {
+    //     cout<<i<<'\n';
+    // }
+    // return 0;
+
+    // x: 0
+    // y: 1
+    // i: 2
     int program[] = {
-        CONST_I, 0x40800000,
-        GSTORE, 0,
-        GLOAD, 0,
-        PRINT_F,
-        GLOAD, 0,
+        CONST_I, 4,
+        CONST_I, 10, 
+        LOAD, 0,     
+        LOAD, 2,
+        LOAD, 1,
+        LE,
+        JMPF, 20,
+        LOAD, 2,
         PRINT_I,
-        GLOAD, 0,
-        F2I,
-        PRINT_F,
+        INC, 2,
+        JMP, 6,
         HALT          
         };
     VM svm(program,0);
-    svm.displayMode('h');
+    svm.displayMode('d');
     // svm.showCode();
     svm.execute();
     // svm.showMemory(0,4);

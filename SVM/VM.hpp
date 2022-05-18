@@ -59,11 +59,18 @@ enum {
     D2F ,       // cast double to float -
     D2L ,       // cast double to long -
 
+    INC ,       // increment local int variable
+    DEC ,       // decrement local int variable
+
     LT     ,  // int less than -
     GT     ,  // int greater than -
     LE     ,  // int less equal -
     GE     ,  // int greater equal -
     EQ     ,  // int equal -
+
+    AND    ,  // boolean and
+    OR     ,  // boolean or
+    NEG    ,  // boolean negate
 
     JMP    ,  // branch -
     JMPT   ,  // branch if true -
