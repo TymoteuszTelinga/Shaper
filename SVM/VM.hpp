@@ -17,79 +17,80 @@
 // double = 2 int
 
 enum {
-    ADD_I    = 0x00,  // int add -
-    SUB_I    ,  // int substracion -
-    MUL_I    ,  // int multyply -
-    DIV_I    ,  // int divde -
-    MOD_I    ,  // int modulo
+    ADD_I = 0x00, // int add -
+    SUB_I   ,  // int substracion -
+    MUL_I   ,  // int multyply -
+    DIV_I   ,  // int divde -
+    MOD_I   ,  // int modulo -
 
-    ADD_F    ,  // float add -
-    SUB_F    ,  // float substracion -
-    MUL_F    ,  // float multyply -
-    DIV_F    ,  // float divde -
+    ADD_F   ,  // float add -
+    SUB_F   ,  // float substracion -
+    MUL_F   ,  // float multyply -
+    DIV_F   ,  // float divde -
 
-    ADD_L    ,  // long add -
-    SUB_L    ,  // long substracion -
-    MUL_L    ,  // long multyply -
-    DIV_L    ,  // long divde -
-    MOD_L    ,  // long modulo -
+    ADD_L   ,  // long add -
+    SUB_L   ,  // long substracion -
+    MUL_L   ,  // long multyply -
+    DIV_L   ,  // long divde -
+    MOD_L   ,  // long modulo -
 
-    ADD_D    ,  // double add -
-    SUB_D    ,  // double substracion -
-    MUL_D    ,  // double multyply -
-    DIV_D    ,  // double divde -
+    ADD_D   ,  // double add -
+    SUB_D   ,  // double substracion -
+    MUL_D   ,  // double multyply -
+    DIV_D   ,  // double divde -
 
-    CONST_I  ,  // push constant -
+    CONST_I ,  // push constant -
 
-    I2S ,       // cast int to short -
-    I2C ,       // cast int to char -
-    I2F ,       // cast int to float -
-    I2L ,       // cast int to long -
-    I2D ,       // cast int to double -
+    I2S     ,  // cast int to short -
+    I2C     ,  // cast int to char -
+    I2F     ,  // cast int to float -
+    I2L     ,  // cast int to long -
+    I2D     ,  // cast int to double -
 
-    F2I ,       // cast float to int -
-    F2L ,       // cast float to long -
-    F2D ,       // cast float to double -
+    F2I     ,  // cast float to int -
+    F2L     ,  // cast float to long -
+    F2D     ,  // cast float to double -
 
-    L2I ,       // cast long to int -
-    L2F ,       // cast long to float -
-    L2D ,       // cast long to double -
+    L2I     ,  // cast long to int -
+    L2F     ,  // cast long to float -
+    L2D     ,  // cast long to double -
 
-    D2I ,       // cast double to int -
-    D2F ,       // cast double to float -
-    D2L ,       // cast double to long -
+    D2I     ,  // cast double to int -
+    D2F     ,  // cast double to float -
+    D2L     ,  // cast double to long -
 
-    INC ,       // increment local int variable
-    DEC ,       // decrement local int variable
+    INC     ,  // increment local int variable
+    DEC     ,  // decrement local int variable
 
-    LT     ,  // int less than -
-    GT     ,  // int greater than -
-    LE     ,  // int less equal -
-    GE     ,  // int greater equal -
-    EQ     ,  // int equal -
+    LT      ,  // int less than -
+    GT      ,  // int greater than -
+    LE      ,  // int less equal -
+    GE      ,  // int greater equal -
+    EQ      ,  // int equal -
 
-    AND    ,  // boolean and
-    OR     ,  // boolean or
-    NEG    ,  // boolean negate
+    AND     ,  // boolean and
+    OR      ,  // boolean or
+    NEG     ,  // boolean negate
 
-    JMP    ,  // branch -
-    JMPT   ,  // branch if true -
-    JMPF   ,  // branch if false -
+    JMP     ,  // branch -
+    JMPT    ,  // branch if true -
+    JMPF    ,  // branch if false -
 
-    LOAD   ,  // load from local (stack) -
-    GLOAD  ,  // load from global memory (memory) -
-    STORE  ,  // store in local (stack) -
-    GSTORE ,  // store in global memory (memory) -
+    LOAD    ,  // load from local (stack) -
+    GLOAD   ,  // load from global memory (memory) -
+    STORE   ,  // store in local (stack) -
+    GSTORE  ,  // store in global memory (memory) -
     
-    PRINT_I  ,  // ? print value on top of the stack -
-    PRINT_F,  // ? print value as float -
-    PRINT_L,  // ? print long value -
-    PRINT_D,  // ? print double value -
+    PRINT_I ,  // ? print value on top of the stack -
+    PRINT_F ,  // ? print value as float -
+    PRINT_L ,  // ? print long value -
+    PRINT_D ,  // ? print double value -
 
-    POP    ,  // ? throw away top of the stack
-    HALT   ,  // stop program -
-    CALL   ,  // call procedure -
-    RET       // return from procedure -
+    POP     ,  // ? throw away top of the stack -
+    POP2    ,  // ? throw away two values or long from top of the stack -
+    HALT    ,  // stop program -
+    CALL    ,  // call procedure -
+    RET        // return from procedure -
 };
 
 class VM

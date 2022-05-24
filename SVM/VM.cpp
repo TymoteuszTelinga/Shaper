@@ -376,24 +376,24 @@ void VM::execute()
             break;
         case JMP:
             {
-                pc = next();
+                pc += next();
             }
             break;
         case JMPT:
             {
-                int addr = next();
+                int offset = next();
                 if (pop())
                 {
-                    pc = addr;
+                    pc += offset;
                 }
             }
             break;
         case JMPF:
             {
-                int addr = next();
+                int offset = next();
                 if (!pop())
                 {
-                    pc = addr;
+                    pc += offset;
                 }
             }
             break;
@@ -448,6 +448,16 @@ void VM::execute()
             {
                 X = popL();
                 std::cout<<asdouble X<<'\n';
+            }
+            break;
+        case POP:
+            {
+                pop();
+            }
+            break;
+        case POP2:
+            {
+                popL();
             }
             break;
         case HALT:
@@ -516,8 +526,8 @@ void VM::push(int value)
 
 void VM::pushL(long long value)
 {
-    push(value);
-    push((value>>32));
+    push(((int*)&value)[0]);
+    push(((int*)&value)[1]);
 }
 
 int VM::pop()
@@ -527,9 +537,10 @@ int VM::pop()
 
 long long VM::popL()
 {
-    long long x = pop();
-    // long long y = pop(); 
-    return (x<<32) | (pop() & 0xffffffff);
+    long long x;
+    ((int*)&x)[1] = pop();
+    ((int*)&x)[0] = pop();
+    return x;
 }
 
 int VM::next()
