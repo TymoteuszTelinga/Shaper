@@ -136,7 +136,13 @@ class Manager:
         if self.curr_function.kind == 0:
            self.visitor.visit(self.curr_function.ctx)
         else:
-            print(self.getVariable("x").val)
+            var = self.getVariable("x");
+            if var.type == Type.INT:
+                print(int(var.val))
+            elif var.type == Type.FLOAT:
+                print(float(var.val))
+            else:
+                print(var.val)
 
 
         self.deleteFromHeap()
@@ -144,7 +150,6 @@ class Manager:
         temp = self.return_var
 
         if temp == None and self.curr_function.return_atom.type != Type.VOID:
-            print("fsgfd")
             raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} returning non-void value doesn't have 'return' statement") 
 
         if temp == None:

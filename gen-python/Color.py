@@ -13,6 +13,10 @@ class Color:
 
     def __ne__(self, other) -> bool:
         return not self == other
+    
+    def __str__(self):
+        ret = f"R:{int(self.R*255)} G:{int(self.G*255)} B:{int(self.B*255)} A:{int(self.A*255)}" 
+        return ret
 
     @staticmethod
     def getColor(colorStr: str):
@@ -30,6 +34,7 @@ class Color:
             return YELLOW
         else:
             return WHITE
+        
 
 
 BLACK = Color(0, 0, 0, 255)

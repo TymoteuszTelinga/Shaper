@@ -1,7 +1,14 @@
 void draw()
 {
-    int x =10;
+    int x = 10;
     int y = 10;
-    paint rectangle at (x*10,y*10) of (8) with YELLOW;
+    paint rectangle at (x*10,y*10) of (sum(x,y)) with YELLOW;
+}
 
+// returns sum of two integers
+int sum(int x, int y)
+{
+    int ret = x+y;
+    print(ret/2/2); 
+    return ret;
 }

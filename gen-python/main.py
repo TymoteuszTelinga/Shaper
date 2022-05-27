@@ -71,7 +71,7 @@ def main(argv):
                 print(e)
                 
         except Exception as e:
-            print("something went wrong")
+            print("something went wrong :(")
             print(e)
 
     else:

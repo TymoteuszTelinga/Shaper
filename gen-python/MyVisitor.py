@@ -1,4 +1,5 @@
 
+from ast import Expression
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 import Shapes
@@ -191,7 +192,7 @@ class MyVisitor(ShaperVisitor):
             
             if op == '+':
                 ret = Constant(ret_type, l.val + r.val)
-            elif op == '/':
+            elif op == '-':
                 ret = Constant(ret_type, l.val - r.val)
 
 
@@ -318,6 +319,9 @@ class MyVisitor(ShaperVisitor):
         if ctx.jumpStatement() != None:
             self.visit(ctx.jumpStatement())
 
+        elif ctx.selectionStatement() != None:
+            self.visitSelectionStatement(ctx.selectionStatement())
+
     def visitPaintStatement(self, ctx: ShaperParser.PaintStatementContext):
         self.visit(ctx.shapeIndicator())
 
@@ -443,3 +447,25 @@ class MyVisitor(ShaperVisitor):
             const = Constant(Type.COLOR, Color.Color.getColor(ctx.getText()))
         
         return const
+
+    def visitSelectionStatement(self, ctx: ShaperParser.SelectionStatementContext):
+            oldScope =  self.manager.createNewScope(True)
+
+            expressions = ctx.expression()
+            compounds = ctx.compoundStatement()
+
+
+            for i in range(len(expressions)):
+                if self.visit(expressions[i]).val == True:
+                    self.visit(compounds[i])
+                    self.manager.curr_scope = oldScope
+                    return;
+                
+
+            if len(compounds) > len(expressions):
+                self.visit(compounds[-1])
+                self.manager.curr_scope = oldScope
+
+    
+
+            

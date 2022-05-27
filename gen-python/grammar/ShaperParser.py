@@ -12,7 +12,7 @@ else:
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3J")
-        buf.write("\u0220\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\u0221\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
@@ -53,20 +53,20 @@ def serializedATN():
         buf.write("+\u01a2\n+\3,\3,\3,\3-\3-\3-\3.\3.\3.\3/\3/\3/\3\60\3")
         buf.write("\60\3\60\3\61\3\61\3\61\5\61\u01b6\n\61\3\62\3\62\3\62")
         buf.write("\3\62\5\62\u01bc\n\62\3\62\3\62\3\63\3\63\3\63\3\63\3")
-        buf.write("\63\3\63\3\63\3\63\3\63\3\63\7\63\u01ca\n\63\f\63\16\63")
-        buf.write("\u01cd\13\63\3\63\3\63\5\63\u01d1\n\63\3\63\3\63\3\63")
-        buf.write("\3\63\3\63\3\63\7\63\u01d9\n\63\f\63\16\63\u01dc\13\63")
-        buf.write("\3\63\3\63\5\63\u01e0\n\63\3\64\3\64\3\64\3\64\3\64\3")
-        buf.write("\64\3\64\3\64\5\64\u01ea\n\64\3\65\3\65\3\65\3\65\3\65")
-        buf.write("\3\65\3\65\3\65\3\65\3\65\5\65\u01f6\n\65\3\65\3\65\3")
-        buf.write("\65\5\65\u01fb\n\65\3\65\3\65\3\65\5\65\u0200\n\65\3\65")
-        buf.write("\3\65\5\65\u0204\n\65\3\66\3\66\3\66\3\66\3\66\3\66\5")
-        buf.write("\66\u020c\n\66\3\66\5\66\u020f\n\66\3\67\5\67\u0212\n")
-        buf.write("\67\3\67\3\67\38\38\39\39\3:\3:\3:\3:\5:\u021e\n:\3:\2")
-        buf.write("\n &(*,.\60\64;\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36")
-        buf.write(" \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\^`bdfhjlnpr\2")
-        buf.write("\b\3\2,\61\3\2\"#\3\2\62\65\3\2$%\3\2&(\5\2%%*+\66\66")
-        buf.write("\2\u0236\2u\3\2\2\2\4{\3\2\2\2\6\u0081\3\2\2\2\b\u0083")
+        buf.write("\63\3\63\3\63\3\63\3\63\3\63\3\63\7\63\u01cb\n\63\f\63")
+        buf.write("\16\63\u01ce\13\63\3\63\3\63\5\63\u01d2\n\63\3\63\3\63")
+        buf.write("\3\63\3\63\3\63\3\63\7\63\u01da\n\63\f\63\16\63\u01dd")
+        buf.write("\13\63\3\63\3\63\5\63\u01e1\n\63\3\64\3\64\3\64\3\64\3")
+        buf.write("\64\3\64\3\64\3\64\5\64\u01eb\n\64\3\65\3\65\3\65\3\65")
+        buf.write("\3\65\3\65\3\65\3\65\3\65\3\65\5\65\u01f7\n\65\3\65\3")
+        buf.write("\65\3\65\5\65\u01fc\n\65\3\65\3\65\3\65\5\65\u0201\n\65")
+        buf.write("\3\65\3\65\5\65\u0205\n\65\3\66\3\66\3\66\3\66\3\66\3")
+        buf.write("\66\5\66\u020d\n\66\3\66\5\66\u0210\n\66\3\67\5\67\u0213")
+        buf.write("\n\67\3\67\3\67\38\38\39\39\3:\3:\3:\3:\5:\u021f\n:\3")
+        buf.write(":\2\n &(*,.\60\64;\2\4\6\b\n\f\16\20\22\24\26\30\32\34")
+        buf.write("\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\^`bdfhjln")
+        buf.write("pr\2\b\3\2,\61\3\2\"#\3\2\62\65\3\2$%\3\2&(\5\2%%*+\66")
+        buf.write("\66\2\u0237\2u\3\2\2\2\4{\3\2\2\2\6\u0081\3\2\2\2\b\u0083")
         buf.write("\3\2\2\2\n\u0095\3\2\2\2\f\u009d\3\2\2\2\16\u00a4\3\2")
         buf.write("\2\2\20\u00a6\3\2\2\2\22\u00a9\3\2\2\2\24\u00b3\3\2\2")
         buf.write("\2\26\u00b9\3\2\2\2\30\u00bd\3\2\2\2\32\u00bf\3\2\2\2")
@@ -80,9 +80,9 @@ def serializedATN():
         buf.write("\2\2\2N\u018e\3\2\2\2P\u0193\3\2\2\2R\u0199\3\2\2\2T\u019e")
         buf.write("\3\2\2\2V\u01a3\3\2\2\2X\u01a6\3\2\2\2Z\u01a9\3\2\2\2")
         buf.write("\\\u01ac\3\2\2\2^\u01af\3\2\2\2`\u01b2\3\2\2\2b\u01b7")
-        buf.write("\3\2\2\2d\u01df\3\2\2\2f\u01e9\3\2\2\2h\u0203\3\2\2\2")
-        buf.write("j\u020e\3\2\2\2l\u0211\3\2\2\2n\u0215\3\2\2\2p\u0217\3")
-        buf.write("\2\2\2r\u021d\3\2\2\2tv\5\4\3\2ut\3\2\2\2uv\3\2\2\2v\3")
+        buf.write("\3\2\2\2d\u01e0\3\2\2\2f\u01ea\3\2\2\2h\u0204\3\2\2\2")
+        buf.write("j\u020f\3\2\2\2l\u0212\3\2\2\2n\u0216\3\2\2\2p\u0218\3")
+        buf.write("\2\2\2r\u021e\3\2\2\2tv\5\4\3\2ut\3\2\2\2uv\3\2\2\2v\3")
         buf.write("\3\2\2\2wx\5\6\4\2xy\5\4\3\2y|\3\2\2\2z|\5\6\4\2{w\3\2")
         buf.write("\2\2{z\3\2\2\2|\5\3\2\2\2}\u0082\5\b\5\2~\177\5\30\r\2")
         buf.write("\177\u0080\7\23\2\2\u0080\u0082\3\2\2\2\u0081}\3\2\2\2")
@@ -221,52 +221,53 @@ def serializedATN():
         buf.write("\u01b9\3\2\2\2\u01bb\u01bc\3\2\2\2\u01bc\u01bd\3\2\2\2")
         buf.write("\u01bd\u01be\7\17\2\2\u01bec\3\2\2\2\u01bf\u01c0\7\67")
         buf.write("\2\2\u01c0\u01c1\7\16\2\2\u01c1\u01c2\5\"\22\2\u01c2\u01c3")
-        buf.write("\7\17\2\2\u01c3\u01cb\5\22\n\2\u01c4\u01c5\78\2\2\u01c5")
+        buf.write("\7\17\2\2\u01c3\u01cc\5\22\n\2\u01c4\u01c5\78\2\2\u01c5")
         buf.write("\u01c6\7\16\2\2\u01c6\u01c7\5\"\22\2\u01c7\u01c8\7\17")
-        buf.write("\2\2\u01c8\u01ca\3\2\2\2\u01c9\u01c4\3\2\2\2\u01ca\u01cd")
-        buf.write("\3\2\2\2\u01cb\u01c9\3\2\2\2\u01cb\u01cc\3\2\2\2\u01cc")
-        buf.write("\u01d0\3\2\2\2\u01cd\u01cb\3\2\2\2\u01ce\u01cf\79\2\2")
-        buf.write("\u01cf\u01d1\5\22\n\2\u01d0\u01ce\3\2\2\2\u01d0\u01d1")
-        buf.write("\3\2\2\2\u01d1\u01e0\3\2\2\2\u01d2\u01d3\7:\2\2\u01d3")
-        buf.write("\u01d4\7\16\2\2\u01d4\u01d5\5\"\22\2\u01d5\u01d6\7\17")
-        buf.write("\2\2\u01d6\u01da\7\20\2\2\u01d7\u01d9\5f\64\2\u01d8\u01d7")
-        buf.write("\3\2\2\2\u01d9\u01dc\3\2\2\2\u01da\u01d8\3\2\2\2\u01da")
-        buf.write("\u01db\3\2\2\2\u01db\u01dd\3\2\2\2\u01dc\u01da\3\2\2\2")
-        buf.write("\u01dd\u01de\7\21\2\2\u01de\u01e0\3\2\2\2\u01df\u01bf")
-        buf.write("\3\2\2\2\u01df\u01d2\3\2\2\2\u01e0e\3\2\2\2\u01e1\u01e2")
-        buf.write("\7;\2\2\u01e2\u01e3\5&\24\2\u01e3\u01e4\7\24\2\2\u01e4")
-        buf.write("\u01e5\5\"\22\2\u01e5\u01ea\3\2\2\2\u01e6\u01e7\7<\2\2")
-        buf.write("\u01e7\u01e8\7\24\2\2\u01e8\u01ea\5\"\22\2\u01e9\u01e1")
-        buf.write("\3\2\2\2\u01e9\u01e6\3\2\2\2\u01eag\3\2\2\2\u01eb\u01ec")
-        buf.write("\7=\2\2\u01ec\u01ed\7\16\2\2\u01ed\u01ee\5\"\22\2\u01ee")
-        buf.write("\u01ef\7\17\2\2\u01ef\u01f0\5\22\n\2\u01f0\u0204\3\2\2")
-        buf.write("\2\u01f1\u01f2\7>\2\2\u01f2\u01f5\7\16\2\2\u01f3\u01f6")
-        buf.write("\5\"\22\2\u01f4\u01f6\5\30\r\2\u01f5\u01f3\3\2\2\2\u01f5")
-        buf.write("\u01f4\3\2\2\2\u01f5\u01f6\3\2\2\2\u01f6\u01f7\3\2\2\2")
-        buf.write("\u01f7\u01fa\7\23\2\2\u01f8\u01fb\5\"\22\2\u01f9\u01fb")
-        buf.write("\5\30\r\2\u01fa\u01f8\3\2\2\2\u01fa\u01f9\3\2\2\2\u01fa")
-        buf.write("\u01fb\3\2\2\2\u01fb\u01fc\3\2\2\2\u01fc\u01ff\7\23\2")
-        buf.write("\2\u01fd\u0200\5\"\22\2\u01fe\u0200\5\30\r\2\u01ff\u01fd")
-        buf.write("\3\2\2\2\u01ff\u01fe\3\2\2\2\u01ff\u0200\3\2\2\2\u0200")
-        buf.write("\u0201\3\2\2\2\u0201\u0202\7\17\2\2\u0202\u0204\5\22\n")
-        buf.write("\2\u0203\u01eb\3\2\2\2\u0203\u01f1\3\2\2\2\u0204i\3\2")
-        buf.write("\2\2\u0205\u0206\7?\2\2\u0206\u020f\7\23\2\2\u0207\u0208")
-        buf.write("\7@\2\2\u0208\u020f\7\23\2\2\u0209\u020b\7A\2\2\u020a")
-        buf.write("\u020c\5\"\22\2\u020b\u020a\3\2\2\2\u020b\u020c\3\2\2")
-        buf.write("\2\u020c\u020d\3\2\2\2\u020d\u020f\7\23\2\2\u020e\u0205")
-        buf.write("\3\2\2\2\u020e\u0207\3\2\2\2\u020e\u0209\3\2\2\2\u020f")
-        buf.write("k\3\2\2\2\u0210\u0212\5p9\2\u0211\u0210\3\2\2\2\u0211")
-        buf.write("\u0212\3\2\2\2\u0212\u0213\3\2\2\2\u0213\u0214\5n8\2\u0214")
-        buf.write("m\3\2\2\2\u0215\u0216\7G\2\2\u0216o\3\2\2\2\u0217\u0218")
-        buf.write("\7B\2\2\u0218q\3\2\2\2\u0219\u021e\7C\2\2\u021a\u021e")
-        buf.write("\7D\2\2\u021b\u021e\7E\2\2\u021c\u021e\7F\2\2\u021d\u0219")
-        buf.write("\3\2\2\2\u021d\u021a\3\2\2\2\u021d\u021b\3\2\2\2\u021d")
-        buf.write("\u021c\3\2\2\2\u021es\3\2\2\2\62u{\u0081\u0095\u009d\u00a4")
-        buf.write("\u00ab\u00b3\u00b9\u00bd\u00c4\u00d2\u00d8\u00ea\u00f4")
-        buf.write("\u00fe\u0109\u0115\u0121\u012d\u0139\u0140\u014c\u014e")
-        buf.write("\u0158\u015d\u0166\u017f\u018c\u0191\u0197\u019c\u01a1")
-        buf.write("\u01b5\u01bb\u01cb\u01d0\u01da\u01df\u01e9\u01f5\u01fa")
-        buf.write("\u01ff\u0203\u020b\u020e\u0211\u021d")
+        buf.write("\2\2\u01c8\u01c9\5\22\n\2\u01c9\u01cb\3\2\2\2\u01ca\u01c4")
+        buf.write("\3\2\2\2\u01cb\u01ce\3\2\2\2\u01cc\u01ca\3\2\2\2\u01cc")
+        buf.write("\u01cd\3\2\2\2\u01cd\u01d1\3\2\2\2\u01ce\u01cc\3\2\2\2")
+        buf.write("\u01cf\u01d0\79\2\2\u01d0\u01d2\5\22\n\2\u01d1\u01cf\3")
+        buf.write("\2\2\2\u01d1\u01d2\3\2\2\2\u01d2\u01e1\3\2\2\2\u01d3\u01d4")
+        buf.write("\7:\2\2\u01d4\u01d5\7\16\2\2\u01d5\u01d6\5\"\22\2\u01d6")
+        buf.write("\u01d7\7\17\2\2\u01d7\u01db\7\20\2\2\u01d8\u01da\5f\64")
+        buf.write("\2\u01d9\u01d8\3\2\2\2\u01da\u01dd\3\2\2\2\u01db\u01d9")
+        buf.write("\3\2\2\2\u01db\u01dc\3\2\2\2\u01dc\u01de\3\2\2\2\u01dd")
+        buf.write("\u01db\3\2\2\2\u01de\u01df\7\21\2\2\u01df\u01e1\3\2\2")
+        buf.write("\2\u01e0\u01bf\3\2\2\2\u01e0\u01d3\3\2\2\2\u01e1e\3\2")
+        buf.write("\2\2\u01e2\u01e3\7;\2\2\u01e3\u01e4\5&\24\2\u01e4\u01e5")
+        buf.write("\7\24\2\2\u01e5\u01e6\5\"\22\2\u01e6\u01eb\3\2\2\2\u01e7")
+        buf.write("\u01e8\7<\2\2\u01e8\u01e9\7\24\2\2\u01e9\u01eb\5\"\22")
+        buf.write("\2\u01ea\u01e2\3\2\2\2\u01ea\u01e7\3\2\2\2\u01ebg\3\2")
+        buf.write("\2\2\u01ec\u01ed\7=\2\2\u01ed\u01ee\7\16\2\2\u01ee\u01ef")
+        buf.write("\5\"\22\2\u01ef\u01f0\7\17\2\2\u01f0\u01f1\5\22\n\2\u01f1")
+        buf.write("\u0205\3\2\2\2\u01f2\u01f3\7>\2\2\u01f3\u01f6\7\16\2\2")
+        buf.write("\u01f4\u01f7\5\"\22\2\u01f5\u01f7\5\30\r\2\u01f6\u01f4")
+        buf.write("\3\2\2\2\u01f6\u01f5\3\2\2\2\u01f6\u01f7\3\2\2\2\u01f7")
+        buf.write("\u01f8\3\2\2\2\u01f8\u01fb\7\23\2\2\u01f9\u01fc\5\"\22")
+        buf.write("\2\u01fa\u01fc\5\30\r\2\u01fb\u01f9\3\2\2\2\u01fb\u01fa")
+        buf.write("\3\2\2\2\u01fb\u01fc\3\2\2\2\u01fc\u01fd\3\2\2\2\u01fd")
+        buf.write("\u0200\7\23\2\2\u01fe\u0201\5\"\22\2\u01ff\u0201\5\30")
+        buf.write("\r\2\u0200\u01fe\3\2\2\2\u0200\u01ff\3\2\2\2\u0200\u0201")
+        buf.write("\3\2\2\2\u0201\u0202\3\2\2\2\u0202\u0203\7\17\2\2\u0203")
+        buf.write("\u0205\5\22\n\2\u0204\u01ec\3\2\2\2\u0204\u01f2\3\2\2")
+        buf.write("\2\u0205i\3\2\2\2\u0206\u0207\7?\2\2\u0207\u0210\7\23")
+        buf.write("\2\2\u0208\u0209\7@\2\2\u0209\u0210\7\23\2\2\u020a\u020c")
+        buf.write("\7A\2\2\u020b\u020d\5\"\22\2\u020c\u020b\3\2\2\2\u020c")
+        buf.write("\u020d\3\2\2\2\u020d\u020e\3\2\2\2\u020e\u0210\7\23\2")
+        buf.write("\2\u020f\u0206\3\2\2\2\u020f\u0208\3\2\2\2\u020f\u020a")
+        buf.write("\3\2\2\2\u0210k\3\2\2\2\u0211\u0213\5p9\2\u0212\u0211")
+        buf.write("\3\2\2\2\u0212\u0213\3\2\2\2\u0213\u0214\3\2\2\2\u0214")
+        buf.write("\u0215\5n8\2\u0215m\3\2\2\2\u0216\u0217\7G\2\2\u0217o")
+        buf.write("\3\2\2\2\u0218\u0219\7B\2\2\u0219q\3\2\2\2\u021a\u021f")
+        buf.write("\7C\2\2\u021b\u021f\7D\2\2\u021c\u021f\7E\2\2\u021d\u021f")
+        buf.write("\7F\2\2\u021e\u021a\3\2\2\2\u021e\u021b\3\2\2\2\u021e")
+        buf.write("\u021c\3\2\2\2\u021e\u021d\3\2\2\2\u021fs\3\2\2\2\62u")
+        buf.write("{\u0081\u0095\u009d\u00a4\u00ab\u00b3\u00b9\u00bd\u00c4")
+        buf.write("\u00d2\u00d8\u00ea\u00f4\u00fe\u0109\u0115\u0121\u012d")
+        buf.write("\u0139\u0140\u014c\u014e\u0158\u015d\u0166\u017f\u018c")
+        buf.write("\u0191\u0197\u019c\u01a1\u01b5\u01bb\u01cc\u01d1\u01db")
+        buf.write("\u01e0\u01ea\u01f6\u01fb\u0200\u0204\u020c\u020f\u0212")
+        buf.write("\u021e")
         return buf.getvalue()
 
 
@@ -4164,7 +4165,7 @@ class ShaperParser ( Parser ):
         self.enterRule(localctx, 98, self.RULE_selectionStatement)
         self._la = 0 # Token type
         try:
-            self.state = 477
+            self.state = 478
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [ShaperParser.IF]:
@@ -4179,7 +4180,7 @@ class ShaperParser ( Parser ):
                 self.match(ShaperParser.RIGHTPAREN)
                 self.state = 449
                 self.compoundStatement()
-                self.state = 457
+                self.state = 458
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 while _la==ShaperParser.ELIF:
@@ -4191,44 +4192,46 @@ class ShaperParser ( Parser ):
                     self.expression()
                     self.state = 453
                     self.match(ShaperParser.RIGHTPAREN)
-                    self.state = 459
+                    self.state = 454
+                    self.compoundStatement()
+                    self.state = 460
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
-                self.state = 462
+                self.state = 463
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if _la==ShaperParser.ELSE:
-                    self.state = 460
-                    self.match(ShaperParser.ELSE)
                     self.state = 461
+                    self.match(ShaperParser.ELSE)
+                    self.state = 462
                     self.compoundStatement()
 
 
                 pass
             elif token in [ShaperParser.SWITCH]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 464
-                self.match(ShaperParser.SWITCH)
                 self.state = 465
-                self.match(ShaperParser.LEFTPAREN)
+                self.match(ShaperParser.SWITCH)
                 self.state = 466
-                self.expression()
+                self.match(ShaperParser.LEFTPAREN)
                 self.state = 467
-                self.match(ShaperParser.RIGHTPAREN)
+                self.expression()
                 self.state = 468
+                self.match(ShaperParser.RIGHTPAREN)
+                self.state = 469
                 self.match(ShaperParser.LEFTBRACKET)
-                self.state = 472
+                self.state = 473
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 while _la==ShaperParser.CASE or _la==ShaperParser.DEFAULT:
-                    self.state = 469
+                    self.state = 470
                     self.labeledStatement()
-                    self.state = 474
+                    self.state = 475
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
-                self.state = 475
+                self.state = 476
                 self.match(ShaperParser.RIGHTBRACKET)
                 pass
             else:
@@ -4292,27 +4295,27 @@ class ShaperParser ( Parser ):
         localctx = ShaperParser.LabeledStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 100, self.RULE_labeledStatement)
         try:
-            self.state = 487
+            self.state = 488
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [ShaperParser.CASE]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 479
-                self.match(ShaperParser.CASE)
                 self.state = 480
-                self.logicalORExpression(0)
+                self.match(ShaperParser.CASE)
                 self.state = 481
-                self.match(ShaperParser.COLON)
+                self.logicalORExpression(0)
                 self.state = 482
+                self.match(ShaperParser.COLON)
+                self.state = 483
                 self.expression()
                 pass
             elif token in [ShaperParser.DEFAULT]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 484
-                self.match(ShaperParser.DEFAULT)
                 self.state = 485
-                self.match(ShaperParser.COLON)
+                self.match(ShaperParser.DEFAULT)
                 self.state = 486
+                self.match(ShaperParser.COLON)
+                self.state = 487
                 self.expression()
                 pass
             else:
@@ -4395,80 +4398,80 @@ class ShaperParser ( Parser ):
         localctx = ShaperParser.IterationStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 102, self.RULE_iterationStatement)
         try:
-            self.state = 513
+            self.state = 514
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [ShaperParser.WHILE]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 489
-                self.match(ShaperParser.WHILE)
                 self.state = 490
-                self.match(ShaperParser.LEFTPAREN)
+                self.match(ShaperParser.WHILE)
                 self.state = 491
-                self.expression()
+                self.match(ShaperParser.LEFTPAREN)
                 self.state = 492
-                self.match(ShaperParser.RIGHTPAREN)
+                self.expression()
                 self.state = 493
+                self.match(ShaperParser.RIGHTPAREN)
+                self.state = 494
                 self.compoundStatement()
                 pass
             elif token in [ShaperParser.FOR]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 495
-                self.match(ShaperParser.FOR)
                 self.state = 496
+                self.match(ShaperParser.FOR)
+                self.state = 497
                 self.match(ShaperParser.LEFTPAREN)
-                self.state = 499
+                self.state = 500
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
                 if token in [ShaperParser.LEFTPAREN, ShaperParser.MINUS, ShaperParser.PLUSPLUS, ShaperParser.MINUSMINUS, ShaperParser.EXCLAMATION, ShaperParser.GLOBAL, ShaperParser.IntegerConstant, ShaperParser.FloatingConstant, ShaperParser.LogicalConstant, ShaperParser.ColorConstant, ShaperParser.Identifier]:
-                    self.state = 497
-                    self.expression()
-                    pass
-                elif token in [ShaperParser.BOOL, ShaperParser.INT, ShaperParser.LONG, ShaperParser.FLOAT, ShaperParser.DOUBLE, ShaperParser.COLOR, ShaperParser.STRUCT, ShaperParser.ARRAY, ShaperParser.LIST]:
                     self.state = 498
+                    self.expression()
+                    pass
+                elif token in [ShaperParser.BOOL, ShaperParser.INT, ShaperParser.LONG, ShaperParser.FLOAT, ShaperParser.DOUBLE, ShaperParser.COLOR, ShaperParser.STRUCT, ShaperParser.ARRAY, ShaperParser.LIST]:
+                    self.state = 499
                     self.declaration()
                     pass
                 elif token in [ShaperParser.SEMICOLON]:
                     pass
                 else:
                     pass
-                self.state = 501
+                self.state = 502
                 self.match(ShaperParser.SEMICOLON)
-                self.state = 504
+                self.state = 505
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
                 if token in [ShaperParser.LEFTPAREN, ShaperParser.MINUS, ShaperParser.PLUSPLUS, ShaperParser.MINUSMINUS, ShaperParser.EXCLAMATION, ShaperParser.GLOBAL, ShaperParser.IntegerConstant, ShaperParser.FloatingConstant, ShaperParser.LogicalConstant, ShaperParser.ColorConstant, ShaperParser.Identifier]:
-                    self.state = 502
-                    self.expression()
-                    pass
-                elif token in [ShaperParser.BOOL, ShaperParser.INT, ShaperParser.LONG, ShaperParser.FLOAT, ShaperParser.DOUBLE, ShaperParser.COLOR, ShaperParser.STRUCT, ShaperParser.ARRAY, ShaperParser.LIST]:
                     self.state = 503
+                    self.expression()
+                    pass
+                elif token in [ShaperParser.BOOL, ShaperParser.INT, ShaperParser.LONG, ShaperParser.FLOAT, ShaperParser.DOUBLE, ShaperParser.COLOR, ShaperParser.STRUCT, ShaperParser.ARRAY, ShaperParser.LIST]:
+                    self.state = 504
                     self.declaration()
                     pass
                 elif token in [ShaperParser.SEMICOLON]:
                     pass
                 else:
                     pass
-                self.state = 506
+                self.state = 507
                 self.match(ShaperParser.SEMICOLON)
-                self.state = 509
+                self.state = 510
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
                 if token in [ShaperParser.LEFTPAREN, ShaperParser.MINUS, ShaperParser.PLUSPLUS, ShaperParser.MINUSMINUS, ShaperParser.EXCLAMATION, ShaperParser.GLOBAL, ShaperParser.IntegerConstant, ShaperParser.FloatingConstant, ShaperParser.LogicalConstant, ShaperParser.ColorConstant, ShaperParser.Identifier]:
-                    self.state = 507
+                    self.state = 508
                     self.expression()
                     pass
                 elif token in [ShaperParser.BOOL, ShaperParser.INT, ShaperParser.LONG, ShaperParser.FLOAT, ShaperParser.DOUBLE, ShaperParser.COLOR, ShaperParser.STRUCT, ShaperParser.ARRAY, ShaperParser.LIST]:
-                    self.state = 508
+                    self.state = 509
                     self.declaration()
                     pass
                 elif token in [ShaperParser.RIGHTPAREN]:
                     pass
                 else:
                     pass
-                self.state = 511
-                self.match(ShaperParser.RIGHTPAREN)
                 self.state = 512
+                self.match(ShaperParser.RIGHTPAREN)
+                self.state = 513
                 self.compoundStatement()
                 pass
             else:
@@ -4532,36 +4535,36 @@ class ShaperParser ( Parser ):
         self.enterRule(localctx, 104, self.RULE_jumpStatement)
         self._la = 0 # Token type
         try:
-            self.state = 524
+            self.state = 525
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [ShaperParser.CONTINUE]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 515
-                self.match(ShaperParser.CONTINUE)
                 self.state = 516
+                self.match(ShaperParser.CONTINUE)
+                self.state = 517
                 self.match(ShaperParser.SEMICOLON)
                 pass
             elif token in [ShaperParser.BREAK]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 517
-                self.match(ShaperParser.BREAK)
                 self.state = 518
+                self.match(ShaperParser.BREAK)
+                self.state = 519
                 self.match(ShaperParser.SEMICOLON)
                 pass
             elif token in [ShaperParser.RETURN]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 519
+                self.state = 520
                 self.match(ShaperParser.RETURN)
-                self.state = 521
+                self.state = 522
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if ((((_la - 12)) & ~0x3f) == 0 and ((1 << (_la - 12)) & ((1 << (ShaperParser.LEFTPAREN - 12)) | (1 << (ShaperParser.MINUS - 12)) | (1 << (ShaperParser.PLUSPLUS - 12)) | (1 << (ShaperParser.MINUSMINUS - 12)) | (1 << (ShaperParser.EXCLAMATION - 12)) | (1 << (ShaperParser.GLOBAL - 12)) | (1 << (ShaperParser.IntegerConstant - 12)) | (1 << (ShaperParser.FloatingConstant - 12)) | (1 << (ShaperParser.LogicalConstant - 12)) | (1 << (ShaperParser.ColorConstant - 12)) | (1 << (ShaperParser.Identifier - 12)))) != 0):
-                    self.state = 520
+                    self.state = 521
                     self.expression()
 
 
-                self.state = 523
+                self.state = 524
                 self.match(ShaperParser.SEMICOLON)
                 pass
             else:
@@ -4618,15 +4621,15 @@ class ShaperParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 527
+            self.state = 528
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==ShaperParser.GLOBAL:
-                self.state = 526
+                self.state = 527
                 self.globalScope()
 
 
-            self.state = 529
+            self.state = 530
             self.identifier()
         except RecognitionException as re:
             localctx.exception = re
@@ -4673,7 +4676,7 @@ class ShaperParser ( Parser ):
         self.enterRule(localctx, 108, self.RULE_identifier)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 531
+            self.state = 532
             self.match(ShaperParser.Identifier)
         except RecognitionException as re:
             localctx.exception = re
@@ -4720,7 +4723,7 @@ class ShaperParser ( Parser ):
         self.enterRule(localctx, 110, self.RULE_globalScope)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 533
+            self.state = 534
             self.match(ShaperParser.GLOBAL)
         except RecognitionException as re:
             localctx.exception = re
@@ -4779,27 +4782,27 @@ class ShaperParser ( Parser ):
         localctx = ShaperParser.ConstantContext(self, self._ctx, self.state)
         self.enterRule(localctx, 112, self.RULE_constant)
         try:
-            self.state = 539
+            self.state = 540
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [ShaperParser.IntegerConstant]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 535
+                self.state = 536
                 localctx.integer = self.match(ShaperParser.IntegerConstant)
                 pass
             elif token in [ShaperParser.FloatingConstant]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 536
+                self.state = 537
                 localctx.floating = self.match(ShaperParser.FloatingConstant)
                 pass
             elif token in [ShaperParser.LogicalConstant]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 537
+                self.state = 538
                 localctx.logical = self.match(ShaperParser.LogicalConstant)
                 pass
             elif token in [ShaperParser.ColorConstant]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 538
+                self.state = 539
                 localctx.color = self.match(ShaperParser.ColorConstant)
                 pass
             else:

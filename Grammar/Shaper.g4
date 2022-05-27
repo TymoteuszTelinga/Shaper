@@ -265,7 +265,7 @@ posSizeParent
 
 selectionStatement
     : IF LEFTPAREN expression RIGHTPAREN compoundStatement 
-        (ELIF LEFTPAREN expression RIGHTPAREN)* 
+        (ELIF LEFTPAREN expression RIGHTPAREN compoundStatement)* 
         ( ELSE compoundStatement )?
     | SWITCH LEFTPAREN expression RIGHTPAREN LEFTBRACKET labeledStatement* RIGHTBRACKET
     ;

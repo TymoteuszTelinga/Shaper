@@ -578,6 +578,9 @@ class CheckVisitor(ShaperVisitor):
         elif ctx.jumpStatement() != None:
             self.visit(ctx.jumpStatement())
 
+        elif ctx.selectionStatement() != None:
+            self.visitSelectionStatement(ctx.selectionStatement())
+
 
 # paintStatement
 #     : PAINT  shapeIndicator
@@ -767,3 +770,26 @@ class CheckVisitor(ShaperVisitor):
             const = Constant(Type.COLOR, None)
         
         return const
+
+    def visitSelectionStatement(self, ctx: ShaperParser.SelectionStatementContext):
+
+
+        expressions = ctx.expression()
+        compounds = ctx.compoundStatement()
+
+
+        for i in range(len(expressions)):
+            oldScope =  self.manager.createNewScope(True)
+            gotVar = self.visit(expressions[i])
+            if gotVar.type != Type.BOOL:
+                raise Exception(f"line {ctx.start.line} Excepted boolean value, instead got variable of " + repr(gotVar.type)  + " type")
+
+            self.visit(compounds[i])
+            self.manager.curr_scope = oldScope
+                
+            
+
+        if len(compounds) > len(expressions):
+            oldScope =  self.manager.createNewScope(True)
+            self.visit(compounds[-1])
+            self.manager.curr_scope = oldScope
