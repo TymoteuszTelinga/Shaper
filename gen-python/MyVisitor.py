@@ -1,5 +1,6 @@
 
 from ast import Expression
+from mimetypes import init
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 import Shapes
@@ -319,6 +320,9 @@ class MyVisitor(ShaperVisitor):
         if ctx.jumpStatement() != None:
             self.visit(ctx.jumpStatement())
 
+        if ctx.iterationStatement() != None:
+            self.visit(ctx.iterationStatement())
+
         elif ctx.selectionStatement() != None:
             self.visitSelectionStatement(ctx.selectionStatement())
 
@@ -466,6 +470,45 @@ class MyVisitor(ShaperVisitor):
                 self.visit(compounds[-1])
                 self.manager.curr_scope = oldScope
 
+    def visitIterationStatement(self, ctx: ShaperParser.IterationStatementContext):
+        if ctx.whileLoopStatement() != None:
+            self.visit(ctx.whileLoopStatement())
+
+        elif ctx.forLoopStatement() != None:
+            self.visit(ctx.forLoopStatement())
+
+
+    def visitWhileLoopStatement(self, ctx: ShaperParser.WhileLoopStatementContext):
+        while self.visit(ctx.expression().val) == True:
+            oldScope = self.manager.createNewScope(True)
+            self.visit(ctx.compoundStatement())
+            self.manager.curr_scope = oldScope
+
+
+    def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
+        print("Ff")
+        if ctx.initExpr != None:
+            self.visit(ctx.initExpr)
+        elif ctx.initDec != None:
+            self.visit(ctx.initDec)
+        
+        if ctx.condition == None:
+            while True:
+                oldScope = self.manager.createNewScope(True)
+                self.visit(ctx.compoundStatement())
+                self.manager.curr_scope = oldScope
+                
+                if ctx.loopExpr != None:
+                    self.visit(ctx.loopExpr)
+            
+        else:
+            while self.visit(ctx.condition).val == True:
+                oldScope = self.manager.createNewScope(True)
+                self.visit(ctx.compoundStatement())
+                self.manager.curr_scope = oldScope
+                
+                if ctx.loopExpr != None:
+                    self.visit(ctx.loopExpr)
     
 
             

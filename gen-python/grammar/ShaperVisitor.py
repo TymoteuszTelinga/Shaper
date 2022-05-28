@@ -269,6 +269,16 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#whileLoopStatement.
+    def visitWhileLoopStatement(self, ctx:ShaperParser.WhileLoopStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#forLoopStatement.
+    def visitForLoopStatement(self, ctx:ShaperParser.ForLoopStatementContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#jumpStatement.
     def visitJumpStatement(self, ctx:ShaperParser.JumpStatementContext):
         return self.visitChildren(ctx)

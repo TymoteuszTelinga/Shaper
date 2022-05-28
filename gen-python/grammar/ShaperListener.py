@@ -476,6 +476,24 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#whileLoopStatement.
+    def enterWhileLoopStatement(self, ctx:ShaperParser.WhileLoopStatementContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#whileLoopStatement.
+    def exitWhileLoopStatement(self, ctx:ShaperParser.WhileLoopStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#forLoopStatement.
+    def enterForLoopStatement(self, ctx:ShaperParser.ForLoopStatementContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#forLoopStatement.
+    def exitForLoopStatement(self, ctx:ShaperParser.ForLoopStatementContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#jumpStatement.
     def enterJumpStatement(self, ctx:ShaperParser.JumpStatementContext):
         pass

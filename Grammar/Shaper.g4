@@ -1,3 +1,5 @@
+// antlr4 -Dlanguage=Python3 Shaper.g4 -visitor -o ..\gen-python\grammar
+
 grammar Shaper;
 
 programm 
@@ -276,8 +278,17 @@ labeledStatement
     ;
 
 iterationStatement
+    : whileLoopStatement
+    | forLoopStatement
+    ;
+
+whileLoopStatement
     : WHILE LEFTPAREN expression RIGHTPAREN compoundStatement
-    | FOR LEFTPAREN (expression|declaration)? SEMICOLON (expression|declaration)? SEMICOLON (expression|declaration)? RIGHTPAREN compoundStatement
+    ;
+
+
+forLoopStatement
+    : FOR LEFTPAREN (initExpr=expression | initDec = declaration)? SEMICOLON (condition=expression)? SEMICOLON (loopExpr=expression)? RIGHTPAREN compoundStatement
     ;
 
 jumpStatement

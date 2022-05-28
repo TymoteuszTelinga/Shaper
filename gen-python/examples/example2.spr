@@ -4,8 +4,6 @@ int height = 360;
 
 void setup()
 {
-    canvas(width, height); 
-    background(GRAY);
 }
 
 void draw()
@@ -26,5 +24,4 @@ void draw()
         }
     }
 
-    noLoop( );
 }
