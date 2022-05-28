@@ -1,3 +1,5 @@
+// antlr4 -Dlanguage=Python3 Shaper.g4 -visitor -o ..\gen-python\grammar
+
 grammar Shaper;
 
 programm 
@@ -16,13 +18,9 @@ externalDeclaration
     ;
 
 functionDefinition
-    : functionSpecifier identifier declarator compoundStatement
+    : typeSpecifier identifier declarator compoundStatement
     ;
 
-functionSpecifier
-    : typeSpecifier
-    | CONST typeSpecifier
-    ;
 
 typeSpecifier
     : VOID
@@ -33,8 +31,8 @@ typeSpecifier
     | DOUBLE
     | COLOR
     | STRUCT identifier
-    | ARRAY functionSpecifier
-    | LIST functionSpecifier
+    | ARRAY typeSpecifier
+    | LIST typeSpecifier
     ;
 
 declarator
@@ -48,7 +46,7 @@ parameterList
     ;
 
 parameterDeclaration
-    : functionSpecifier identifier
+    : typeSpecifier identifier
     ;
 
 compoundStatement
@@ -70,13 +68,9 @@ declaration
     ;
 
 initDeclarator
-    : declarationSpecifier identifier ( assignmentOperator assignmentExpression)?
+    : declarationType identifier ( assignmentOperator assignmentExpression)?
     ;
 
-declarationSpecifier
-    : declarationType
-    | CONST declarationType
-    ;
 
 declarationType
     : BOOL
@@ -86,8 +80,8 @@ declarationType
     | DOUBLE
     | COLOR
     | STRUCT identifier
-    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationSpecifier
-    | LIST declarationSpecifier
+    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationType
+    | LIST declarationType
     ;
 
 structDeclarator
@@ -152,7 +146,7 @@ postfixExpression
     ;
 
 primaryExpression
-    : identifier
+    : scopeIdentifier
     | constant
     | LEFTPAREN expression RIGHTPAREN                        
     | functionCall
@@ -264,7 +258,7 @@ toStatement
     ;
 
 colorStatement
-    : WITH (identifier|constant)
+    : WITH ( scopeIdentifier|constant)
     ;
 
 posSizeParent
@@ -273,7 +267,7 @@ posSizeParent
 
 selectionStatement
     : IF LEFTPAREN expression RIGHTPAREN compoundStatement 
-        (ELIF LEFTPAREN expression RIGHTPAREN)* 
+        (ELIF LEFTPAREN expression RIGHTPAREN compoundStatement)* 
         ( ELSE compoundStatement )?
     | SWITCH LEFTPAREN expression RIGHTPAREN LEFTBRACKET labeledStatement* RIGHTBRACKET
     ;
@@ -284,8 +278,17 @@ labeledStatement
     ;
 
 iterationStatement
+    : whileLoopStatement
+    | forLoopStatement
+    ;
+
+whileLoopStatement
     : WHILE LEFTPAREN expression RIGHTPAREN compoundStatement
-    | FOR LEFTPAREN (expression|declaration)? SEMICOLON (expression|declaration)? SEMICOLON (expression|declaration)? RIGHTPAREN compoundStatement
+    ;
+
+
+forLoopStatement
+    : FOR LEFTPAREN (initExpr=expression | initDec = declaration)? SEMICOLON (condition=expression)? SEMICOLON (loopExpr=expression)? RIGHTPAREN compoundStatement
     ;
 
 jumpStatement
@@ -294,8 +297,17 @@ jumpStatement
     | RETURN expression? SEMICOLON
     ;
 
+
+scopeIdentifier
+    : globalScope? identifier
+    ;
+
 identifier
     : Identifier
+    ;
+
+globalScope
+    : GLOBAL
     ;
 
 constant
@@ -364,8 +376,6 @@ ARRAY: 'array';
 
 LIST: 'list';
 
-CONST: 'const';
-
 OR: '|';
 
 AND: '&';
@@ -433,6 +443,8 @@ CONTINUE: 'continue';
 BREAK: 'break';
 
 RETURN: 'return';
+
+GLOBAL: 'global:';
 
 IntegerConstant
     : NonZeroDigit Digit*

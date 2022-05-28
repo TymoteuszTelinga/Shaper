@@ -1,11 +1,41 @@
-int x = 10;
+int x = 9;
 
-void draw()
+void setup()
 { 
+    test();
+}
 
+int fib(int n)
+{
+    if (n < 0)
+    {
+        return 0;
+    }
+    elif (n < 3)
+    {
+        return 1;
+    }
+    else
+    {
+        return fib(n-1)+fib(n-2);
+    }
 }
 
 void test()
 {
-    int f  =10;
+    if (x == 10)
+    {
+        print(x);
+    }
+    elif(x+1 == 10)
+    {
+        print(x);
+    }
+    else
+    {
+        print(-1);
+    }
+
+    int y = fib(x);
+    print(y);
 }

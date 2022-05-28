@@ -29,11 +29,6 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ShaperParser#functionSpecifier.
-    def visitFunctionSpecifier(self, ctx:ShaperParser.FunctionSpecifierContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by ShaperParser#typeSpecifier.
     def visitTypeSpecifier(self, ctx:ShaperParser.TypeSpecifierContext):
         return self.visitChildren(ctx)
@@ -76,11 +71,6 @@ class ShaperVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ShaperParser#initDeclarator.
     def visitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by ShaperParser#declarationSpecifier.
-    def visitDeclarationSpecifier(self, ctx:ShaperParser.DeclarationSpecifierContext):
         return self.visitChildren(ctx)
 
 
@@ -279,13 +269,33 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#whileLoopStatement.
+    def visitWhileLoopStatement(self, ctx:ShaperParser.WhileLoopStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#forLoopStatement.
+    def visitForLoopStatement(self, ctx:ShaperParser.ForLoopStatementContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#jumpStatement.
     def visitJumpStatement(self, ctx:ShaperParser.JumpStatementContext):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#scopeIdentifier.
+    def visitScopeIdentifier(self, ctx:ShaperParser.ScopeIdentifierContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#identifier.
     def visitIdentifier(self, ctx:ShaperParser.IdentifierContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#globalScope.
+    def visitGlobalScope(self, ctx:ShaperParser.GlobalScopeContext):
         return self.visitChildren(ctx)
 
 

@@ -1,10 +1,15 @@
 import sys
 import os.path
+
 from antlr4 import *
+from antlr4.error.ErrorListener import ErrorListener
+
 from grammar.ShaperLexer import ShaperLexer
 from grammar.ShaperParser import ShaperParser
+
 from MyVisitor import MyVisitor
-from antlr4.error.ErrorListener import ErrorListener
+from CheckVisitor import CheckVisitor
+from Manager import Manager
 
 class ShaperErrorListener(ErrorListener):
     def __init__(self):
@@ -26,6 +31,7 @@ class ShaperErrorListener(ErrorListener):
 
 
 def main(argv):
+    sys.setrecursionlimit(10000)
 
     if len(argv)>1 and os.path.isfile(argv[1]):
         input_stream = FileStream(argv[1])
@@ -45,17 +51,27 @@ def main(argv):
         try:
             tree = parser.programm()
             
-            myVisitor = MyVisitor()
+            manager = Manager()
+            
+            checkVisitor = CheckVisitor(manager)
+
+
+            myVisitor = MyVisitor(manager)
             try:
-                myVisitor.visit(tree)
-                print(myVisitor.funDict)
-                myVisitor.visit(tree)
-                #myVisitor.window.show()
+
+                checkVisitor.visit(tree)
+                checkVisitor.checkFunctionsBody()
+
+
+                myVisitor.start(tree)
+                # print(myVisitor.funDict)
+                # myVisitor.visit(tree)
+                # #myVisitor.window.show()
             except Exception as e:
                 print(e)
                 
         except Exception as e:
-            print("something went wrong")
+            print("something went wrong :(")
             print(e)
 
     else:

@@ -44,15 +44,6 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by ShaperParser#functionSpecifier.
-    def enterFunctionSpecifier(self, ctx:ShaperParser.FunctionSpecifierContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#functionSpecifier.
-    def exitFunctionSpecifier(self, ctx:ShaperParser.FunctionSpecifierContext):
-        pass
-
-
     # Enter a parse tree produced by ShaperParser#typeSpecifier.
     def enterTypeSpecifier(self, ctx:ShaperParser.TypeSpecifierContext):
         pass
@@ -131,15 +122,6 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#initDeclarator.
     def exitInitDeclarator(self, ctx:ShaperParser.InitDeclaratorContext):
-        pass
-
-
-    # Enter a parse tree produced by ShaperParser#declarationSpecifier.
-    def enterDeclarationSpecifier(self, ctx:ShaperParser.DeclarationSpecifierContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#declarationSpecifier.
-    def exitDeclarationSpecifier(self, ctx:ShaperParser.DeclarationSpecifierContext):
         pass
 
 
@@ -494,6 +476,24 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#whileLoopStatement.
+    def enterWhileLoopStatement(self, ctx:ShaperParser.WhileLoopStatementContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#whileLoopStatement.
+    def exitWhileLoopStatement(self, ctx:ShaperParser.WhileLoopStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#forLoopStatement.
+    def enterForLoopStatement(self, ctx:ShaperParser.ForLoopStatementContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#forLoopStatement.
+    def exitForLoopStatement(self, ctx:ShaperParser.ForLoopStatementContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#jumpStatement.
     def enterJumpStatement(self, ctx:ShaperParser.JumpStatementContext):
         pass
@@ -503,12 +503,30 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ShaperParser#scopeIdentifier.
+    def enterScopeIdentifier(self, ctx:ShaperParser.ScopeIdentifierContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#scopeIdentifier.
+    def exitScopeIdentifier(self, ctx:ShaperParser.ScopeIdentifierContext):
+        pass
+
+
     # Enter a parse tree produced by ShaperParser#identifier.
     def enterIdentifier(self, ctx:ShaperParser.IdentifierContext):
         pass
 
     # Exit a parse tree produced by ShaperParser#identifier.
     def exitIdentifier(self, ctx:ShaperParser.IdentifierContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#globalScope.
+    def enterGlobalScope(self, ctx:ShaperParser.GlobalScopeContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#globalScope.
+    def exitGlobalScope(self, ctx:ShaperParser.GlobalScopeContext):
         pass
 
 
