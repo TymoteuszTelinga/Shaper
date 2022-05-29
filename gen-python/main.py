@@ -62,8 +62,12 @@ def main(argv):
                 checkVisitor.visit(tree)
                 checkVisitor.checkFunctionsBody()
 
+                if(len(checkVisitor.errorstack) > 0):
+                    for error in checkVisitor.errorstack:
+                        print(error)
 
-                myVisitor.start(tree)
+                else:        
+                    myVisitor.start(tree)
                 # print(myVisitor.funDict)
                 # myVisitor.visit(tree)
                 # #myVisitor.window.show()

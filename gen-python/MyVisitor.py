@@ -1,6 +1,3 @@
-
-from ast import Expression
-from mimetypes import init
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 import Shapes
@@ -307,20 +304,20 @@ class MyVisitor(ShaperVisitor):
         if ctx.paintStatement() != None:
             self.visit(ctx.paintStatement())
 
-        if ctx.compoundStatement() != None:
+        elif ctx.compoundStatement() != None:
             oldScope =  self.manager.createNewScope(True)
 
             self.visit(ctx.compoundStatement())
 
             self.manager.curr_scope = oldScope
 
-        if ctx.expression() != None:
+        elif ctx.expression() != None:
             self.visit(ctx.expression())
 
-        if ctx.jumpStatement() != None:
+        elif ctx.jumpStatement() != None:
             self.visit(ctx.jumpStatement())
 
-        if ctx.iterationStatement() != None:
+        elif ctx.iterationStatement() != None:
             self.visit(ctx.iterationStatement())
 
         elif ctx.selectionStatement() != None:
@@ -479,14 +476,13 @@ class MyVisitor(ShaperVisitor):
 
 
     def visitWhileLoopStatement(self, ctx: ShaperParser.WhileLoopStatementContext):
-        while self.visit(ctx.expression().val) == True:
+        while self.visit(ctx.expression()).val == True:
             oldScope = self.manager.createNewScope(True)
             self.visit(ctx.compoundStatement())
             self.manager.curr_scope = oldScope
 
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
-        print("Ff")
         if ctx.initExpr != None:
             self.visit(ctx.initExpr)
         elif ctx.initDec != None:

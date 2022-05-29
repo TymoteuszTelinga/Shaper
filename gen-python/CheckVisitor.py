@@ -1,3 +1,6 @@
+from xmlrpc.client import Boolean
+
+from numpy import void
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
@@ -14,6 +17,7 @@ class CheckVisitor(ShaperVisitor):
     def __init__(self, manager: Manager) -> None:
         self.gatherFunctions = True
         self.manager = manager
+        self.errorstack = []
 
 
     def checkFunctionsBody(self):
@@ -141,7 +145,8 @@ class CheckVisitor(ShaperVisitor):
             par_list = self.visit(ctx.parameterList())
             for param in par_list:
                 if var.name == param.name:
-                    raise Exception(f"line {ctx.start.line} Ambiguity Error: Two or more parameters of this same name in one function")
+                    self.errorstack.append(f"line {ctx.start.line} Ambiguity Error: Two or more parameters of this same name in one function")
+                    # raise Exception(f"line {ctx.start.line} Ambiguity Error: Two or more parameters of this same name in one function")
             
             par_list.insert(0,var) # insert new variable to start of the list 
             
@@ -207,13 +212,15 @@ class CheckVisitor(ShaperVisitor):
 
         # variable created earlier in current scope
         if not self.manager.isVariableAvailable(name):
-            raise Exception(f"line {ctx.start.line} Variable \'{name}\' defined earlier in this scope")
+            self.errorstack.append(f"line {ctx.start.line} Variable \'{name}\' defined earlier in this scope")
+            # raise Exception(f"line {ctx.start.line} Variable \'{name}\' defined earlier in this scope")
 
         # initializing value
         if ctx.assignmentExpression() != None:
             r_value = self.visit(ctx.assignmentExpression())
             if var.type != r_value.type:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
 
         self.manager.addVariable(var)
 
@@ -253,26 +260,33 @@ class CheckVisitor(ShaperVisitor):
             op = ctx.assignmentOperator().getText()
 
             if(type(l) is Constant):
-                raise Exception(f"line {ctx.start.line} Can't assign value to a non-variable atom")
+                self.errorstack.append(f"line {ctx.start.line} Can't assign value to a non-variable atom")
+                # raise Exception(f"line {ctx.start.line} Can't assign value to a non-variable atom")
 
             if l.type != r.type :
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
 
             if op == '+=':
                 if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
             elif op == '-=':
                 if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type)) 
+                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type)) 
             elif op == '*=':
                 if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
             elif op == '/=':
                 if l.type not in [Type.FLOAT, Type.INT]:
-                    raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
             elif op == '%=':
                 if l.type not in [Type.INT]:
-                    raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
 
             return l
 
@@ -289,10 +303,12 @@ class CheckVisitor(ShaperVisitor):
             r = self.visit(ctx.logicalANDExpression())
             
             if l.type not in [Type.BOOL]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'|\' to type " + repr(l.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'|\' to type " + repr(l.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'|\' to type " + repr(l.type))
             
             if r.type not in [Type.BOOL]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'|\' to type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'|\' to type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'|\' to type " + repr(r.type))
 
             ret = Constant(Type.BOOL, None)
 
@@ -311,10 +327,12 @@ class CheckVisitor(ShaperVisitor):
             r = self.visit(ctx.equalityExpression())
             
             if l.type not in [Type.BOOL]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'&\' to type " + repr(l.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'&\' to type " + repr(l.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'&\' to type " + repr(l.type))
             
             if r.type not in [Type.BOOL]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'&\' to type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'&\' to type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'&\' to type " + repr(r.type))
 
             ret = Constant(Type.BOOL, None)
 
@@ -334,13 +352,16 @@ class CheckVisitor(ShaperVisitor):
             op = ctx.equalityOperator().getText()
 
             if l.type not in [Type.INT, Type.FLOAT, Type.BOOL, Type.COLOR]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
             
             if r.type not in [Type.INT, Type.FLOAT, Type.BOOL, Type.COLOR]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
             if l.type != r.type and (Type.BOOL in [l.type, r.type] or Type.Color in [l.type, r.type]):
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
             
             return Constant(Type.BOOL, None)
 
@@ -358,10 +379,12 @@ class CheckVisitor(ShaperVisitor):
             op = ctx.relationalOperator().getText()
 
             if l.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
             
             if r.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
             return  Constant(Type.BOOL, None)
 
@@ -379,10 +402,12 @@ class CheckVisitor(ShaperVisitor):
             op = ctx.additiveOperator().getText()
 
             if l.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type))
             
             if r.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
             
             ret_type = Type.INT    
             if r.type == Type.FLOAT or l.type == Type.FLOAT:
@@ -406,10 +431,12 @@ class CheckVisitor(ShaperVisitor):
             op = ctx.multiplicativeOperator().getText()
             
             if l.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"line {ctx.start.line} Can't use  multiplicative operator \'{op}\' to type " + repr(l.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  multiplicative operator \'{op}\' to type " + repr(l.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  multiplicative operator \'{op}\' to type " + repr(l.type))
             
             if r.type not in [Type.INT, Type.FLOAT]:
-                raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
+                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
             ret_type = Type.INT    
             if r.type == Type.FLOAT or l.type == Type.FLOAT:
@@ -417,7 +444,8 @@ class CheckVisitor(ShaperVisitor):
             
             if op == '%':
                 if ret_type != Type.INT:
-                    raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type \'float\'" )
+                    self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type \'float\'" )
+                    # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type \'float\'" )
 
             return Constant(ret_type, None)
     
@@ -435,23 +463,29 @@ class CheckVisitor(ShaperVisitor):
 
             if  op == '-':
                 if ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception(f"line {ctx.start.line} Can't use unary operator \'-\' to type " + repr(ret.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use unary operator \'-\' to type " + repr(ret.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use unary operator \'-\' to type " + repr(ret.type))
 
             elif op == '!':
                 if ret.type not in [Type.BOOL]:
-                    raise Exception(f"line {ctx.start.line} Can't use unary operator \'!\' to type " + repr(ret.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use unary operator \'!\' to type " + repr(ret.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use unary operator \'!\' to type " + repr(ret.type))
 
             elif op == '++':
                 if type(ret) == Constant:
-                    raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
                 elif ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
 
             elif op == '--':
                 if type(ret) == Constant:
-                    raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
                 elif ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
 
             return Constant(ret.type, None)
 
@@ -470,24 +504,30 @@ class CheckVisitor(ShaperVisitor):
 
             if type(ret) == Constant:
                 if ctx.DOT() != None:
-                     raise Exception(f"line {ctx.start.line} Can't use operator \'.\' to a non-variable atom")
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'.\' to a non-variable atom")
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'.\' to a non-variable atom")
                 elif ctx.PLUSPLUS() != None:
-                     raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
                 elif ctx.MINUSMINUS() != None:
-                     raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
             
             if ctx.DOT() != None:
                 if ret.type in [Type.BOOL, Type.INT, Type.FLOAT, Type.VOID]:
-                    raise Exception(f"line {ctx.start.line} Can't use operator \'.\' to type " + repr(ret.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'.\' to type " + repr(ret.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'.\' to type " + repr(ret.type))
 
 
             elif ctx.PLUSPLUS() != None:
                 if ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
 
             elif ctx.MINUSMINUS() != None:
                 if ret.type not in [Type.INT, Type.FLOAT]:
-                    raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
+                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
 
         
             return Constant(ret.type, None)
@@ -528,13 +568,17 @@ class CheckVisitor(ShaperVisitor):
         if error == 0:
             return function.return_atom
         if error == 1:
-            raise Exception(f"line {ctx.start.line} Functions 'setup' and 'draw' can't be called directly!")
+            self.errorstack.append(f"line {ctx.start.line} Functions 'setup' and 'draw' can't be called directly!")
+            # raise Exception(f"line {ctx.start.line} Functions 'setup' and 'draw' can't be called directly!")
         elif error == 2:
-            raise Exception(f"line {ctx.start.line} Function {name} doesn't exist!") 
+            self.errorstack.append(f"line {ctx.start.line} Function {name} doesn't exist!")
+            # raise Exception(f"line {ctx.start.line} Function {name} doesn't exist!") 
         elif error == 3:
-            raise Exception(f"line {ctx.start.line} Called function has {len(params)} parameters, but was declared with {len(function.parameters)}")
+            self.errorstack.append(f"line {ctx.start.line} Called function has {len(params)} parameters, but was declared with {len(function.parameters)}")
+            # raise Exception(f"line {ctx.start.line} Called function has {len(params)} parameters, but was declared with {len(function.parameters)}")
         elif error == 4:
-            raise Exception(f"line {ctx.start.line} At {function[0]} parameter expected type {function[1].type}, but got type {params[function[0]].type}")
+            self.errorstack.append(f"line {ctx.start.line} At {function[0]} parameter expected type {function[1].type}, but got type {params[function[0]].type}")
+            # raise Exception(f"line {ctx.start.line} At {function[0]} parameter expected type {function[1].type}, but got type {params[function[0]].type}")
 
 
 # functionParameterList
@@ -577,6 +621,9 @@ class CheckVisitor(ShaperVisitor):
 
         elif ctx.jumpStatement() != None:
             self.visit(ctx.jumpStatement())
+
+        elif ctx.iterationStatement() != None:
+            self.visit(ctx.iterationStatement())
 
         elif ctx.selectionStatement() != None:
             self.visitSelectionStatement(ctx.selectionStatement())
@@ -687,13 +734,15 @@ class CheckVisitor(ShaperVisitor):
             const = self.visit(ctx.constant())
 
             if const.type != Type.COLOR:
-                raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(const.type))
+                self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(const.type))
+                # raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(const.type))
         else:
             var = self.visit(ctx.scopeIdentifier())
 
 
-            if var.type != Type.COLOR: 
-                raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(var.type))
+            if var.type != Type.COLOR:
+                self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(var.type)) 
+                # raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(var.type))
 
 
 # posSizeParent
@@ -709,9 +758,11 @@ class CheckVisitor(ShaperVisitor):
             pos_size_tulp = (var, var)
         
         if pos_size_tulp[0].type not in [Type.INT, Type.FLOAT]:
+            self.errorstack.append()
             raise Exception(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
 
         if pos_size_tulp[1].type not in [Type.INT, Type.FLOAT]:
+            self.errorstack.append()
             raise Exception(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
     
 
@@ -727,7 +778,8 @@ class CheckVisitor(ShaperVisitor):
             self.manager.return_var = Constant(Type.VOID, None)
 
         if self.manager.return_var.type != self.manager.curr_function.return_atom.type:
-            raise Exception(f"line {ctx.start.line} Incorrect return type, expected {self.manager.curr_function.return_atom.type}, but got type {self.manager.return_var.type}")
+            self.errorstack.append(f"line {ctx.start.line} Incorrect return type, expected {self.manager.curr_function.return_atom.type}, but got type {self.manager.return_var.type}")
+            # raise Exception(f"line {ctx.start.line} Incorrect return type, expected {self.manager.curr_function.return_atom.type}, but got type {self.manager.return_var.type}")
 
 
     def visitScopeIdentifier(self, ctx: ShaperParser.ScopeIdentifierContext):
@@ -736,12 +788,16 @@ class CheckVisitor(ShaperVisitor):
             var = self.manager.global_scope.getVariable(name)
 
             if var == None:
-                raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist in global scope")
+                self.errorstack.append(f"line {ctx.start.line} Variable " + name + " doesn't exist in global scope")
+                var = Variable(name, Type.VOID)
+                # raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist in global scope")
         else: 
             var = self.manager.getVariable(name)
 
             if var == None:
-                raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist")
+                self.errorstack.append(f"line {ctx.start.line} Variable " + name + " doesn't exist")
+                var = Variable(name, Type.VOID)
+                # raise Exception(f"line {ctx.start.line} Variable " + name + " doesn't exist")
             
         return var
 
@@ -782,7 +838,8 @@ class CheckVisitor(ShaperVisitor):
             oldScope =  self.manager.createNewScope(True)
             gotVar = self.visit(expressions[i])
             if gotVar.type != Type.BOOL:
-                raise Exception(f"line {ctx.start.line} Excepted boolean value, instead got variable of " + repr(gotVar.type)  + " type")
+                self.errorstack.append(f"line {ctx.start.line} Excepted boolean value, instead got value of " + repr(gotVar.type)  + " type")
+                # raise Exception(f"line {ctx.start.line} Excepted boolean value, instead got value of " + repr(gotVar.type)  + " type")
 
             self.visit(compounds[i])
             self.manager.curr_scope = oldScope
@@ -793,3 +850,51 @@ class CheckVisitor(ShaperVisitor):
             oldScope =  self.manager.createNewScope(True)
             self.visit(compounds[-1])
             self.manager.curr_scope = oldScope
+
+    def visitIterationStatement(self, ctx: ShaperParser.IterationStatementContext):
+        if ctx.whileLoopStatement() != None:
+            self.visit(ctx.whileLoopStatement())
+
+        elif ctx.forLoopStatement() != None:
+            self.visit(ctx.forLoopStatement())
+
+    def visitWhileLoopStatement(self, ctx: ShaperParser.WhileLoopStatementContext):
+        gotVar = self.visit(ctx.expression())
+
+        if gotVar.type != Type.BOOL:
+            self.errorstack.append(f"line {ctx.start.line} Excepted boolean value, instead got value of " + repr(gotVar.type)  + " type")
+            # raise Exception(f"line {ctx.start.line} Excepted boolean value, instead got value of " + repr(gotVar.type)  + " type")
+
+    
+        oldScope = self.manager.createNewScope(True)
+        self.visit(ctx.compoundStatement())
+        self.manager.curr_scope = oldScope
+
+    def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
+        if ctx.initExpr != None:
+            self.visit(ctx.initExpr)
+        elif ctx.initDec != None:
+            self.visit(ctx.initDec)
+        
+        if ctx.condition == None:
+            
+            oldScope = self.manager.createNewScope(True)
+            self.visit(ctx.compoundStatement())
+            self.manager.curr_scope = oldScope
+                
+            if ctx.loopExpr != None:
+                    self.visit(ctx.loopExpr)
+            
+        else:
+            gotVar = self.visit(ctx.condition)
+
+            if gotVar.type != Type.BOOL:
+                self.errorstack.append(f"line {ctx.start.line} Excepted boolean value as condition, instead got value of " + repr(gotVar.type)  + " type")
+                # raise Exception(f"line {ctx.start.line} Excepted boolean value as condition, instead got value of " + repr(gotVar.type)  + " type")
+            
+            oldScope = self.manager.createNewScope(True)
+            self.visit(ctx.compoundStatement())
+            self.manager.curr_scope = oldScope
+                
+            if ctx.loopExpr != None:
+                self.visit(ctx.loopExpr)

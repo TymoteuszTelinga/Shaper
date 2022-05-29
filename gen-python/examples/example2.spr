@@ -8,20 +8,24 @@ void setup()
 
 void draw()
 {
-
-    for (int x = gridSize; x <= width - gridSize; x += gridSize)
+    int mirror = -1;
+    while(mirror < 2)
     {
-        for (int y = gridSize; y <= height - gridSize; y += gridSize)
+        for (int x = gridSize; x <= width - gridSize; x += gridSize)
         {
-            if( x%(2*gridSize) == 0 )
+            for (int y = gridSize; y <= height - gridSize; y += gridSize)
             {
-                paint line from (x,y) to (width/2,height/2) with BLACK;
-            }
-            else
-            {   
-                paint line from (x,y) to (width/2,height/2) with WHITE;
+                if( x%(2*gridSize) == 0 )
+                {
+                    paint line from (mirror*x,mirror * y) to (width/2,height/2) with WHITE;
+                }
+                else
+                {   
+                    paint line from (mirror*x, mirror * y) to (width/2,height/2) with WHITE;
+                }
             }
         }
-    }
 
+     ++mirror;
+   }
 }
