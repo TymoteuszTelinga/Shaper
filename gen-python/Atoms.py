@@ -6,6 +6,10 @@ class Variable:
         self.type : Type = v_type
         self.val = None
 
+        # only for array
+        self.elements = []
+        self.element_type = None
+
     def __repr__(self) -> str:
         return repr(self.type) + " " + self.name
 

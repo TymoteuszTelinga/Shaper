@@ -80,7 +80,7 @@ declarationType
     | FLOAT
     | DOUBLE
     | COLOR
-    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationType
+    | ARRAY LEFTPAREN (scopeIdentifier | constant)? RIGHTPAREN declarationType
     ;
 
 expression
@@ -136,15 +136,15 @@ postfixExpression
 primaryExpression
     : scopeIdentifier
     | constant
-    | identifier arrayIndex
+    | scopeIdentifier arrayIndex
     | LEFTPAREN expression RIGHTPAREN                        
     | functionCall
     ;
 
 
 arrayIndex
-    : LEFTBRACKET (identifier | constant) RIGHTBRACKET
-    | LEFTBRACKET (identifier | constant) RIGHTBRACKET arrayIndex
+    : LEFTBRACKET (scopeIdentifier | constant) RIGHTBRACKET
+    | LEFTBRACKET (scopeIdentifier | constant) RIGHTBRACKET arrayIndex
     ;
 
 functionCall

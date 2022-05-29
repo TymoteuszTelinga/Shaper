@@ -1,3 +1,4 @@
+import re
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
@@ -198,13 +199,23 @@ class CheckVisitor(ShaperVisitor):
             self.visit(ctx.statement())
 
 
+    def fillTypesTree(self, var : Variable, types : list, sizes : list):
+        if len(types) > 0:
+            var.element_type = types[0]
+            var.elements = [Variable("unnamed", var.element_type)] 
+            self.fillTypesTree(var.elements[0], types[1:], sizes[1:])
+
 # initDeclarator
 #     : declarationType identifier ( assignmentOperator assignmentExpression)?
 #     ;
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
         name = ctx.identifier().getText() # name of declared variable
-        type = self.visit(ctx.declarationType()) # type of declared variable
-        var = Variable(name, type) # create new variable
+        types, sizes = self.visit(ctx.declarationType()) # type of declared variable
+
+
+        var = Variable(name, types[0]) # create new variable
+
+        self.fillTypesTree(var, types[1:], sizes)
 
 
         # variable created earlier in current scope
@@ -220,6 +231,9 @@ class CheckVisitor(ShaperVisitor):
                 # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
 
         self.manager.addVariable(var)
+    
+
+        
 
 
 # declarationType
@@ -234,7 +248,34 @@ class CheckVisitor(ShaperVisitor):
 #     | LIST declarationType
 #     ;
     def visitDeclarationType(self, ctx: ShaperParser.DeclarationTypeContext) -> Type:
-        return Type.getType(ctx.getText())
+        type_list = []
+        size_list = []
+
+        if ctx.declarationType() == None:
+            type_list.append(Type.getType(ctx.getText()))
+             
+        else: 
+            type_list.append(Type.ARRAY)
+
+            gotVar = None
+            if (ctx.scopeIdentifier() != None):
+                gotVar = self.visit(ctx.scopeIdentifier())
+            else:
+                gotVar = self.visit(ctx.constant())
+            
+            if gotVar.type not in [Type.CHAR, Type.SHORT, Type.INT, Type.LONG]:
+                self.errorstack.append(f"line {ctx.start.line} Array size must be an integer number, instead got value of type {repr(gotVar.type)} ")
+            
+            size_list.append(gotVar)
+             
+            ret = self.visit(ctx.declarationType())
+
+            type_list += ret[0]
+            size_list += ret[1]
+
+        return (type_list, size_list)
+
+            
 
 
 # expression
@@ -528,18 +569,50 @@ class CheckVisitor(ShaperVisitor):
 #     | functionCall
 #     ;
     def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
-        if ctx.scopeIdentifier() != None: # get existing variable
-            var = self.visit(ctx.scopeIdentifier())
-            return var
 
-        elif ctx.constant() != None:
+        if ctx.constant() != None:
             return self.visit(ctx.constant())
+
+        elif ctx.arrayIndex() != None:
+            
+            gotVar = self.visit(ctx.scopeIdentifier()) 
+            indexes = self.visit(ctx.arrayIndex())
+
+            for _ in indexes:
+                
+                if gotVar.type != Type.ARRAY:
+                    self.errorstack.append(f"line {ctx.start.line} Can't use index operator with a variable of type {repr(gotVar.type)}")
+                    break
+                else:
+                    gotVar = gotVar.elements[0]
+            return gotVar
+                    
         
         elif ctx.expression() != None:
             return self.visit(ctx.expression())
         
         elif ctx.functionCall() != None:
             return self.visit(ctx.functionCall())
+
+        else:
+            var = self.visit(ctx.scopeIdentifier())
+            return var
+
+    def visitArrayIndex(self, ctx: ShaperParser.ArrayIndexContext):
+        gotVar = None
+        if ctx.scopeIdentifier() != None:
+            gotVar = self.visit(ctx.scopeIdentifier())
+        else:
+            gotVar = self.visit(ctx.constant())
+        
+        if gotVar.type not in [Type.CHAR, Type.SHORT, Type.INT, Type.LONG]:
+                self.errorstack.append(f"line {ctx.start.line} Array's element index must be an integer number, instead got value of type {repr(gotVar.type)} ")
+
+        if ctx.arrayIndex() != None:
+            return [gotVar] + self.visit(ctx.arrayIndex())
+
+        return [gotVar]
+        
 
 # functionCall
 #     : identifier LEFTPAREN functionParameterList? RIGHTPAREN 
