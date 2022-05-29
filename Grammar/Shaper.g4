@@ -25,14 +25,14 @@ functionDefinition
 typeSpecifier
     : VOID
     | BOOL
+    | CHAR
+    | SHORT
     | INT
     | LONG
     | FLOAT
     | DOUBLE
     | COLOR
-    | STRUCT identifier
     | ARRAY typeSpecifier
-    | LIST typeSpecifier
     ;
 
 declarator
@@ -64,7 +64,6 @@ instruction
 
 declaration
     : initDeclarator 
-    | structDeclarator 
     ;
 
 initDeclarator
@@ -74,24 +73,14 @@ initDeclarator
 
 declarationType
     : BOOL
+    | CHAR
+    | SHORT
     | INT
     | LONG
     | FLOAT
     | DOUBLE
     | COLOR
-    | STRUCT identifier
     | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationType
-    | LIST declarationType
-    ;
-
-structDeclarator
-    : STRUCT identifier LEFTBRACKET structDeclarationList RIGHTBRACKET
-    ;
-
-
-structDeclarationList
-    : declaration SEMICOLON
-    | structDeclarationList declaration SEMICOLON
     ;
 
 expression
@@ -140,7 +129,6 @@ unaryExpression
 
 postfixExpression
     : primaryExpression
-    | postfixExpression DOT identifier
     | postfixExpression PLUSPLUS
     | postfixExpression MINUSMINUS
     ;
@@ -148,8 +136,15 @@ postfixExpression
 primaryExpression
     : scopeIdentifier
     | constant
+    | identifier arrayIndex
     | LEFTPAREN expression RIGHTPAREN                        
     | functionCall
+    ;
+
+
+arrayIndex
+    : LEFTBRACKET (identifier | constant) RIGHTBRACKET
+    | LEFTBRACKET (identifier | constant) RIGHTBRACKET arrayIndex
     ;
 
 functionCall
@@ -205,7 +200,6 @@ statement
     | expression SEMICOLON
     | paintStatement SEMICOLON
     | selectionStatement 
-    | labeledStatement 
     | iterationStatement
     | jumpStatement
     ;
@@ -269,14 +263,8 @@ selectionStatement
     : IF LEFTPAREN expression RIGHTPAREN compoundStatement 
         (ELIF LEFTPAREN expression RIGHTPAREN compoundStatement)* 
         ( ELSE compoundStatement )?
-    | SWITCH LEFTPAREN expression RIGHTPAREN LEFTBRACKET labeledStatement* RIGHTBRACKET
     ;
     
-labeledStatement
-    : CASE logicalORExpression COLON expression
-    | DEFAULT COLON expression
-    ;
-
 iterationStatement
     : whileLoopStatement
     | forLoopStatement
@@ -292,9 +280,7 @@ forLoopStatement
     ;
 
 jumpStatement
-    : CONTINUE SEMICOLON
-    | BREAK SEMICOLON
-    | RETURN expression? SEMICOLON
+    : RETURN expression? SEMICOLON
     ;
 
 
@@ -364,6 +350,8 @@ LONG: 'long';
 
 CHAR: 'char';
 
+SHORT: 'short';
+
 FLOAT: 'float';
 
 DOUBLE: 'double';
@@ -428,19 +416,9 @@ ELIF: 'elif';
 
 ELSE: 'else';
 
-SWITCH: 'switch';
-
-CASE: 'case';
-
-DEFAULT: 'default';
-
 WHILE: 'while';
 
 FOR: 'for';
-
-CONTINUE: 'continue';
-
-BREAK: 'break';
 
 RETURN: 'return';
 

@@ -1,6 +1,3 @@
-from xmlrpc.client import Boolean
-
-from numpy import void
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
@@ -65,7 +62,7 @@ class CheckVisitor(ShaperVisitor):
 # externalDeclarationList
 #     : externalDeclaration externalDeclarationList
 #     | externalDeclaration 
-#     ;    
+#     ; 
     def visitExternalDeclarationList(self, ctx: ShaperParser.ExternalDeclarationListContext):
         self.visit(ctx.externalDeclaration()) 
 
@@ -491,7 +488,6 @@ class CheckVisitor(ShaperVisitor):
 
 # postfixExpression
 #     : primaryExpression
-#     | postfixExpression DOT identifier
 #     | postfixExpression PLUSPLUS
 #     | postfixExpression MINUSMINUS
 #     ;
@@ -503,23 +499,15 @@ class CheckVisitor(ShaperVisitor):
             ret = self.visit(ctx.postfixExpression())
 
             if type(ret) == Constant:
-                if ctx.DOT() != None:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'.\' to a non-variable atom")
-                    # raise Exception(f"line {ctx.start.line} Can't use operator \'.\' to a non-variable atom")
-                elif ctx.PLUSPLUS() != None:
+                if ctx.PLUSPLUS() != None:
                     self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
                     # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
                 elif ctx.MINUSMINUS() != None:
                     self.errorstack.append(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
                     # raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
             
-            if ctx.DOT() != None:
-                if ret.type in [Type.BOOL, Type.INT, Type.FLOAT, Type.VOID]:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use operator \'.\' to type " + repr(ret.type))
-                    # raise Exception(f"line {ctx.start.line} Can't use operator \'.\' to type " + repr(ret.type))
 
-
-            elif ctx.PLUSPLUS() != None:
+            if ctx.PLUSPLUS() != None:
                 if ret.type not in [Type.INT, Type.FLOAT]:
                     self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
                     # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))

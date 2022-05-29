@@ -134,24 +134,6 @@ class ShaperListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by ShaperParser#structDeclarator.
-    def enterStructDeclarator(self, ctx:ShaperParser.StructDeclaratorContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#structDeclarator.
-    def exitStructDeclarator(self, ctx:ShaperParser.StructDeclaratorContext):
-        pass
-
-
-    # Enter a parse tree produced by ShaperParser#structDeclarationList.
-    def enterStructDeclarationList(self, ctx:ShaperParser.StructDeclarationListContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#structDeclarationList.
-    def exitStructDeclarationList(self, ctx:ShaperParser.StructDeclarationListContext):
-        pass
-
-
     # Enter a parse tree produced by ShaperParser#expression.
     def enterExpression(self, ctx:ShaperParser.ExpressionContext):
         pass
@@ -248,6 +230,15 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#primaryExpression.
     def exitPrimaryExpression(self, ctx:ShaperParser.PrimaryExpressionContext):
+        pass
+
+
+    # Enter a parse tree produced by ShaperParser#arrayIndex.
+    def enterArrayIndex(self, ctx:ShaperParser.ArrayIndexContext):
+        pass
+
+    # Exit a parse tree produced by ShaperParser#arrayIndex.
+    def exitArrayIndex(self, ctx:ShaperParser.ArrayIndexContext):
         pass
 
 
@@ -455,15 +446,6 @@ class ShaperListener(ParseTreeListener):
 
     # Exit a parse tree produced by ShaperParser#selectionStatement.
     def exitSelectionStatement(self, ctx:ShaperParser.SelectionStatementContext):
-        pass
-
-
-    # Enter a parse tree produced by ShaperParser#labeledStatement.
-    def enterLabeledStatement(self, ctx:ShaperParser.LabeledStatementContext):
-        pass
-
-    # Exit a parse tree produced by ShaperParser#labeledStatement.
-    def exitLabeledStatement(self, ctx:ShaperParser.LabeledStatementContext):
         pass
 
 
