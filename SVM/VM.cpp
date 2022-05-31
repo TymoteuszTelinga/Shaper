@@ -9,7 +9,7 @@ const int STACK_SIZE = 100;
 #define asdouble *(double*)&
 #define aslong *(long long*)&
 
-VM::VM(const int* code, const int PC, const unsigned int memSize):code(code)
+VM::VM(const int* code, const int PC, const unsigned int memSize):code(code), mmu(memSize,0)
 {
     memory = new int[memSize];
     stack = new int[STACK_SIZE];
@@ -217,16 +217,16 @@ void VM::execute()
                 pushL(aslong c);
             }
             break;
-        case I2S:
-            {
-                short s = pop();
-                push(s);
-            }
-            break;
         case I2C:
             {
                 char c = pop();
                 push (c);
+            }
+            break;
+        case I2S:
+            {
+                short s = pop();
+                push(s);
             }
             break;
         case I2F:
@@ -414,6 +414,13 @@ void VM::execute()
                 push(memory[addr]);
             }
             break;
+        case ALOAD_I:
+            {
+                int index = pop();
+                int addr = pop();
+                push(memory[addr+index]);
+            }
+            break;
         case STORE:
             {
                 int offset = next();
@@ -426,6 +433,20 @@ void VM::execute()
                 int addr = next();
                 int v = pop();
                 memory[addr] = v;
+            }
+            break;
+        case ASTORE_I:
+            {
+                int val = pop();
+                int index = pop();
+                int addr = pop();
+                memory[addr+index] = val;
+            }
+            break;
+        case PRINT_C:
+            {
+                char c = pop();
+                std::cout<<c;
             }
             break;
         case PRINT_I:
@@ -481,6 +502,23 @@ void VM::execute()
                 fp = pop();
                 sp -= pop();
                 push(rval);
+            }
+            break;
+        case NEWARR:
+            {
+                int size = pop();
+                int adr = mmu.lock(size);
+                if (adr < 0)
+                {
+                    std::cerr<<"not enough memory\n";
+                    bDied = true;
+                }
+                push(adr);
+            }
+            break;
+        case FREE:
+            {
+                mmu.free(pop());
             }
             break;
         default:

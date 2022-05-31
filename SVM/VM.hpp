@@ -1,6 +1,8 @@
 #ifndef __VM_H__
 #define __VM_H__
 
+#include "MMU.hpp"
+
 // C - char
 // S - short
 // I - int    b
@@ -15,6 +17,7 @@
 // float  = 1 int
 // long   = 2 int
 // double = 2 int
+// color  = 1 int
 
 enum {
     ADD_I = 0x00, // int add -
@@ -41,8 +44,8 @@ enum {
 
     CONST_I ,  // push constant -
 
-    I2S     ,  // cast int to short -
     I2C     ,  // cast int to char -
+    I2S     ,  // cast int to short -
     I2F     ,  // cast int to float -
     I2L     ,  // cast int to long -
     I2D     ,  // cast int to double -
@@ -78,9 +81,13 @@ enum {
 
     LOAD    ,  // load from local (stack) -
     GLOAD   ,  // load from global memory (memory) -
+    ALOAD_I,   // load int from array -
+
     STORE   ,  // store in local (stack) -
     GSTORE  ,  // store in global memory (memory) -
+    ASTORE_I,  // store int in array -
     
+    PRINT_C ,  // ? print value as char
     PRINT_I ,  // ? print value on top of the stack -
     PRINT_F ,  // ? print value as float -
     PRINT_L ,  // ? print long value -
@@ -90,7 +97,9 @@ enum {
     POP2    ,  // ? throw away two values or long from top of the stack -
     HALT    ,  // stop program -
     CALL    ,  // call procedure -
-    RET        // return from procedure -
+    RET     ,  // return from procedure -
+    NEWARR  ,  // alocate memory for new array
+    FREE      // free memory from pointer
 };
 
 class VM
@@ -104,6 +113,8 @@ private:
     unsigned int fp;    // frame pointer
 
     bool bDied = false;
+
+    MMU mmu;
 
 public:
     VM(const int* code, const int PC, const unsigned int memSize = 300);
