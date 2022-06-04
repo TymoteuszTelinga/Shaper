@@ -1,7 +1,0 @@
-void setup()
-{
-
-    array(5) array(10) float x;
-
-    x{3}{8}{1};
-}

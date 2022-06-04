@@ -4,8 +4,23 @@ void draw()
 {
     int y = 10;
     int x = 10;
+    //b(true);
     domek(global:x,global:y);
     domek(x,y);
+}
+
+void b(bool first)
+{
+    int i = 5;
+    if(first == true)
+    {
+        b(false);
+        print(i);
+    }
+    else
+    {
+        i = 0;
+    }
 }
 
 void domek(int x, int y)
@@ -29,8 +44,8 @@ void domek(int x, int y)
 
 void domek2(int x,int y)
 {
-    int width = 200;
-    int height = 160;
+    int width = 200.0;
+    int height = 160.0;
     x +=4;
     paint rectangle at (x + width/4, y) 
                     of (width/5, 3*height/5) 
