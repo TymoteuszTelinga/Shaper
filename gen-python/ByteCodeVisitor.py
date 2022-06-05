@@ -33,11 +33,11 @@ class ByteCodeVisitor(ShaperVisitor):
 
         # enter 'setup'
         if self.manager.setup_func != None:
-            self.maker.functionCallStack.append(('setup', self.maker.bytecodePosition))
+            self.maker.functionCallStack.append(('setup', self.maker.commandCounter))
             self.maker.CALL(-1, 0)
         
         if self.manager.draw_func != None:
-            self.maker.functionCallStack.append(('draw', self.maker.bytecodePosition))
+            self.maker.functionCallStack.append(('draw', self.maker.commandCounter))
             self.maker.CALL(-1, 0)
             self.maker.JMP(-1)
         
@@ -55,7 +55,6 @@ class ByteCodeVisitor(ShaperVisitor):
             self.manager.curr_scope = oldScope
 
         if self.manager.draw_func != None:
-            print(type(self.manager.draw_func))
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
             self.maker.framePosition = 1
@@ -90,7 +89,7 @@ class ByteCodeVisitor(ShaperVisitor):
     def fillFunctionsPosition(self):
         for functionCall in self.maker.functionCallStack:
             funcAddress = self.manager.getFunctionAddress(functionCall[0])
-
+            
             comm = self.maker.commandsQueue[functionCall[1]]
             comm = (comm[0], funcAddress, comm[2])
 
@@ -520,7 +519,7 @@ class ByteCodeVisitor(ShaperVisitor):
         if ctx.functionParameterList() != None:
             params = self.visit(ctx.functionParameterList())
 
-        self.maker.functionCallStack.append((name, self.maker.bytecodePosition))
+        self.maker.functionCallStack.append((name, self.maker.commandCounter))
         self.maker.CALL(-1, len(params))
         
         return self.manager.findFunction(name)
