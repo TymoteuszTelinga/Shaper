@@ -101,7 +101,7 @@ class MyVisitor(ShaperVisitor):
             l = self.visit(ctx.unaryExpression())
             r = self.visit(ctx.assignmentExpression())
             op = ctx.assignmentOperator().getText()
-
+        
 
             if op == '=':
                 l.val  =  r.val 
@@ -251,10 +251,7 @@ class MyVisitor(ShaperVisitor):
         else:
             ret = self.visit(ctx.postfixExpression())
             
-            if ctx.DOT() != None:
-                return ret
-
-            elif ctx.PLUSPLUS() != None:
+            if ctx.PLUSPLUS() != None:
                 new_ret = Constant(ret.type, ret.val)
                 ret.val += 1
                 return new_ret

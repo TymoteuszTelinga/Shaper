@@ -81,6 +81,10 @@ class Manager:
 
         self.user_func[fun.name] = fun
 
+    def findFunction(self, name:str):
+        return self.user_func[name].return_atom
+    
+
     def functionExists(self,name:str, params:list):
         #check if function with this name exists
         if name in self.user_func.keys():
@@ -110,6 +114,12 @@ class Manager:
         
         oldFunction = self.curr_function
 
+        if name in self.user_func.keys():
+            self.curr_function = self.user_func[name]
+        elif name in self.built_in_func.keys():
+            self.curr_function = self.built_in_func[name]
+
+
         #create new scope
         oldScope = self.createNewScope(False)
 
@@ -121,23 +131,15 @@ class Manager:
             var.val = got.val
 
             self.addVariable(var)
-
-        if self.curr_function.kind == 0:
-           self.visitor.visit(self.curr_function.ctx)
-        
-        temp = self.return_var
-
-        self.curr_scope = oldScope
-        self.curr_function = oldFunction
-
-        return temp # function's return value
-        
+    
         if not self.addToHeap():
             if self.curr_function.kind == 0:
                 raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
             else:
                 raise Exception(f"line {ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
         
+        if self.curr_function.kind == 0:
+           self.visitor.visit(self.curr_function.ctx)
         else:
             var = self.getVariable("x");
             if var.type == Type.INT:
@@ -150,7 +152,7 @@ class Manager:
 
         self.deleteFromHeap()
 
-        
+        temp = self.return_var
 
         if temp == None and self.curr_function.return_atom.type != Type.VOID:
             raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} returning non-void value doesn't have 'return' statement") 
@@ -164,7 +166,7 @@ class Manager:
         self.curr_scope = oldScope
         self.curr_function = oldFunction
         
-        
+        temp = self.return_var
             
     def getVariable(self, name: str):
         var = self.curr_scope.getVariable(name) 

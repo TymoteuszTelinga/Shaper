@@ -1,5 +1,6 @@
 import sys
 import os.path
+from tabnanny import check
 
 from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
@@ -7,7 +8,7 @@ from antlr4.error.ErrorListener import ErrorListener
 from grammar.ShaperLexer import ShaperLexer
 from grammar.ShaperParser import ShaperParser
 
-from MyVisitor import MyVisitor
+from ByteCodeVisitor import ByteCodeVisitor
 from CheckVisitor import CheckVisitor
 from Manager import Manager
 
@@ -22,12 +23,11 @@ class ShaperErrorListener(ErrorListener):
         raise Exception("Ambiguity ERROR")
 
     def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
-        #raise Exception(f"Attempting full Context ERROR")
-        pass
+        raise Exception(f"Attempting full Context ERROR")
+
 
     def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
-        #raise Exception("ContextSensitivity ERROR")
-        pass
+        raise Exception("ContextSensitivity ERROR")
 
 
 def main(argv):
@@ -48,35 +48,33 @@ def main(argv):
         parser.addErrorListener(error_listener)
         
 
-        try:
-            tree = parser.programm()
-            
-            manager = Manager()
-            
-            checkVisitor = CheckVisitor(manager)
+        # try:
+        tree = parser.programm()
+        
+        manager = Manager()
+        
+        checkVisitor = CheckVisitor(manager)
 
 
-            myVisitor = MyVisitor(manager)
-            try:
+        checkVisitor.visit(tree)
+        checkVisitor.checkFunctionsBody()
 
-                checkVisitor.visit(tree)
-                checkVisitor.checkFunctionsBody()
+        if(len(checkVisitor.errorstack) > 0):
+            for error in checkVisitor.errorstack:
+                print(error)
 
-                if(len(checkVisitor.errorstack) > 0):
-                    for error in checkVisitor.errorstack:
-                        print(error)
+        else:      
+            byteCodeVisitor = ByteCodeVisitor(checkVisitor.manager)
 
-                else:        
-                    myVisitor.start(tree)
-                # print(myVisitor.funDict)
-                # myVisitor.visit(tree)
-                # #myVisitor.window.show()
-            except Exception as e:
-                print(e)
+            byteCodeVisitor.generateCode(tree)
+
+            print(byteCodeVisitor.maker.commandsQueue)
+
+
                 
-        except Exception as e:
-            print("something went wrong :(")
-            print(e)
+        # except Exception as e:
+        #     print("something went wrong :(")
+        #     print(e)
 
     else:
         print("File doesn't exist!")

@@ -67,7 +67,7 @@ declaration
     ;
 
 initDeclarator
-    : declarationType identifier ( assignmentOperator assignmentExpression)?
+    : declarationType identifier (assignmentOperator assignmentExpression)?
     ;
 
 

@@ -1,4 +1,3 @@
-import re
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
@@ -50,6 +49,7 @@ class CheckVisitor(ShaperVisitor):
 #     ;
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):
         
+
         #file is not empty
         if ctx.externalDeclarationList() != None: 
             #gather functions
@@ -619,10 +619,10 @@ class CheckVisitor(ShaperVisitor):
 #     ;
     def visitFunctionCall(self, ctx: ShaperParser.FunctionCallContext):
         name = self.visit(ctx.identifier()) # name of called function
+
         params = []
         if ctx.functionParameterList() != None:
             params = self.visit(ctx.functionParameterList()) # parameters of called function
-        
         
         (function, error) = self.manager.functionExists(name, params)
 
@@ -640,6 +640,8 @@ class CheckVisitor(ShaperVisitor):
         elif error == 4:
             self.errorstack.append(f"line {ctx.start.line} At {function[0]} parameter expected type {function[1].type}, but got type {params[function[0]].type}")
             # raise Exception(f"line {ctx.start.line} At {function[0]} parameter expected type {function[1].type}, but got type {params[function[0]].type}")
+        
+        return Constant(Type.VOID, None)
 
 
 # functionParameterList
