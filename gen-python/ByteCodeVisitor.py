@@ -29,8 +29,73 @@ class ByteCodeVisitor(ShaperVisitor):
         self.isGlobal = True
         # get global variables
         self.visit(tree)
-
         self.isGlobal = False
+
+        # enter 'setup'
+        if self.manager.setup_func != None:
+            self.maker.functionCallStack.append(('setup', self.maker.bytecodePosition))
+            self.maker.CALL(-1, 0)
+        
+        if self.manager.draw_func != None:
+            self.maker.functionCallStack.append(('draw', self.maker.bytecodePosition))
+            self.maker.CALL(-1, 0)
+            self.maker.JMP(-1)
+        
+        self.maker.HALT()
+
+        if self.manager.setup_func != None:
+            oldScope = self.manager.createNewScope(False)
+            oldFP = self.maker.framePosition
+            self.maker.framePosition = 1
+
+            self.manager.setup_func.address = self.maker.bytecodePosition
+            self.visit(self.manager.setup_func.ctx)
+
+            self.maker.framePosition = oldFP
+            self.manager.curr_scope = oldScope
+
+        if self.manager.draw_func != None:
+            print(type(self.manager.draw_func))
+            oldScope = self.manager.createNewScope(False)
+            oldFP = self.maker.framePosition
+            self.maker.framePosition = 1
+
+            self.manager.draw_func.address = self.maker.bytecodePosition
+            self.visit(self.manager.draw_func.ctx)
+            self.maker.framePosition = oldFP
+            self.manager.curr_scope = oldScope
+
+        for func in self.manager.user_func.values():
+            oldScope = self.manager.createNewScope(False)
+            oldFP = self.maker.framePosition
+            self.maker.framePosition = 1
+
+            par_count = len(func.parameters)
+            for i in range(par_count):
+                param = func.parameters[i]
+                var = Variable(param.name, param.type)
+                var.address = -par_count + i - 2
+                self.manager.addVariable(var)
+
+
+            func.address = self.maker.bytecodePosition
+
+            self.visit(func.ctx)
+
+            self.maker.framePosition = oldFP
+            self.manager.curr_scope = oldScope
+
+        self.fillFunctionsPosition()
+
+    def fillFunctionsPosition(self):
+        for functionCall in self.maker.functionCallStack:
+            funcAddress = self.manager.getFunctionAddress(functionCall[0])
+
+            comm = self.maker.commandsQueue[functionCall[1]]
+            comm = (comm[0], funcAddress, comm[2])
+
+            self.maker.commandsQueue[functionCall[1]] = comm
+
 
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):   
         #file is not empty
@@ -52,20 +117,47 @@ class ByteCodeVisitor(ShaperVisitor):
         if (ctx.initDeclarator() != None): 
             self.visit(ctx.initDeclarator())
 
+    def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
+        if ctx.instructionList() != None:
+            self.visit(ctx.instructionList())
+            
+        self.maker.CONST_I(0)
+        self.maker.RET()
 
+
+    def visitInstructionList(self, ctx: ShaperParser.InstructionListContext):
+        self.visit(ctx.instruction())
+
+        if ctx.instructionList() != None:
+            self.visit(ctx.instructionList())
+    
+    def visitInstruction(self, ctx: ShaperParser.InstructionContext):
+        if ctx.declaration() != None:
+            self.visit(ctx.declaration())
+        else:
+            self.visit(ctx.statement())
 
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
         name = ctx.identifier().getText()
         type = self.visit(ctx.declarationType())
         var = Variable(name, type)
 
-        if type == Type.LONG or type == Type.DOUBLE:
-            var.address = self.maker.getLongMemoryAddress()
-        else:
-            var.address = self.maker.getIntMemoryAddress()
+
 
         if self.isGlobal:
+            if type == Type.LONG or type == Type.DOUBLE:
+                var.address = self.maker.getLongMemoryAddress()
+            else:
+                var.address = self.maker.getIntMemoryAddress()
             var.isGlobal = True
+        
+        else:
+            if type == Type.LONG or type == Type.DOUBLE:
+                var.address = self.maker.getLongFrameAddress()
+            else:
+                var.address = self.maker.getIntFrameAddress()
+            var.isGlobal = True
+        
 
         if ctx.assignmentExpression() != None:
             self.visit(ctx.assignmentExpression())
@@ -82,11 +174,11 @@ class ByteCodeVisitor(ShaperVisitor):
         return self.visitChildren(ctx)
 
     def visitAssignmentExpression(self, ctx: ShaperParser.AssignmentExpressionContext):
-        if ctx.unaryExpression() == None:
+        if ctx.scopeIdentifier() == None:
            return self.visit(ctx.logicalORExpression())
 
         else:
-            l = self.visit(ctx.unaryExpression())
+            l = self.visit(ctx.scopeIdentifier())
             op = ctx.assignmentOperator().getText()
             
         
@@ -442,6 +534,58 @@ class ByteCodeVisitor(ShaperVisitor):
         else:
             return [self.visit(ctx.expression())]
 
+
+    def visitStatement(self, ctx: ShaperParser.StatementContext):
+        if ctx.paintStatement() != None:
+            self.visit(ctx.paintStatement())
+
+        elif ctx.compoundStatement() != None:
+            oldScope =  self.manager.createNewScope(True)
+            oldFP = self.maker.framePosition
+            self.visit(ctx.compoundStatement())
+            self.maker.framePosition = oldFP
+            self.manager.curr_scope = oldScope
+
+
+        elif ctx.expression() != None:
+            self.visit(ctx.expression())
+
+        elif ctx.jumpStatement() != None:
+            self.visit(ctx.jumpStatement())
+
+        elif ctx.iterationStatement() != None:
+            self.visit(ctx.iterationStatement())
+
+        elif ctx.selectionStatement() != None:
+            self.visitSelectionStatement(ctx.selectionStatement())
+
+
+    def visitJumpStatement(self, ctx: ShaperParser.JumpStatementContext):
+        if ctx.expression() != None:
+            self.visit(ctx.expression())
+        else:
+            self.maker.CONST_I(0)
+
+        self.maker.RET()
+
+
+    # def visitSelectionStatement(self, ctx: ShaperParser.SelectionStatementContext):
+    #     oldScope  =  self.manager.createNewScope(True)
+
+    #     expressions = ctx.expression()
+    #     compounds = ctx.compoundStatement()
+
+
+    #     for i in range(len(expressions)):
+    #         if self.visit(expressions[i]).val == True:
+    #             self.visit(compounds[i])
+    #             self.manager.curr_scope = oldScope
+    #             return;
+            
+
+    #     if len(compounds) > len(expressions):
+    #         self.visit(compounds[-1])
+    #         self.manager.curr_scope = oldScope
 
     def visitScopeIdentifier(self, ctx: ShaperParser.ScopeIdentifierContext):
         name = self.visit(ctx.identifier())

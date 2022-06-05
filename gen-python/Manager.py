@@ -81,7 +81,24 @@ class Manager:
 
         self.user_func[fun.name] = fun
 
+    def getFunctionAddress(self, name: str) -> int:
+        if name == 'draw':
+            return self.draw_func.address
+        elif name == 'setup':
+            return self.setup_func.address
+
+        return self.user_func[name].address
+
     def findFunction(self, name:str):
+        if name == 'draw':
+            fun = self.draw_func
+            print(fun.address)
+            return self.draw_func
+        elif name == 'setup':
+            fun = self.setup_func
+            print(fun.address)
+            return self.setup_func
+
         return self.user_func[name].return_atom
     
 

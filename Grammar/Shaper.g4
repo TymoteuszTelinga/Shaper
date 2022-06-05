@@ -89,7 +89,7 @@ expression
 
 assignmentExpression
     : logicalORExpression
-    | unaryExpression assignmentOperator assignmentExpression
+    | scopeIdentifier assignmentOperator assignmentExpression
     ;
 
 logicalORExpression

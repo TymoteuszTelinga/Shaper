@@ -276,8 +276,6 @@ class CheckVisitor(ShaperVisitor):
         return (type_list, size_list)
 
             
-
-
 # expression
 #     : assignmentExpression
 #     ;
@@ -290,10 +288,10 @@ class CheckVisitor(ShaperVisitor):
 #     | unaryExpression assignmentOperator assignmentExpression
 #     ;
     def visitAssignmentExpression(self, ctx: ShaperParser.AssignmentExpressionContext) -> Variable:
-        if ctx.unaryExpression() == None:
+        if ctx.scopeIdentifier() == None:
             return self.visit(ctx.logicalORExpression())
         else:
-            l = self.visit(ctx.unaryExpression())
+            l = self.visit(ctx.scopeIdentifier())
             r = self.visit(ctx.assignmentExpression())
             op = ctx.assignmentOperator().getText()
 

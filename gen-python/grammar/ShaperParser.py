@@ -122,7 +122,7 @@ def serializedATN():
         buf.write("\u00d2\u00c7\3\2\2\2\u00d2\u00c8\3\2\2\2\u00d2\u00c9\3")
         buf.write("\2\2\2\u00d2\u00ca\3\2\2\2\u00d3\35\3\2\2\2\u00d4\u00d5")
         buf.write("\5 \21\2\u00d5\37\3\2\2\2\u00d6\u00dc\5\"\22\2\u00d7\u00d8")
-        buf.write("\5.\30\2\u00d8\u00d9\5:\36\2\u00d9\u00da\5 \21\2\u00da")
+        buf.write("\5l\67\2\u00d8\u00d9\5:\36\2\u00d9\u00da\5 \21\2\u00da")
         buf.write("\u00dc\3\2\2\2\u00db\u00d6\3\2\2\2\u00db\u00d7\3\2\2\2")
         buf.write("\u00dc!\3\2\2\2\u00dd\u00de\b\22\1\2\u00de\u00df\5$\23")
         buf.write("\2\u00df\u00e5\3\2\2\2\u00e0\u00e1\f\3\2\2\u00e1\u00e2")
@@ -1571,8 +1571,8 @@ class ShaperParser ( Parser ):
             return self.getTypedRuleContext(ShaperParser.LogicalORExpressionContext,0)
 
 
-        def unaryExpression(self):
-            return self.getTypedRuleContext(ShaperParser.UnaryExpressionContext,0)
+        def scopeIdentifier(self):
+            return self.getTypedRuleContext(ShaperParser.ScopeIdentifierContext,0)
 
 
         def assignmentOperator(self):
@@ -1620,7 +1620,7 @@ class ShaperParser ( Parser ):
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 213
-                self.unaryExpression()
+                self.scopeIdentifier()
                 self.state = 214
                 self.assignmentOperator()
                 self.state = 215
