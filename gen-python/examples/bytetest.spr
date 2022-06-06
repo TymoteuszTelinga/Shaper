@@ -1,13 +1,20 @@
+int b = 7;
 void setup()
 {
-
-    a(2, 7);
-
+    int a = 0;
+    for(int x = 5;x < b ;a+2)
+    {
+        x = 10;
+    }
+    
 }
 
-int a(int b,int d)
-{
-    b = 5;
-    d = b -1;
-    return 10;
-}
+//int fib(int n)
+//{
+  //  if(n <= 1)
+    //{
+      //  return n;
+    //}
+
+    //return fib(n-1) + fib(n-2);
+//}

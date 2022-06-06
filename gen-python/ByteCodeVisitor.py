@@ -43,6 +43,14 @@ class ByteCodeVisitor(ShaperVisitor):
         
         self.maker.HALT()
 
+        self.lookSetupFunc()
+        self.lookDrawFunc()
+        self.lookUserDefinedFunc()
+
+        self.fillFunctionsPosition()
+        self.fillJumpsPosition()
+
+    def lookSetupFunc(self):
         if self.manager.setup_func != None:
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
@@ -54,6 +62,10 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.framePosition = oldFP
             self.manager.curr_scope = oldScope
 
+            self.maker.CONST_I(0)
+            self.maker.RET()
+
+    def lookDrawFunc(self):
         if self.manager.draw_func != None:
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
@@ -62,8 +74,12 @@ class ByteCodeVisitor(ShaperVisitor):
             self.manager.draw_func.address = self.maker.bytecodePosition
             self.visit(self.manager.draw_func.ctx)
             self.maker.framePosition = oldFP
-            self.manager.curr_scope = oldScope
+            self.manager.curr_scope = oldScope  
 
+            self.maker.CONST_I(0)
+            self.maker.RET()
+
+    def lookUserDefinedFunc(self):
         for func in self.manager.user_func.values():
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
@@ -84,7 +100,8 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.framePosition = oldFP
             self.manager.curr_scope = oldScope
 
-        self.fillFunctionsPosition()
+            self.maker.CONST_I(0)
+            self.maker.RET()
 
     def fillFunctionsPosition(self):
         for functionCall in self.maker.functionCallStack:
@@ -94,6 +111,13 @@ class ByteCodeVisitor(ShaperVisitor):
             comm = (comm[0], funcAddress, comm[2])
 
             self.maker.commandsQueue[functionCall[1]] = comm
+    
+    def fillJumpsPosition(self):
+        for jump in self.maker.jumpStack:
+            comm = self.maker.commandsQueue[jump[0]]
+            comm = (comm[0], jump[1])
+
+            self.maker.commandsQueue[jump[0]] = comm
 
 
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):   
@@ -119,9 +143,7 @@ class ByteCodeVisitor(ShaperVisitor):
     def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
         if ctx.instructionList() != None:
             self.visit(ctx.instructionList())
-            
-        self.maker.CONST_I(0)
-        self.maker.RET()
+        
 
 
     def visitInstructionList(self, ctx: ShaperParser.InstructionListContext):
@@ -155,7 +177,7 @@ class ByteCodeVisitor(ShaperVisitor):
                 var.address = self.maker.getLongFrameAddress()
             else:
                 var.address = self.maker.getIntFrameAddress()
-            var.isGlobal = True
+            var.isGlobal = False
         
 
         if ctx.assignmentExpression() != None:
@@ -309,7 +331,7 @@ class ByteCodeVisitor(ShaperVisitor):
                 ret = Constant(Type.BOOL, None)
             elif op == '>':
                 self.maker.GT()
-                # self.maker.LT()
+                # self.maker.LE()
                 # self.maker.NEG()
                 ret = Constant(Type.BOOL, None)
             elif op == '<=':
@@ -317,7 +339,7 @@ class ByteCodeVisitor(ShaperVisitor):
                 ret = Constant(Type.BOOL, None)
             elif op == '>=':
                 self.maker.GE()
-                # self.maker.LE()
+                # self.maker.LT()
                 # self.maker.NEG()
                 ret = Constant(Type.BOOL, None)
 
@@ -568,23 +590,189 @@ class ByteCodeVisitor(ShaperVisitor):
         self.maker.RET()
 
 
-    # def visitSelectionStatement(self, ctx: ShaperParser.SelectionStatementContext):
-    #     oldScope  =  self.manager.createNewScope(True)
+    def visitSelectionStatement(self, ctx: ShaperParser.SelectionStatementContext):
+        expressions = ctx.expression()
+        compounds = ctx.compoundStatement()
 
-    #     expressions = ctx.expression()
-    #     compounds = ctx.compoundStatement()
+        com_len = len(compounds)
+        exp_len = len(expressions)
+
+        # list of points where jumps to end starts (commandPosition nad bytePosition)
+        end_jump = []
+
+        # list of tuples of points where jumps to next fragment of if-else
+        # clause starts (commandPosition nad bytePosition)
+        frag_jump = []
+
+        # the first one is the 'if'
+        # the next ones are 'elif'
+        for i in range(exp_len):
+
+            # add to jump stack information about jump when to later fill 
+            # by it appriopriate command in commandQueue
+            #
+            # it takes place in second lap and next ones
+            if i > 0:
+                jmp_start = frag_jump.pop()
+                self.maker.jumpStack.append((jmp_start[0], 
+                                             self.maker.bytecodePosition - jmp_start[1] - 2))
+
+            # get condition value
+            self.visit(expressions[i])
+
+            # add this place as a start point
+            frag_jump.append((self.maker.commandCounter, self.maker.bytecodePosition))
+
+            # if false jump to 'elif'/'else'/end of clause
+            self.maker.JMPF(-1)
+
+            # make scope for visiting context
+            oldScope  =  self.manager.createNewScope(True)
+            oldFP = self.maker.framePosition
+
+            # visit context
+            self.visit(compounds[i])
+
+            #restore scope and fp
+            self.maker.framePosition = oldFP
+            self.manager.curr_scope = oldScope
 
 
-    #     for i in range(len(expressions)):
-    #         if self.visit(expressions[i]).val == True:
-    #             self.visit(compounds[i])
-    #             self.manager.curr_scope = oldScope
-    #             return;
+            if com_len > exp_len or i <= exp_len - 2:
+                #save this as a source of jump
+                end_jump.append((self.maker.commandCounter, self.maker.bytecodePosition))
+
+                #make jump to end of clause
+                self.maker.JMP(-1)
+
+
+            # check next fragment of clause
+
             
+        # here is checked 'else' fragment, firstly we 
+        # save this place as a destination 
+        # for jump from last section 
+        # it takes place whenever 'else' exists
+        # or not
+        jmp_start = frag_jump.pop()
+        self.maker.jumpStack.append((jmp_start[0], 
+                                    self.maker.bytecodePosition - jmp_start[1] - 2))
 
-    #     if len(compounds) > len(expressions):
-    #         self.visit(compounds[-1])
-    #         self.manager.curr_scope = oldScope
+        # if 'true' 'else' exists
+        if len(compounds) > len(expressions):
+            # make new scope
+            oldScope  =  self.manager.createNewScope(True)
+            oldFP = self.maker.framePosition
+
+            # visit context
+            self.visit(compounds[-1])
+
+            # restore scope
+            self.maker.framePosition = oldFP
+            self.manager.curr_scope = oldScope
+
+            # end of if-clause
+        
+        # in this place we must full jumpStack with information
+        # to jump here if context of one body from if was visited
+        # the last one won't be entered, because jump from there is unnecesary
+        while len(end_jump):
+            jmp_end = end_jump.pop()
+            self.maker.jumpStack.append((jmp_end[0], 
+                                         self.maker.bytecodePosition - jmp_end[1] - 2))
+        
+    def visitIterationStatement(self, ctx: ShaperParser.IterationStatementContext):
+        if ctx.whileLoopStatement() != None:
+            self.visit(ctx.whileLoopStatement())
+
+        elif ctx.forLoopStatement() != None:
+            self.visit(ctx.forLoopStatement())
+
+    def visitWhileLoopStatement(self, ctx: ShaperParser.WhileLoopStatementContext):
+
+        
+        # get destination to condition jump
+        cond_address = self.maker.bytecodePosition
+
+        # check expression
+        self.visit(ctx.expression())
+
+        # make jump to end if condition is False:
+        end_jump = (self.maker.commandCounter, self.maker.bytecodePosition)
+
+        self.maker.JMPF(-1)
+
+        # make new scope
+        oldScope  =  self.manager.createNewScope(True)
+        oldFP = self.maker.framePosition
+
+        # visit context
+        self.visit(ctx.compoundStatement())
+
+        # restore scope
+        self.maker.framePosition = oldFP
+        self.manager.curr_scope = oldScope
+
+        curr_address = self.maker.bytecodePosition
+
+        # make jump to start of while
+        self.maker.JMP(cond_address - curr_address - 2)
+
+        # add out of while jump to stack 
+        self.maker.jumpStack.append((end_jump[0], 
+                                     self.maker.bytecodePosition - end_jump[1] - 2))
+
+
+    def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
+        
+
+        #visit init Expression/Declaration
+        if ctx.initExpr != None:
+            self.visit(ctx.initExpr)
+        elif ctx.initDec != None:
+            self.visit(ctx.initDec)
+
+
+        # save address to this place for condition jump
+        cond_address = self.maker.bytecodePosition
+
+
+        # check condition
+        if ctx.condition != None:
+            self.visit(ctx.condition)
+        else:
+            self.maker.CONST_I(1)
+
+        # make jump to end if condition is False:
+        end_jump = (self.maker.commandCounter, self.maker.bytecodePosition)
+
+        self.maker.JMPF(-1)
+
+        # make new scope
+        oldScope  =  self.manager.createNewScope(True)
+        oldFP = self.maker.framePosition
+
+        # visit context
+        self.visit(ctx.compoundStatement())
+
+        # restore scope
+        self.maker.framePosition = oldFP
+        self.manager.curr_scope = oldScope
+
+        # visit loop Expression
+        if ctx.loopExpr != None:
+            self.visit(ctx.loopExpr)
+
+        curr_address = self.maker.bytecodePosition
+
+        # make jump to condition
+        self.maker.JMP(cond_address - curr_address - 2)
+
+        # add out of for jump to stack 
+        self.maker.jumpStack.append((end_jump[0], 
+                                     self.maker.bytecodePosition - end_jump[1] - 2))
+        
+        
 
     def visitScopeIdentifier(self, ctx: ShaperParser.ScopeIdentifierContext):
         name = self.visit(ctx.identifier())

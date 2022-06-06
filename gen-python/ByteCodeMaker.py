@@ -1,9 +1,13 @@
 class ByteCodeMaker:
 
     def __init__(self) -> None:
-        # self.globalVariables = []
-        # self.localVariables = []
+
+
+        # containts info about:
+        # * commandNumber where jump was initialized
+        # * bytecodePosition of place where jump ends
         self.jumpStack = []
+
         self.functionCallStack = []
         self.bytecodePosition = 0
 
@@ -354,17 +358,11 @@ class ByteCodeMaker:
     def JMP(self, offset: int):
         self.commandsQueue.append(("JMP", offset))
 
-        # to fill later offset value
-        self.jumpStack.append(self.bytecodePosition)
-
         self.commandCounter += 1 
         self.bytecodePosition += 2
 
     def JMPT(self, offset: int):
         self.commandsQueue.append(("JMPT", offset))
-
-        # to fill later an offset value
-        self.jumpStack.append(self.bytecodePosition)
 
         self.framePosition -= 1
         self.commandCounter += 1 
@@ -372,9 +370,6 @@ class ByteCodeMaker:
 
     def JMPF(self, offset: int):
         self.commandsQueue.append(("JMPF", offset))
-
-        # to fill later an offset value
-        self.jumpStack.append(self.bytecodePosition)
 
         self.framePosition -= 1
         self.commandCounter += 1 
