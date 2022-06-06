@@ -34,7 +34,8 @@ int MMU::lock(int size)
     {
         return -1;
     }
-    
+    // TODO
+    // poprawic złożonośc / wydajnośc
     reserved.push_back(Block(adres,size));
     sort(reserved.begin(),reserved.end(),[] (const Block& A, const Block& B) { return A.adr < B.adr; });
 
@@ -51,6 +52,18 @@ void MMU::free(int adr)
             break;
         }
     }
+}
+
+int MMU::size(int adr) const
+{
+    for (size_t i = 0; i < reserved.size(); i++)
+    {
+        if (reserved[i].adr == adr)
+        {
+            return reserved[i].length;
+        }
+    }
+    return 0;
 }
 
 void MMU::show() const

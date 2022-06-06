@@ -504,6 +504,8 @@ void VM::execute()
                 push(rval);
             }
             break;
+        case DUMMY:
+            break;
         case NEWARR:
             {
                 int size = pop();
@@ -516,9 +518,70 @@ void VM::execute()
                 push(adr);
             }
             break;
+        case LENGTH:
+            {
+                push(mmu.size(pop()));
+            }
+            break;
         case FREE:
             {
                 mmu.free(pop());
+            }
+            break;
+        case DISPLAY:
+            {
+                graphic.Display();
+            }
+            break;
+        case CLEAR:
+            {
+                graphic.Clear();
+            }
+            break;
+        case RECT:
+            {
+                int color  = pop();
+                int height = pop();
+                int width  = pop();
+                int y      = pop();
+                int x      = pop();
+
+                graphic.DrawRect(x,y,width,height,color);
+            }
+            break;
+        case ELIPSE:
+            {
+                int color = pop();
+                int R2    = pop();
+                int R1    = pop();
+                int y     = pop();
+                int x     = pop();
+
+                graphic.DrawEpise(x,y,R1,R2,color);
+            }
+            break;
+        case LINE:
+            {
+                int color = pop();
+                int y2    = pop();
+                int x2    = pop();
+                int y1    = pop();
+                int x1    = pop();
+
+                graphic.DrawLine(x1,y1,x2,y2,color);
+            }
+            break;
+        case TRIANGLE:
+            {
+                int color = pop();
+                int y3    = pop();
+                int x3    = pop();
+                int y2    = pop();
+                int x2    = pop();
+                int y1    = pop();
+                int x1    = pop();
+
+                graphic.DrawTriangle(x1,y1,x2,y2,x3,y3,color);
             }
             break;
         default:
@@ -529,6 +592,16 @@ void VM::execute()
         }
 
         // showStack();
+        // std::cout<<"PC: "<<pc<<std::endl;
+        if (graphic.isOpen())
+        {
+            graphic.ProcedEvents();
+        }
+        else
+        {
+            bDied = true;
+            std::cerr<<"window closed\n";
+        }
 
         if (bDied)
         {

@@ -22,10 +22,11 @@ public:
     MMU(int size, int off);
     ~MMU();
 
-    int lock(int size);
-    void free(int adr);
+    int lock(int size); //rezerwd block of memory
+    void free(int adr); //free block of memory
+    int size(int adr) const;
 
-    void show() const;
+    void show() const; //debug
 };
 
 #endif // __MMU_H__

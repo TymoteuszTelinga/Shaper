@@ -2,6 +2,7 @@
 #define __VM_H__
 
 #include "MMU.hpp"
+#include "Graphic.hpp"
 
 // C - char
 // S - short
@@ -87,7 +88,7 @@ enum {
     GSTORE  ,  // store in global memory (memory) -
     ASTORE_I,  // store int in array -
     
-    PRINT_C ,  // ? print value as char
+    PRINT_C ,  // ? print value as char - 
     PRINT_I ,  // ? print value on top of the stack -
     PRINT_F ,  // ? print value as float -
     PRINT_L ,  // ? print long value -
@@ -98,8 +99,18 @@ enum {
     HALT    ,  // stop program -
     CALL    ,  // call procedure -
     RET     ,  // return from procedure -
+    DUMMY   ,  // do nothink
+
     NEWARR  ,  // alocate memory for new array
-    FREE      // free memory from pointer
+    LENGTH  ,  // length of reserved block
+    FREE    ,  // free memory from pointer
+
+    DISPLAY  ,// display window
+    CLEAR    ,// clear window screen
+    RECT     ,// draw rectangle
+    ELIPSE   ,// draw elipse
+    LINE     ,// draw line
+    TRIANGLE  // draw triangle
 };
 
 class VM
@@ -115,6 +126,7 @@ private:
     bool bDied = false;
 
     MMU mmu;
+    Graphic graphic;
 
 public:
     VM(const int* code, const int PC, const unsigned int memSize = 300);
