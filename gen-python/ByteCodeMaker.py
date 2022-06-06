@@ -509,3 +509,45 @@ class ByteCodeMaker:
         self.framePosition -= 1
         self.commandCounter += 1 
         self.bytecodePosition += 1
+
+    def DISPLAY(self):
+        self.commandsQueue.append(("DISPLAY"))
+
+        self.commandCounter += 1
+        self.bytecodePosition += 1
+    
+    def CLEAR(self):
+        self.commandsQueue.append(("CLEAR"))
+
+        self.commandCounter += 1
+        self.bytecodePosition += 1
+
+    def RECT(self):
+        self.commandsQueue.append(("RECT"))
+
+        self.framePosition -= 5
+        self.commandCounter += 1
+        self.bytecodePosition += 1
+    
+    def ELIPSE(self):
+        self.commandsQueue.append(("ELIPSE"))
+
+        self.framePosition -= 5
+        self.commandCounter += 1
+        self.bytecodePosition += 1
+
+    def LINE(self):
+        self.commandsQueue.append(("LINE"))
+
+        self.framePosition -= 5
+        self.commandCounter += 1
+        self.bytecodePosition += 1
+    
+    def TRIANGLE(self):
+        self.commandsQueue.append(("TRIANGLE"))
+
+        self.framePosition -= 7
+        self.commandCounter += 1
+        self.bytecodePosition += 1
+    
+    

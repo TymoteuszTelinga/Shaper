@@ -37,9 +37,11 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.CALL(-1, 0)
         
         if self.manager.draw_func != None:
+            self.maker.CLEAR()
             self.maker.functionCallStack.append(('draw', self.maker.commandCounter))
             self.maker.CALL(-1, 0)
-            self.maker.JMP(-1)
+            self.maker.DISPLAY()
+            self.maker.JMP(-7)
         
         self.maker.HALT()
 
@@ -54,7 +56,7 @@ class ByteCodeVisitor(ShaperVisitor):
         if self.manager.setup_func != None:
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
-            self.maker.framePosition = 1
+            self.maker.framePosition = 0
 
             self.manager.setup_func.address = self.maker.bytecodePosition
             self.visit(self.manager.setup_func.ctx)
@@ -69,7 +71,7 @@ class ByteCodeVisitor(ShaperVisitor):
         if self.manager.draw_func != None:
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
-            self.maker.framePosition = 1
+            self.maker.framePosition = 0
 
             self.manager.draw_func.address = self.maker.bytecodePosition
             self.visit(self.manager.draw_func.ctx)
@@ -83,7 +85,7 @@ class ByteCodeVisitor(ShaperVisitor):
         for func in self.manager.user_func.values():
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
-            self.maker.framePosition = 1
+            self.maker.framePosition = 0
 
             par_count = len(func.parameters)
             for i in range(par_count):
@@ -580,6 +582,89 @@ class ByteCodeVisitor(ShaperVisitor):
         elif ctx.selectionStatement() != None:
             self.visitSelectionStatement(ctx.selectionStatement())
 
+    def visitPaintStatement(self, ctx: ShaperParser.PaintStatementContext):
+        self.visit(ctx.shapeIndicator())
+
+    def visitShapeIndicator(self, ctx: ShaperParser.ShapeIndicatorContext):
+        self.visitChildren(ctx)
+
+    def visitLineParameters(self, ctx: ShaperParser.LineParametersContext):
+        self.visit(ctx.fromStatement())
+        self.visit(ctx.toStatement())
+
+        if(ctx.colorStatement() != None):
+            self.visit(ctx.colorStatement())  
+        else:
+            self.maker.CONST_I(int(Color.WHITE))
+
+        self.maker.LINE()
+    
+    def visitTriangleParameters(self, ctx: ShaperParser.TriangleParametersContext):
+        self.visit(ctx.fromStatement())
+        self.visit(ctx.throughStatement())
+        self.visit(ctx.toStatement())
+
+        if(ctx.colorStatement() != None):
+            self.visit(ctx.colorStatement())  
+        else:
+            self.maker.CONST_I(int(Color.WHITE))
+        
+        self.maker.TRIANGLE()
+
+    def visitRectangleParameters(self, ctx: ShaperParser.RectangleParametersContext):
+        self.visit(ctx.atStatement())
+        self.visit(ctx.ofStatement())
+
+        if(ctx.colorStatement() != None):
+            self.visit(ctx.colorStatement())  
+        else:
+            self.maker.CONST_I(int(Color.WHITE))
+        
+        self.maker.RECT()
+
+    def visitCircleParameters(self, ctx: ShaperParser.CircleParametersContext): 
+        self.visit(ctx.atStatement())
+        self.visit(ctx.ofStatement())
+
+        if(ctx.colorStatement() != None):
+            self.visit(ctx.colorStatement())  
+        else:
+            self.maker.CONST_I(int(Color.WHITE))
+        
+        self.maker.ELIPSE()
+
+    def visitAtStatement(self, ctx: ShaperParser.AtStatementContext):
+        self.visitChildren(ctx) 
+    
+    def visitOfStatement(self, ctx: ShaperParser.OfStatementContext):
+        self.visitChildren(ctx)
+
+    def visitFromStatement(self, ctx: ShaperParser.FromStatementContext):
+        self.visitChildren(ctx)
+
+    def visitThroughStatement(self, ctx: ShaperParser.ThroughStatementContext):
+        self.visitChildren(ctx)
+
+    def visitToStatement(self, ctx: ShaperParser.ToStatementContext):
+        self.visitChildren(ctx)
+
+    def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
+        if ctx.constant != None:
+            self.maker.CONST_I(int(self.visit(ctx.constant()).val))
+        else:
+            self.visit(ctx.scopeIdentifier())
+
+    def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):        
+        if ctx.right != None:
+
+            self.visit(ctx.left)
+            self.visit(ctx.right)
+
+        else:
+            self.visit(ctx.left)
+            self.maker.LOAD(self.maker.framePosition)
+
+
 
     def visitJumpStatement(self, ctx: ShaperParser.JumpStatementContext):
         if ctx.expression() != None:
@@ -588,7 +673,6 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.CONST_I(0)
 
         self.maker.RET()
-
 
     def visitSelectionStatement(self, ctx: ShaperParser.SelectionStatementContext):
         expressions = ctx.expression()
@@ -724,8 +808,6 @@ class ByteCodeVisitor(ShaperVisitor):
 
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
-        
-
         #visit init Expression/Declaration
         if ctx.initExpr != None:
             self.visit(ctx.initExpr)
@@ -771,7 +853,6 @@ class ByteCodeVisitor(ShaperVisitor):
         # add out of for jump to stack 
         self.maker.jumpStack.append((end_jump[0], 
                                      self.maker.bytecodePosition - end_jump[1] - 2))
-        
         
 
     def visitScopeIdentifier(self, ctx: ShaperParser.ScopeIdentifierContext):

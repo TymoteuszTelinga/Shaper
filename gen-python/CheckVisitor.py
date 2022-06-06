@@ -819,12 +819,11 @@ class CheckVisitor(ShaperVisitor):
             pos_size_tulp = (var, var)
         
         if pos_size_tulp[0].type not in [Type.INT, Type.FLOAT]:
-            self.errorstack.append()
-            raise Exception(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+            self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+
 
         if pos_size_tulp[1].type not in [Type.INT, Type.FLOAT]:
-            self.errorstack.append()
-            raise Exception(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+            self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
     
 
 # jumpStatement
