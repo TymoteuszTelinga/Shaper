@@ -549,15 +549,19 @@ class ByteCodeVisitor(ShaperVisitor):
         if ctx.functionParameterList() != None:
             params = self.visit(ctx.functionParameterList())
 
-        ret = self.manager.findFunction(name)
+        if name == "print":
+            self.maker.PRINT_I()
+            return Constant(Type.VOID, None)
+        else:
+            ret = self.manager.findFunction(name)
 
-        self.maker.functionCallStack.append((name, self.maker.commandCounter))
-        self.maker.CALL(-1, len(params))
-        
-        if ret.type == Type.VOID:
-            self.maker.POP()
+            self.maker.functionCallStack.append((name, self.maker.commandCounter))
+            self.maker.CALL(-1, len(params))
+            
+            if ret.type == Type.VOID:
+                self.maker.POP()
 
-        return ret
+            return ret
         
     def visitFunctionParameterList(self, ctx: ShaperParser.FunctionParameterListContext):
 

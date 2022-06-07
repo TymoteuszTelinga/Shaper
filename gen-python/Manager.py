@@ -98,6 +98,8 @@ class Manager:
             fun = self.setup_func
             print(fun.address)
             return self.setup_func
+        
+        
 
         return self.user_func[name].return_atom
     

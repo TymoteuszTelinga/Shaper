@@ -1,6 +1,6 @@
 int gridSize = 40;
-int width = 900;
-int height = 600;
+int width = 800;
+int height = 800;
 
 void setup()
 {
@@ -9,21 +9,23 @@ void setup()
 void draw()
 {
     int mirror = 1;
-//   while(mirror < 2)
-//    {
-        for (int x = gridSize; x <= width - gridSize; x += gridSize)
+
+        int x = gridSize;
+        while(x <= width - gridSize)
         {
             for (int y = gridSize; y <= height - gridSize; y += gridSize)
             {
                 if( x%(2*gridSize) == 0 )
                 {
-                    paint line from (mirror*x,mirror * y) to (width/2,height/2) with WHITE;
+                   paint line from (0, y) to (x,height/2) with WHITE;
                 }
                 else
                 {   
                     paint line from (mirror*x, mirror * y) to (width/2,height/2) with WHITE;
                 }
             }
+
+            x += gridSize;
         }
 
 //     ++mirror;
