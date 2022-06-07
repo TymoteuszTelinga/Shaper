@@ -28,7 +28,7 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> t1;
 
 public:
-    Graphic();
+    Graphic(int width, int height, int fps);
     ~Graphic();
 
     void ProcedEvents();

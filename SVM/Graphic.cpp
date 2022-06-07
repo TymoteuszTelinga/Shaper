@@ -34,11 +34,11 @@ sf::Vector2f EllipseShape::getPoint(std::size_t index) const
     return sf::Vector2f(m_radius.x + x, m_radius.y + y);
 }
 
-Graphic::Graphic()
+Graphic::Graphic(int width, int height, int fps)
 {
-    window.create(sf::VideoMode(400, 400), "SVM");
-    window.setFramerateLimit(240);
-    windowHeight = 400;
+    window.create(sf::VideoMode(width, height), "SVM");
+    window.setFramerateLimit(fps);
+    windowHeight = height;
     t1 = std::chrono::high_resolution_clock::now();
 }
 

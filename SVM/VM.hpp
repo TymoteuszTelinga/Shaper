@@ -116,6 +116,17 @@ enum {
     TRIANGLE  // draw triangle
 };
 
+struct Parameters
+{
+    unsigned int memSize = 300;
+    unsigned int stackSize = 100;
+    unsigned int fps = 240;
+    bool debug = false;
+    unsigned int width = 400;
+    unsigned int height = 400;
+};
+
+
 class VM
 {
 private:
@@ -130,9 +141,10 @@ private:
 
     MMU mmu;
     Graphic graphic;
+    Parameters parameters;
 
 public:
-    VM(const int* code, const int PC, const unsigned int memSize = 300);
+    VM(const int* code, const int PC, const Parameters params);
     ~VM();
 
     void execute();

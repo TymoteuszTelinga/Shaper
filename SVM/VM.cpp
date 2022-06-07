@@ -2,17 +2,16 @@
 #include "VM.hpp"
 #include <iostream>
 
-const int STACK_SIZE = 100;
-
 #define asfloat *(float*)&
 #define asint *(int*)&
 #define asdouble *(double*)&
 #define aslong *(long long*)&
 
-VM::VM(const int* code, const int PC, const unsigned int memSize):code(code), mmu(memSize,0)
+VM::VM(const int* code, const int PC, const Parameters params):code(code), mmu(params.memSize,0), graphic(params.width, params.height, params.fps)
 {
-    memory = new int[memSize];
-    stack = new int[STACK_SIZE];
+    parameters = params;
+    memory = new int[params.memSize];
+    stack = new int[params.stackSize];
     pc = PC;
     fp = 0;
     sp = -1;
@@ -614,8 +613,11 @@ void VM::execute()
             return;
         }
 
-        // showStack();
-        // std::cout<<"PC: "<<pc<<std::endl;
+        if (parameters.debug)
+        {
+            showStack();
+        }
+
         if (graphic.isOpen())
         {
             graphic.ProcedEvents();
@@ -648,7 +650,7 @@ void VM::displayMode(const char c) const
 
 void VM::push(int value)
 {
-    if (sp >= STACK_SIZE)
+    if (sp >= (int)parameters.stackSize)
     {
         std::cerr<<"stack overflow\n";
         bDied = true;
