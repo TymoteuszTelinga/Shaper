@@ -1,9 +1,8 @@
 
 from Commands import Command
-import ctypes
 
 class ByteCodeWriter:
-    def __init__(self, filename="artist"):
+    def __init__(self, filename="..\SVM\paint.hae"):
         self.filename = filename
         self.fileHandler = None
 

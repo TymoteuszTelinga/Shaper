@@ -73,6 +73,7 @@ def main(argv):
 
             writer = ByteCodeWriter()
 
+            print(byteCodeVisitor.maker.commandsQueue)
             writer.writeToFile(byteCodeVisitor.maker.commandsQueue)
             
             

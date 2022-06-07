@@ -6,5 +6,6 @@ void draw()
     paint line from (0,600) to (800,0) with WHITE;
     paint rectangle at (350,80) of (60) with BLACK;
     paint circle at (400,300) of (100,50) with BLUE;
+    
     return;
 }

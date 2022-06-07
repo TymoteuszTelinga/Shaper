@@ -39,14 +39,14 @@ class ByteCodeMaker:
     def getLongFrameAddress(self) -> int:
         temp = self.framePosition
 
-        self.framePosition += 2
+        #self.framePosition += 2
 
         return temp
 
     def getIntFrameAddress(self) -> int:
         temp = self.framePosition
 
-        self.framePosition += 1
+        #self.framePosition += 1
 
         return temp
 

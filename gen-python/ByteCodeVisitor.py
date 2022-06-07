@@ -35,11 +35,13 @@ class ByteCodeVisitor(ShaperVisitor):
         if self.manager.setup_func != None:
             self.maker.functionCallStack.append(('setup', self.maker.commandCounter))
             self.maker.CALL(-1, 0)
+            self.maker.POP()
         
         if self.manager.draw_func != None:
             self.maker.CLEAR()
             self.maker.functionCallStack.append(('draw', self.maker.commandCounter))
             self.maker.CALL(-1, 0)
+            self.maker.POP()
             self.maker.DISPLAY()
             self.maker.JMP(-7)
         
@@ -56,7 +58,7 @@ class ByteCodeVisitor(ShaperVisitor):
         if self.manager.setup_func != None:
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
-            self.maker.framePosition = 0
+            self.maker.framePosition = 1
 
             self.manager.setup_func.address = self.maker.bytecodePosition
             self.visit(self.manager.setup_func.ctx)
@@ -71,7 +73,7 @@ class ByteCodeVisitor(ShaperVisitor):
         if self.manager.draw_func != None:
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
-            self.maker.framePosition = 0
+            self.maker.framePosition = 1
 
             self.manager.draw_func.address = self.maker.bytecodePosition
             self.visit(self.manager.draw_func.ctx)
@@ -85,7 +87,7 @@ class ByteCodeVisitor(ShaperVisitor):
         for func in self.manager.user_func.values():
             oldScope = self.manager.createNewScope(False)
             oldFP = self.maker.framePosition
-            self.maker.framePosition = 0
+            self.maker.framePosition = 1
 
             par_count = len(func.parameters)
             for i in range(par_count):
@@ -179,6 +181,8 @@ class ByteCodeVisitor(ShaperVisitor):
                 var.address = self.maker.getLongFrameAddress()
             else:
                 var.address = self.maker.getIntFrameAddress()
+
+            self.maker.CONST_I(0)
             var.isGlobal = False
         
 
@@ -387,8 +391,10 @@ class ByteCodeVisitor(ShaperVisitor):
                 self.maker.MUL_I()
                 ret = Constant(ret_type, None)
             elif op == '/':
+                self.maker.DIV_I()
                 ret = Constant(ret_type, None)
             elif op == '%':
+                self.maker.MOD_I()
                 ret = Constant(ret_type, None)
 
             return ret
@@ -543,16 +549,22 @@ class ByteCodeVisitor(ShaperVisitor):
         if ctx.functionParameterList() != None:
             params = self.visit(ctx.functionParameterList())
 
+        ret = self.manager.findFunction(name)
+
         self.maker.functionCallStack.append((name, self.maker.commandCounter))
         self.maker.CALL(-1, len(params))
         
-        return self.manager.findFunction(name)
+        if ret.type == Type.VOID:
+            self.maker.POP()
+
+        return ret
         
     def visitFunctionParameterList(self, ctx: ShaperParser.FunctionParameterListContext):
 
         if ctx.functionParameterList() != None:
-            params = self.visit(ctx.functionParameterList())
+            params = [None]
             params.insert(0,self.visit(ctx.expression()))
+            params += self.visit(ctx.functionParameterList())
             return params
         else:
             return [self.visit(ctx.expression())]
@@ -662,7 +674,8 @@ class ByteCodeVisitor(ShaperVisitor):
 
         else:
             self.visit(ctx.left)
-            self.maker.LOAD(self.maker.framePosition)
+
+            self.maker.LOAD(self.maker.framePosition-1)
 
 
 
