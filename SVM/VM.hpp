@@ -82,11 +82,13 @@ enum {
 
     LOAD    ,  // load from local (stack) -
     GLOAD   ,  // load from global memory (memory) -
-    ALOAD_I,   // load int from array -
+    ALOAD_I ,  // load int from array -
+    LOAD_CH ,  // get color chanel
 
     STORE   ,  // store in local (stack) -
     GSTORE  ,  // store in global memory (memory) -
     ASTORE_I,  // store int in array -
+    STORE_CH,  // set color chanel
     
     PRINT_C ,  // ? print value as char - 
     PRINT_I ,  // ? print value on top of the stack -
@@ -100,6 +102,7 @@ enum {
     CALL    ,  // call procedure -
     RET     ,  // return from procedure -
     DUMMY   ,  // do nothink
+    RANDOM  ,  // put random int on top of stack
 
     NEWARR  ,  // alocate memory for new array
     LENGTH  ,  // length of reserved block
@@ -135,7 +138,7 @@ public:
     void execute();
     // debug
     void displayMode(const char c) const;
-    void showCode() const;
+    void showCode(int len = 10) const;
     void showMemory(unsigned int start = 0, unsigned int end = 300) const;
 
 private:

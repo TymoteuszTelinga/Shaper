@@ -37,7 +37,7 @@ sf::Vector2f EllipseShape::getPoint(std::size_t index) const
 Graphic::Graphic()
 {
     window.create(sf::VideoMode(400, 400), "SVM");
-    window.setFramerateLimit(120);
+    window.setFramerateLimit(240);
     windowHeight = 400;
     t1 = std::chrono::high_resolution_clock::now();
 }

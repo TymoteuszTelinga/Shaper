@@ -25,9 +25,9 @@ VM::~VM()
     delete [] memory;
 }
 
-void VM::showCode() const
+void VM::showCode(int len) const
 {
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < len; i++)
     {
         std::cout<<i<<": "<<code[i]<<'\n';
     }
@@ -421,6 +421,14 @@ void VM::execute()
                 push(memory[addr+index]);
             }
             break;
+        case LOAD_CH:
+            {
+                int chanel = next();
+                int color = pop();
+                char rgba = ((char*)&color)[chanel];
+                push(rgba);
+            }
+            break;
         case STORE:
             {
                 int offset = next();
@@ -441,6 +449,16 @@ void VM::execute()
                 int index = pop();
                 int addr = pop();
                 memory[addr+index] = val;
+            }
+            break;
+        case STORE_CH:
+            {
+                int chanel = next();
+                int value = pop();
+                char color = pop();
+                std::cout<<"VAl: "<<value<<'\n';
+                ((char*)&value)[chanel] = color;
+                push(value);
             }
             break;
         case PRINT_C:
@@ -506,6 +524,11 @@ void VM::execute()
             break;
         case DUMMY:
             break;
+        case RANDOM:
+            {
+                push(rand());
+            }
+            break;;
         case NEWARR:
             {
                 int size = pop();
@@ -643,6 +666,10 @@ void VM::pushL(long long value)
 
 int VM::pop()
 {
+    if(sp < 0)
+    {
+        bDied = true;
+    }
     return stack[sp--];
 }
 

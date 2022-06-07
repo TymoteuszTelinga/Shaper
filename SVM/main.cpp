@@ -6,44 +6,127 @@
 using std::cout;
 using std::string;
 
+void loadProgram(const string& src)
+{
+    std::ifstream file("out.txt", std::ios::binary);
+    if (file.is_open())
+    {
+        file.seekg (0, std::ios::end);
+        int length = file.tellg();
+        file.seekg (0, std::ios::beg);
+        char *buffer = new char[length];
+        file.read(buffer,length);
+        for (size_t i = 0; i < length/4; i++)
+        {
+            std::cout<<*(((int*)buffer)+i)<<" | ";
+        }
+        file.close();
+    }
+}
+
 int main(int argc, char *argv[])
 {
     cout<<"Hello\n";
 
     int program[] = {
-            CONST_I, 0,
+            CONST_I, 200,
+            CONST_I, 50,
+            CONST_I, 15,
             CONST_I, 10,
-            CONST_I, 40,
-            CONST_I, 40,
-            CONST_I, 0x0000FFFF,
-            INC, 0,
-            LOAD, 0,
-            CONST_I, 400,
-            LT,
-            JMPT, 4,
-            CONST_I, 0,
-            STORE, 0,
-            CLEAR,
-            LOAD, 0,
-            LOAD, 1,
-            LOAD, 2,
-            LOAD, 3,
-            LOAD, 4,
-            RECT,
-            DISPLAY,
-            JMP, -28,
+            CONST_I, (int)0xFF0000FF,
+            CONST_I, 1,// goright = true;
+            CONST_I, 1,// go up = true;
+            CONST_I, 0,// if bounce == true;
+                // horizontal movement
+                LOAD, 5,
+                JMPT, 4,
+                    DEC, 0,
+                    JMP, 2,
+                INC, 0,
+                // vertical movement
+                LOAD, 6,
+                JMPT, 4,
+                    DEC, 1,
+                    JMP, 2,
+                INC, 1,
+                // horizontal bounce
+                LOAD, 0,
+                LOAD, 2,
+                ADD_I,
+                CONST_I, 400,
+                LT,
+                JMPT, 9,
+                    LOAD, 5,
+                    NEG,
+                    STORE, 5,
+                    CONST_I, 1,
+                    STORE, 7,
+                LOAD, 0,
+                LOAD, 2,
+                SUB_I,
+                CONST_I, 0,
+                GT,
+                JMPT, 9,
+                    LOAD, 5,
+                    NEG,
+                    STORE, 5,
+                    CONST_I, 1,
+                    STORE, 7,
+                //vertical bounce
+                LOAD, 1,
+                LOAD, 3,
+                ADD_I,
+                CONST_I, 400,
+                LT,
+                JMPT, 9,
+                    LOAD, 6,
+                    NEG,
+                    STORE, 6,
+                    CONST_I, 1,
+                    STORE, 7,
+                LOAD, 1,
+                LOAD, 3,
+                SUB_I,
+                CONST_I, 0,
+                GT,
+                JMPT, 9,
+                    LOAD, 6,
+                    NEG,
+                    STORE, 6,
+                    CONST_I, 1,
+                    STORE, 7,
+                LOAD, 7,
+                JMPF, 10,
+                    RANDOM,
+                    CONST_I, 523,
+                    MUL_I,
+                    STORE, 4,
+                    CONST_I, 0,
+                    STORE, 7, 
+
+                // CLEAR,
+                DUMMY,
+                LOAD, 0,
+                LOAD, 1,
+                LOAD, 2,
+                LOAD, 3,
+                LOAD, 4,
+                ELIPSE,
+                DISPLAY,
+            JMP, -125,
             HALT,
         };
     VM svm(program,0);
 
-    svm.displayMode('d');
-    // svm.showCode();
+    // svm.displayMode('h');
+    // svm.showCode(53);
     svm.execute();
     // svm.showMemory(0,4);
     
     cout<<"END\n";
     return 0;
 }
+
 
 
     // int program[] = {
