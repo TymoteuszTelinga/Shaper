@@ -1,21 +1,21 @@
 import enum
 
 class Type(enum.Enum):
-    ANY = 0;
-    VOID = 1;
+    ANY = 0
+    VOID = 1
 
-    BOOL = 2;
+    BOOL = 2
 
-    CHAR = 3;
-    SHORT = 4;
-    INT = 5;
-    LONG = 6;
+    CHAR = 3
+    SHORT = 4
+    INT = 5
+    LONG = 6
 
-    FLOAT = 7;
-    DOUBLE = 8;
+    FLOAT = 7
+    DOUBLE = 8
 
-    COLOR = 9;
-    ARRAY = 10;
+    COLOR = 9
+    ARRAY = 10
 
     @staticmethod
     def getType(str):

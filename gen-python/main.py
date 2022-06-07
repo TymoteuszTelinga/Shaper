@@ -12,6 +12,8 @@ from ByteCodeVisitor import ByteCodeVisitor
 from CheckVisitor import CheckVisitor
 from Manager import Manager
 
+from ByteCodeWriter import ByteCodeWriter
+
 class ShaperErrorListener(ErrorListener):
     def __init__(self):
         super(ShaperErrorListener, self).__init__()
@@ -68,7 +70,12 @@ def main(argv):
 
             byteCodeVisitor.generateCode(tree)
 
-            print(byteCodeVisitor.maker.commandsQueue)
+
+            writer = ByteCodeWriter()
+
+            writer.writeToFile(byteCodeVisitor.maker.commandsQueue)
+            
+            
 
 
                 
