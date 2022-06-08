@@ -43,7 +43,7 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.CALL(-1, 0)
             self.maker.POP()
             self.maker.DISPLAY()
-            self.maker.JMP(-7)
+            self.maker.JMP(-8)
         
         self.maker.HALT()
 

@@ -64,33 +64,36 @@ class Command(enum.Enum):
     LOAD    =46  # load from local (stack) -
     GLOAD    =47 # load from global memory (memory) -
     ALOAD_I  =48 # load int from array -
+    LOAD_CH = 49  # get color chanel
 
-    STORE    =49 # store in local (stack) -
-    GSTORE  =50  # store in global memory (memory) -
-    ASTORE_I =51  # store int in array -
+    STORE    =50 # store in local (stack) -
+    GSTORE  =51  # store in global memory (memory) -
+    ASTORE_I =52  # store int in array -
+    STORE_CH = 53# set color chanel
     
-    PRINT_C  =52 # ? print value as char - 
-    PRINT_I  =53 # ? print value on top of the stack -
-    PRINT_F  =54 # ? print value as float -
-    PRINT_L  =55 # ? print long value -
-    PRINT_D =56  # ? print double value -
+    PRINT_C  =54 # ? print value as char - 
+    PRINT_I  =55 # ? print value on top of the stack -
+    PRINT_F  =56 # ? print value as float -
+    PRINT_L  =57 # ? print long value -
+    PRINT_D =58  # ? print double value -
 
-    POP     =57  # ? throw away top of the stack -
-    POP2     =58 # ? throw away two values or long from top of the stack -
-    HALT    =59  # stop program -
-    CALL    =60  # call procedure -
-    RET     =61  # return from procedure -
-    DUMMY  =62   # do nothink
+    POP     =59  # ? throw away top of the stack -
+    POP2     =60 # ? throw away two values or long from top of the stack -
+    HALT    =61  # stop program -
+    CALL    =62  # call procedure -
+    RET     =63  # return from procedure -
+    DUMMY  =64  # do nothink
+    RANDOM  =65  # put random int on top of stack
 
-    NEWARR  =63  # alocate memory for new array
-    LENGTH  =64  # length of reserved block
-    FREE    =65  # free memory from pointer
+    NEWARR  =66  # alocate memory for new array
+    LENGTH  =67  # length of reserved block
+    FREE    =68  # free memory from pointer
 
-    DISPLAY  =66# display window
-    CLEAR   =67# clear window screen
-    RECT    =68# draw rectangle
-    ELIPSE   =69# draw elipse
-    LINE     =70# draw line
-    TRIANGLE  =71# draw triangle
+    DISPLAY  =69# display window
+    CLEAR   =70# clear window screen
+    RECT    =71# draw rectangle
+    ELIPSE   =72# draw elipse
+    LINE     =73# draw line
+    TRIANGLE  =74# draw triangle
 
     
