@@ -665,10 +665,16 @@ class ByteCodeVisitor(ShaperVisitor):
         self.visitChildren(ctx)
 
     def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
-        if ctx.constant != None:
+        if ctx.constant() != None:
             self.maker.CONST_I(int(self.visit(ctx.constant()).val))
-        else:
-            self.visit(ctx.scopeIdentifier())
+        elif ctx.scopeIdentifier() != None: 
+            var = self.visit(ctx.scopeIdentifier())
+            
+            if var.isGlobal:
+                self.maker.GLOAD(var.address)
+            else: 
+                self.maker.LOAD(var.address)
+
 
     def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):        
         if ctx.right != None:

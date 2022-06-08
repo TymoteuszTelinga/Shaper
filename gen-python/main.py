@@ -70,19 +70,14 @@ def main(argv):
 
             byteCodeVisitor.generateCode(tree)
 
-
             writer = ByteCodeWriter()
 
-            print(byteCodeVisitor.maker.commandsQueue)
+            if len(argv) > 3 and argv[3] == '--show':
+                print(byteCodeVisitor.maker.commandsQueue)
+                 
             writer.writeToFile(byteCodeVisitor.maker.commandsQueue)
             
-            
-
-
-                
-        # except Exception as e:
-        #     print("something went wrong :(")
-        #     print(e)
+        
 
     else:
         print("File doesn't exist!")
