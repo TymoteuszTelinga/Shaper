@@ -1,6 +1,9 @@
 
 from Commands import Command
 
+"""
+Writes commands to bytecode file
+"""
 class ByteCodeWriter:
     def __init__(self, filename="..\SVM\paint.hae"):
         self.filename = filename

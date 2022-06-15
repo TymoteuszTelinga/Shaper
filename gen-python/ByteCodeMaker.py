@@ -1,5 +1,10 @@
 from Commands import Command
 
+'''
+Class below creates, a set of commands
+and holds points which should be later filled
+with appriopriate values
+'''
 class ByteCodeMaker:
 
     def __init__(self) -> None:
