@@ -11,6 +11,8 @@ int vecy = 1;
 
 int step = 5;
 
+color col = RED;
+
 void setup()
 {
 
@@ -57,10 +59,22 @@ void move()
 
 void changeColor()
 {
+    if(col == RED)
+    {
+        col = GREEN;
+    }
+    elif (col == GREEN)
+    {
+        col = YELLOW;
+    }
+    else
+    {
+        col = RED;
+    }
 
 }
 
 void show()
 {
-    paint rectangle at (x, y) of (size) with RED;
+    paint rectangle at (x, y) of (size) with col;
 }
