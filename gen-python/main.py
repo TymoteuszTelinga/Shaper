@@ -3,7 +3,6 @@ import os.path
 
 from antlr4 import *
 
-
 from grammar.ShaperLexer import ShaperLexer
 from grammar.ShaperParser import ShaperParser
 
