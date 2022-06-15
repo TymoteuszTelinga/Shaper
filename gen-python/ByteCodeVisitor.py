@@ -1,5 +1,4 @@
-from distutils.archive_util import make_archive
-import imp
+
 from multiprocessing.dummy import Manager
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
@@ -22,6 +21,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
         self.manager.curr_scope = Scope()
         self.manager.global_scope = self.manager.curr_scope
+
 
     
     def generateCode(self, tree):
@@ -123,6 +123,17 @@ class ByteCodeVisitor(ShaperVisitor):
 
             self.maker.commandsQueue[jump[0]] = comm
 
+    def redundant_pop(self, var):
+        if var.type == Type.LONG or var.type == Type.DOUBLE:
+            self.maker.POP2()
+        else:
+            self.maker.POP()
+
+        var.type = Type.VOID
+
+        
+
+
 
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):   
         #file is not empty
@@ -142,7 +153,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def visitDeclaration(self, ctx: ShaperParser.DeclarationContext):
         if (ctx.initDeclarator() != None): 
-            self.visit(ctx.initDeclarator())
+            return self.visit(ctx.initDeclarator())
 
     def visitCompoundStatement(self, ctx: ShaperParser.CompoundStatementContext):
         if ctx.instructionList() != None:
@@ -168,7 +179,6 @@ class ByteCodeVisitor(ShaperVisitor):
         var = Variable(name, type)
 
 
-
         if self.isGlobal:
             if type == Type.LONG or type == Type.DOUBLE:
                 var.address = self.maker.getLongMemoryAddress()
@@ -182,12 +192,16 @@ class ByteCodeVisitor(ShaperVisitor):
             else:
                 var.address = self.maker.getIntFrameAddress()
 
+            print(var.address)
             self.maker.CONST_I(0)
             var.isGlobal = False
         
 
         if ctx.assignmentExpression() != None:
+
             self.visit(ctx.assignmentExpression())
+
+
             if self.isGlobal:
                 self.maker.GSTORE(var.address)
             else:
@@ -196,18 +210,27 @@ class ByteCodeVisitor(ShaperVisitor):
 
 
         self.manager.addVariable(var)
+        return var
 
     def visitExpression(self, ctx: ShaperParser.ExpressionContext) -> Variable:
-        return self.visitChildren(ctx)
+        ret = self.visitChildren(ctx)
+        
+        # self.redundant_pop(ret)
+
+        return ret
 
     def visitAssignmentExpression(self, ctx: ShaperParser.AssignmentExpressionContext):
         if ctx.scopeIdentifier() == None:
-           return self.visit(ctx.logicalORExpression())
+            ret = self.visit(ctx.logicalORExpression())
+
+            return ret
 
         else:
+
             l = self.visit(ctx.scopeIdentifier())
             op = ctx.assignmentOperator().getText()
             
+
         
             if op == '=':
                 self.visit(ctx.assignmentExpression())
@@ -273,7 +296,13 @@ class ByteCodeVisitor(ShaperVisitor):
                     self.visit(ctx.assignmentExpression()) # save right value
                     self.maker.MOD_I()
                     self.maker.STORE(l.address)
+
+            if l.isGlobal:
+                self.maker.GLOAD(l.address)
+            else:
+                self.maker.LOAD(l.address)
             
+
             return l
 
 
@@ -557,9 +586,6 @@ class ByteCodeVisitor(ShaperVisitor):
 
             self.maker.functionCallStack.append((name, self.maker.commandCounter))
             self.maker.CALL(-1, len(params))
-            
-            if ret.type == Type.VOID:
-                self.maker.POP()
 
             return ret
         
@@ -587,7 +613,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
 
         elif ctx.expression() != None:
-            self.visit(ctx.expression())
+            self.redundant_pop(self.visit(ctx.expression()))
 
         elif ctx.jumpStatement() != None:
             self.visit(ctx.jumpStatement())
@@ -831,11 +857,19 @@ class ByteCodeVisitor(ShaperVisitor):
 
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
+        # make new scope
+        oldScope  =  self.manager.createNewScope(True)
+        oldFP = self.maker.framePosition
+
+        ret = None
+
+        
         #visit init Expression/Declaration
         if ctx.initExpr != None:
-            self.visit(ctx.initExpr)
+            self.redundant_pop(self.visit(ctx.initExpr))
         elif ctx.initDec != None:
-            self.visit(ctx.initDec)
+            ret = self.visit(ctx.initDec)
+        
 
 
         # save address to this place for condition jump
@@ -853,20 +887,13 @@ class ByteCodeVisitor(ShaperVisitor):
 
         self.maker.JMPF(-1)
 
-        # make new scope
-        oldScope  =  self.manager.createNewScope(True)
-        oldFP = self.maker.framePosition
 
-        # visit context
+        # visit contextF
         self.visit(ctx.compoundStatement())
-
-        # restore scope
-        self.maker.framePosition = oldFP
-        self.manager.curr_scope = oldScope
 
         # visit loop Expression
         if ctx.loopExpr != None:
-            self.visit(ctx.loopExpr)
+            self.redundant_pop(self.visit(ctx.loopExpr))
 
         curr_address = self.maker.bytecodePosition
 
@@ -876,7 +903,16 @@ class ByteCodeVisitor(ShaperVisitor):
         # add out of for jump to stack 
         self.maker.jumpStack.append((end_jump[0], 
                                      self.maker.bytecodePosition - end_jump[1] - 2))
+
+        # restore scope
+        self.maker.framePosition = oldFP
+        self.manager.curr_scope = oldScope
+
+        if ret != None:
+            self.redundant_pop(ret) 
         
+
+
 
     def visitScopeIdentifier(self, ctx: ShaperParser.ScopeIdentifierContext):
         name = self.visit(ctx.identifier())
