@@ -15,6 +15,5 @@ class ShaperErrorListener(ErrorListener):
     def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
         raise Exception(f"Attempting full Context ERROR")
 
-
     def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
         raise Exception("ContextSensitivity ERROR")
