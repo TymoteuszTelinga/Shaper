@@ -1,0 +1,80 @@
+int width = 800;
+int height = 600;
+
+int x = 400;
+int y = 300;
+
+int size = 40;
+
+int vecx = 1;
+int vecy = 1;
+
+int step = 5;
+
+color col = RED;
+
+void setup()
+{
+
+}
+
+void draw()
+{
+    bool bounced = bounce(); 
+
+    if(bounced)
+    {
+        changeColor();
+    }
+
+    move();
+
+    show();
+}
+
+bool bounce()
+{
+    bool ret = false;
+
+    if(x + size >=width | x<=0)
+    {
+        vecx = -vecx;
+        ret = true;
+    }
+
+    if (y + size>=height | y<= 0)
+    {
+        vecy = -vecy;
+        ret = true;    
+    }
+
+    return ret;
+}
+
+void move()
+{
+    x += step * vecx;
+    y += step * vecy;
+}
+
+void changeColor()
+{
+    if(col == RED)
+    {
+        col = GREEN;
+    }
+    elif (col == GREEN)
+    {
+        col = YELLOW;
+    }
+    else
+    {
+        col = RED;
+    }
+
+}
+
+void show()
+{
+    paint rectangle at (x, y) of (size) with col;
+}

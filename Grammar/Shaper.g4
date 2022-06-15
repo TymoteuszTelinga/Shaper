@@ -67,7 +67,7 @@ declaration
     ;
 
 initDeclarator
-    : declarationType identifier ( assignmentOperator assignmentExpression)?
+    : declarationType identifier (assignmentOperator assignmentExpression)?
     ;
 
 
@@ -89,7 +89,7 @@ expression
 
 assignmentExpression
     : logicalORExpression
-    | unaryExpression assignmentOperator assignmentExpression
+    | scopeIdentifier assignmentOperator assignmentExpression
     ;
 
 logicalORExpression
@@ -464,7 +464,7 @@ Identifier
 
 fragment
 NonDigit
-    : [a-zA-Z]
+    : [a-zA-Z_]
     ;
 
 fragment

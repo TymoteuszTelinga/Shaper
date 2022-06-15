@@ -1,59 +1,44 @@
 int x = 100;
-int y =200;
+int y = 200;
 void draw()
 {
     int y = 10;
     int x = 10;
-    //b(true);
     domek(global:x,global:y);
     domek(x,y);
 }
 
-void b(bool first)
-{
-    int i = 5;
-    if(first == true)
-    {
-        b(false);
-        print(i);
-    }
-    else
-    {
-        i = 0;
-    }
-}
 
 void domek(int x, int y)
 {
    // print(RED);
     int width = 200;
     int height = 160;
-    print(y);
 
     paint rectangle at (x, y) 
                     of (width,height) 
                     with YELLOW;
 
     paint triangle from (x, y + height)
-                   through (x + width/2, y + 3*height/2) 
+                  through (x + width/2, y + 3*height/2) 
                    to (x+ width,y+ height) 
-                   with RED;
+                  with RED;
 
     domek2(x,y);
 }
 
 void domek2(int x,int y)
 {
-    int width = 200.0;
-    int height = 160.0;
-    x +=4;
+    int width = 200;
+    int height = 160;
+
     paint rectangle at (x + width/4, y) 
                     of (width/5, 3*height/5) 
-                    with BLACK;
+                    with RED;
 
     paint rectangle at (x+ 3*width/5, y + 2*height/5) 
                     of (height/3) 
                     with BLUE;
                     
-    domek(x+10, y+10);
+    //domek(x+10, y+10);
 }

@@ -8,6 +8,7 @@ class Function:
         self.parameters = []
         self.kind = 0 # 0 - user 1 - built in
         self.ctx = None
+        self.address = 0
 
     def setReturnVar(self, type: Type) -> None:
         self.return_atom = Constant(type, None)

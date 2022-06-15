@@ -1,4 +1,3 @@
-import re
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
@@ -50,6 +49,7 @@ class CheckVisitor(ShaperVisitor):
 #     ;
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):
         
+
         #file is not empty
         if ctx.externalDeclarationList() != None: 
             #gather functions
@@ -276,8 +276,6 @@ class CheckVisitor(ShaperVisitor):
         return (type_list, size_list)
 
             
-
-
 # expression
 #     : assignmentExpression
 #     ;
@@ -290,10 +288,10 @@ class CheckVisitor(ShaperVisitor):
 #     | unaryExpression assignmentOperator assignmentExpression
 #     ;
     def visitAssignmentExpression(self, ctx: ShaperParser.AssignmentExpressionContext) -> Variable:
-        if ctx.unaryExpression() == None:
+        if ctx.scopeIdentifier() == None:
             return self.visit(ctx.logicalORExpression())
         else:
-            l = self.visit(ctx.unaryExpression())
+            l = self.visit(ctx.scopeIdentifier())
             r = self.visit(ctx.assignmentExpression())
             op = ctx.assignmentOperator().getText()
 
@@ -619,10 +617,10 @@ class CheckVisitor(ShaperVisitor):
 #     ;
     def visitFunctionCall(self, ctx: ShaperParser.FunctionCallContext):
         name = self.visit(ctx.identifier()) # name of called function
+
         params = []
         if ctx.functionParameterList() != None:
             params = self.visit(ctx.functionParameterList()) # parameters of called function
-        
         
         (function, error) = self.manager.functionExists(name, params)
 
@@ -640,6 +638,8 @@ class CheckVisitor(ShaperVisitor):
         elif error == 4:
             self.errorstack.append(f"line {ctx.start.line} At {function[0]} parameter expected type {function[1].type}, but got type {params[function[0]].type}")
             # raise Exception(f"line {ctx.start.line} At {function[0]} parameter expected type {function[1].type}, but got type {params[function[0]].type}")
+        
+        return Constant(Type.VOID, None)
 
 
 # functionParameterList
@@ -819,12 +819,11 @@ class CheckVisitor(ShaperVisitor):
             pos_size_tulp = (var, var)
         
         if pos_size_tulp[0].type not in [Type.INT, Type.FLOAT]:
-            self.errorstack.append()
-            raise Exception(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+            self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+
 
         if pos_size_tulp[1].type not in [Type.INT, Type.FLOAT]:
-            self.errorstack.append()
-            raise Exception(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
+            self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'int' or 'float', got " + repr(pos_size_tulp[0].type))
     
 
 # jumpStatement
