@@ -1,8 +1,6 @@
-import types
 from Types import Type
 from Scope import Scope
 from Function import Function
-from WindowMaker import WindowMaker
 from Atoms import *
 
 class Manager:
@@ -11,7 +9,6 @@ class Manager:
 
     def __init__(self) -> None:
         self.visitor = None
-        self.window: WindowMaker = WindowMaker()
 
         #scopes
         self.curr_scope: Scope = Scope()
