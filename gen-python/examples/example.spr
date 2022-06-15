@@ -1,10 +1,14 @@
 void draw()
 {
-    for(int x = 0; x < 10; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            paint rectangle at (x*10,y*10) of 8 with BLACK;
-        }
-    }
+    int x = 10;
+    int y = 10;
+    paint rectangle at (x*10,y*10) of (sum(x,y)) with YELLOW;
+}
+
+// returns sum of two integers
+int sum(int x, int y)
+{
+    int ret = x+y;
+    print(ret/2/2); 
+    return ret;
 }

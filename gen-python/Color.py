@@ -1,5 +1,5 @@
 class Color:
-    def __init__(self,R: int,G: int,B: int,A: int):
+    def __init__(self, R: int, G: int, B: int, A: int):
         self.R = R / 255.0
         self.G = G / 255.0
         self.B = B / 255.0
@@ -13,6 +13,21 @@ class Color:
 
     def __ne__(self, other) -> bool:
         return not self == other
+    
+    def __str__(self):
+        ret = f"R:{int(self.R*255)} G:{int(self.G*255)} B:{int(self.B*255)} A:{int(self.A*255)}" 
+        return ret
+
+    def __int__(self) -> None:
+        ret = int(self.R * 255)
+        ret *= 256
+        ret += int(self.G * 255)
+        ret *= 256
+        ret += int(self.B * 255)
+        ret *= 256
+        ret += int(self.A * 255)
+        return ret
+        
 
     @staticmethod
     def getColor(colorStr: str):
@@ -30,6 +45,7 @@ class Color:
             return YELLOW
         else:
             return WHITE
+        
 
 
 BLACK = Color(0, 0, 0, 255)

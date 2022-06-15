@@ -1,3 +1,5 @@
+// antlr4 -Dlanguage=Python3 Shaper.g4 -visitor -o ..\gen-python\grammar
+
 grammar Shaper;
 
 programm 
@@ -16,25 +18,21 @@ externalDeclaration
     ;
 
 functionDefinition
-    : functionSpecifier identifier declarator compoundStatement
+    : typeSpecifier identifier declarator compoundStatement
     ;
 
-functionSpecifier
-    : typeSpecifier
-    | CONST typeSpecifier
-    ;
 
 typeSpecifier
     : VOID
     | BOOL
+    | CHAR
+    | SHORT
     | INT
     | LONG
     | FLOAT
     | DOUBLE
     | COLOR
-    | STRUCT identifier
-    | ARRAY functionSpecifier
-    | LIST functionSpecifier
+    | ARRAY typeSpecifier
     ;
 
 declarator
@@ -48,7 +46,7 @@ parameterList
     ;
 
 parameterDeclaration
-    : functionSpecifier identifier
+    : typeSpecifier identifier
     ;
 
 compoundStatement
@@ -66,38 +64,23 @@ instruction
 
 declaration
     : initDeclarator 
-    | structDeclarator 
     ;
 
 initDeclarator
-    : declarationSpecifier identifier ( assignmentOperator assignmentExpression)?
+    : declarationType identifier (assignmentOperator assignmentExpression)?
     ;
 
-declarationSpecifier
-    : declarationType
-    | CONST declarationType
-    ;
 
 declarationType
     : BOOL
+    | CHAR
+    | SHORT
     | INT
     | LONG
     | FLOAT
     | DOUBLE
     | COLOR
-    | STRUCT identifier
-    | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationSpecifier
-    | LIST declarationSpecifier
-    ;
-
-structDeclarator
-    : STRUCT identifier LEFTBRACKET structDeclarationList RIGHTBRACKET
-    ;
-
-
-structDeclarationList
-    : declaration SEMICOLON
-    | structDeclarationList declaration SEMICOLON
+    | ARRAY LEFTPAREN (scopeIdentifier | constant)? RIGHTPAREN declarationType
     ;
 
 expression
@@ -106,7 +89,7 @@ expression
 
 assignmentExpression
     : logicalORExpression
-    | unaryExpression assignmentOperator assignmentExpression
+    | scopeIdentifier assignmentOperator assignmentExpression
     ;
 
 logicalORExpression
@@ -146,16 +129,22 @@ unaryExpression
 
 postfixExpression
     : primaryExpression
-    | postfixExpression DOT identifier
     | postfixExpression PLUSPLUS
     | postfixExpression MINUSMINUS
     ;
 
 primaryExpression
-    : identifier
+    : scopeIdentifier
     | constant
+    | scopeIdentifier arrayIndex
     | LEFTPAREN expression RIGHTPAREN                        
     | functionCall
+    ;
+
+
+arrayIndex
+    : LEFTBRACKET (scopeIdentifier | constant) RIGHTBRACKET
+    | LEFTBRACKET (scopeIdentifier | constant) RIGHTBRACKET arrayIndex
     ;
 
 functionCall
@@ -211,7 +200,6 @@ statement
     | expression SEMICOLON
     | paintStatement SEMICOLON
     | selectionStatement 
-    | labeledStatement 
     | iterationStatement
     | jumpStatement
     ;
@@ -264,7 +252,7 @@ toStatement
     ;
 
 colorStatement
-    : WITH (identifier|constant)
+    : WITH ( scopeIdentifier|constant)
     ;
 
 posSizeParent
@@ -273,29 +261,39 @@ posSizeParent
 
 selectionStatement
     : IF LEFTPAREN expression RIGHTPAREN compoundStatement 
-        (ELIF LEFTPAREN expression RIGHTPAREN)* 
+        (ELIF LEFTPAREN expression RIGHTPAREN compoundStatement)* 
         ( ELSE compoundStatement )?
-    | SWITCH LEFTPAREN expression RIGHTPAREN LEFTBRACKET labeledStatement* RIGHTBRACKET
     ;
     
-labeledStatement
-    : CASE logicalORExpression COLON expression
-    | DEFAULT COLON expression
+iterationStatement
+    : whileLoopStatement
+    | forLoopStatement
     ;
 
-iterationStatement
+whileLoopStatement
     : WHILE LEFTPAREN expression RIGHTPAREN compoundStatement
-    | FOR LEFTPAREN (expression|declaration)? SEMICOLON (expression|declaration)? SEMICOLON (expression|declaration)? RIGHTPAREN compoundStatement
+    ;
+
+
+forLoopStatement
+    : FOR LEFTPAREN (initExpr=expression | initDec = declaration)? SEMICOLON (condition=expression)? SEMICOLON (loopExpr=expression)? RIGHTPAREN compoundStatement
     ;
 
 jumpStatement
-    : CONTINUE SEMICOLON
-    | BREAK SEMICOLON
-    | RETURN expression? SEMICOLON
+    : RETURN expression? SEMICOLON
+    ;
+
+
+scopeIdentifier
+    : globalScope? identifier
     ;
 
 identifier
     : Identifier
+    ;
+
+globalScope
+    : GLOBAL
     ;
 
 constant
@@ -352,6 +350,8 @@ LONG: 'long';
 
 CHAR: 'char';
 
+SHORT: 'short';
+
 FLOAT: 'float';
 
 DOUBLE: 'double';
@@ -363,8 +363,6 @@ STRUCT: 'struct';
 ARRAY: 'array';
 
 LIST: 'list';
-
-CONST: 'const';
 
 OR: '|';
 
@@ -418,21 +416,13 @@ ELIF: 'elif';
 
 ELSE: 'else';
 
-SWITCH: 'switch';
-
-CASE: 'case';
-
-DEFAULT: 'default';
-
 WHILE: 'while';
 
 FOR: 'for';
 
-CONTINUE: 'continue';
-
-BREAK: 'break';
-
 RETURN: 'return';
+
+GLOBAL: 'global:';
 
 IntegerConstant
     : NonZeroDigit Digit*
@@ -474,7 +464,7 @@ Identifier
 
 fragment
 NonDigit
-    : [a-zA-Z]
+    : [a-zA-Z_]
     ;
 
 fragment

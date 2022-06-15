@@ -29,11 +29,6 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ShaperParser#functionSpecifier.
-    def visitFunctionSpecifier(self, ctx:ShaperParser.FunctionSpecifierContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by ShaperParser#typeSpecifier.
     def visitTypeSpecifier(self, ctx:ShaperParser.TypeSpecifierContext):
         return self.visitChildren(ctx)
@@ -79,23 +74,8 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ShaperParser#declarationSpecifier.
-    def visitDeclarationSpecifier(self, ctx:ShaperParser.DeclarationSpecifierContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by ShaperParser#declarationType.
     def visitDeclarationType(self, ctx:ShaperParser.DeclarationTypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by ShaperParser#structDeclarator.
-    def visitStructDeclarator(self, ctx:ShaperParser.StructDeclaratorContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by ShaperParser#structDeclarationList.
-    def visitStructDeclarationList(self, ctx:ShaperParser.StructDeclarationListContext):
         return self.visitChildren(ctx)
 
 
@@ -151,6 +131,11 @@ class ShaperVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ShaperParser#primaryExpression.
     def visitPrimaryExpression(self, ctx:ShaperParser.PrimaryExpressionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#arrayIndex.
+    def visitArrayIndex(self, ctx:ShaperParser.ArrayIndexContext):
         return self.visitChildren(ctx)
 
 
@@ -269,13 +254,18 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ShaperParser#labeledStatement.
-    def visitLabeledStatement(self, ctx:ShaperParser.LabeledStatementContext):
+    # Visit a parse tree produced by ShaperParser#iterationStatement.
+    def visitIterationStatement(self, ctx:ShaperParser.IterationStatementContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ShaperParser#iterationStatement.
-    def visitIterationStatement(self, ctx:ShaperParser.IterationStatementContext):
+    # Visit a parse tree produced by ShaperParser#whileLoopStatement.
+    def visitWhileLoopStatement(self, ctx:ShaperParser.WhileLoopStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#forLoopStatement.
+    def visitForLoopStatement(self, ctx:ShaperParser.ForLoopStatementContext):
         return self.visitChildren(ctx)
 
 
@@ -284,8 +274,18 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#scopeIdentifier.
+    def visitScopeIdentifier(self, ctx:ShaperParser.ScopeIdentifierContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#identifier.
     def visitIdentifier(self, ctx:ShaperParser.IdentifierContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ShaperParser#globalScope.
+    def visitGlobalScope(self, ctx:ShaperParser.GlobalScopeContext):
         return self.visitChildren(ctx)
 
 
