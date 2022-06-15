@@ -14,7 +14,7 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-# *.dll
+*.dll
 
 # Fortran module files
 *.mod
@@ -43,3 +43,12 @@ __pycache__
 # out file
 out.txt
 
+
+
+SFML
+
+*.hae
+
+# grammar files
+.antlr
+antlr4-runtime
