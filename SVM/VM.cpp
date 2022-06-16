@@ -7,7 +7,7 @@
 #define asdouble *(double*)&
 #define aslong *(long long*)&
 
-VM::VM(const int* code, const int PC, const Parameters params):code(code), mmu(params.memSize,0), graphic(params.width, params.height, params.fps)
+VM::VM(const int* code, const int PC, const Parameters params):code(code), mmu(params.memSize,params.memOffset), graphic(params.width, params.height, params.fps)
 {
     parameters = params;
     memory = new int[params.memSize];
@@ -35,6 +35,7 @@ void VM::showCode(int len) const
 
 void VM::showMemory(unsigned int start, unsigned int end) const
 {
+    std::cout<<"memOffset: "<<mmu.getOffset()<<'\n';
     for (unsigned int i = start; i < end; i++)
     {
         std::cout<<memory[i]<<':';
