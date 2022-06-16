@@ -83,12 +83,12 @@ enum {
     LOAD    ,  // load from local (stack) -
     GLOAD   ,  // load from global memory (memory) -
     ALOAD_I ,  // load int from array -
-    LOAD_CH ,  // get color chanel
+    LOAD_CH ,  // get color chanel (R-3, G-2, B-1, A-0)
 
     STORE   ,  // store in local (stack) -
     GSTORE  ,  // store in global memory (memory) -
     ASTORE_I,  // store int in array -
-    STORE_CH,  // set color chanel
+    STORE_CH,  // set color chanel (R-3, G-2, B-1, A-0)
     
     PRINT_C ,  // ? print value as char - 
     PRINT_I ,  // ? print value on top of the stack -
@@ -119,6 +119,7 @@ enum {
 struct Parameters
 {
     unsigned int memSize = 300;
+    unsigned int memOffset = 0;
     unsigned int stackSize = 100;
     unsigned int fps = 240;
     bool debug = false;
@@ -151,7 +152,7 @@ public:
     // debug
     void displayMode(const char c) const;
     void showCode(int len = 10) const;
-    void showMemory(unsigned int start = 0, unsigned int end = 300) const;
+    void showMemory(unsigned int start = 0, unsigned int end = 100) const;
 
 private:
     void showStack() const;      //debug

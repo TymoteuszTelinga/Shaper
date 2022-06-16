@@ -7,7 +7,7 @@
 
 using std::string;
 
-int* loadProgram(const string& src)
+int* loadProgram(const string& src, Parameters &params)
 {
     std::ifstream file(src, std::ios::binary);
     if (file.is_open())
@@ -15,7 +15,10 @@ int* loadProgram(const string& src)
         file.seekg (0, std::ios::end);
         int length = file.tellg();
         file.seekg (0, std::ios::beg);
-        char *buffer = new char[length];
+        char *buffer = new char[length-4];
+        // int offset;
+        file.read((char*)&params.memOffset,4);
+        //  = offset;
         file.read(buffer,length);
         file.close();
         return (int*)buffer;
@@ -23,7 +26,8 @@ int* loadProgram(const string& src)
     return nullptr;
 }
 
-// main filename [-w width | -h height | -fps fps | -d] 
+// main filename [-w width | -h height | -fps fps | -d | -m memSize | -s stackSize] 
+// saving frames?
 int main(int argc, char *argv[])
 {
 
@@ -67,9 +71,23 @@ int main(int argc, char *argv[])
         params.debug = true;
     }
 
-    int *program = loadProgram(src);
+    itr = std::find(options.begin(), options.end(), "-m");
+    if (itr != options.end())
+    {
+        params.memSize = std::stoi(*(++itr));
+    }
+
+    itr = std::find(options.begin(), options.end(), "-s");
+    if (itr != options.end())
+    {
+        params.stackSize = std::stoi(*(++itr));
+    }
+
+    int *program = loadProgram(src, params);
 
     VM svm(program,0,params);
+    // svm.showCode(142);
+    svm.showMemory();
     svm.execute();
     
     std::cout<<"END\n";

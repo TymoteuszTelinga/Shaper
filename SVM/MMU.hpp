@@ -27,6 +27,7 @@ public:
     int size(int adr) const;
 
     void show() const; //debug
+    int getOffset() const { return offset; };
 };
 
 #endif // __MMU_H__
