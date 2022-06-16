@@ -32,7 +32,7 @@ class Manager:
     def start(self):
         if self.setup_func != None:
             self.curr_function = self.setup_func
-            oldScope = self.createNewScope(False)
+            oldScope = self.create_new_scope(False)
             self.visitor.visit(self.setup_func.ctx)
 
             self.return_var = None
@@ -44,7 +44,7 @@ class Manager:
             self.window.setContext(self, self.visitor, self.draw_func.ctx)
             self.window.show()
 
-    def createNewScope(self, hasParent) -> Scope:
+    def create_new_scope(self, hasParent) -> Scope:
         new_scope = Scope()
         old_scope = self.curr_scope
 
@@ -55,28 +55,33 @@ class Manager:
 
         return old_scope
 
-    def addFunction(self, fun: Function):
+    def func_exists(self, fun):
         if fun.name == 'draw':
             if self.draw_func == None:
                 self.draw_func = fun
-                return
+                
             else:
-                raise Exception("Function \'draw()\' is redeclared")
+                self.visitor.errorstack.append("Function \'draw()\' is redeclared")
+            return True
         
         if fun.name == 'setup':
             if self.setup_func == None:
-                self.setup_func= fun
-                return
+                self.setup_func = fun
             else:
-                raise Exception("Function \'setup()\' is redeclared")
+                self.visitor.errorstack.append("Function \'setup()\' is redeclared")
+            return True
         
         if fun.name in self.built_in_func.keys():
-            raise Exception(f"Function '{fun.name}' is built-in, can't be redeclared")
+            self.visitor.errorstack.append(f"Function '{fun.name}' is built-in, can't be redeclared")
+            return True
 
         if fun.name in self.user_func.keys():
-            raise Exception(f"Function '{fun.name}' was declared earlier, can't be redeclared")
+            self.visitor.errorstack.append(f"Function '{fun.name}' was declared earlier, can't be redeclared")
+            return True
 
-        self.user_func[fun.name] = fun
+    def addFunction(self, fun: Function):
+        if not self.func_exists(fun):
+            self.user_func[fun.name] = fun
 
     def getFunctionAddress(self, name: str) -> int:
         if name == 'draw':
@@ -126,64 +131,7 @@ class Manager:
                 
         return(func, 0)
 
-    def enterFunction(self, name: str, params: list, ctx):
-        
-        oldFunction = self.curr_function
 
-        if name in self.user_func.keys():
-            self.curr_function = self.user_func[name]
-        elif name in self.built_in_func.keys():
-            self.curr_function = self.built_in_func[name]
-
-
-        #create new scope
-        oldScope = self.createNewScope(False)
-
-        # add function's call parameters to new scope
-        for i in range(len(params)):
-            got = params[i]
-            expected = self.curr_function.parameters[i]
-            var = Variable(expected.name, got.type)
-            var.val = got.val
-
-            self.addVariable(var)
-    
-        if not self.addToHeap():
-            if self.curr_function.kind == 0:
-                raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
-            else:
-                raise Exception(f"line {ctx.start.line} Function {self.curr_function.name} exceeded maximum recursion depth: {self.max_recursion}") 
-        
-        if self.curr_function.kind == 0:
-           self.visitor.visit(self.curr_function.ctx)
-        else:
-            var = self.getVariable("x");
-            if var.type == Type.INT:
-                print(int(var.val))
-            elif var.type == Type.FLOAT:
-                print(float(var.val))
-            else:
-                print(var.val)
-
-
-        self.deleteFromHeap()
-
-        temp = self.return_var
-
-        if temp == None and self.curr_function.return_atom.type != Type.VOID:
-            raise Exception(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} returning non-void value doesn't have 'return' statement") 
-
-        if temp == None:
-            
-            temp = Constant(Type.VOID, None)
-
-        self.return_var = None
-
-        self.curr_scope = oldScope
-        self.curr_function = oldFunction
-        
-        temp = self.return_var
-            
     def getVariable(self, name: str):
         var = self.curr_scope.getVariable(name) 
 
@@ -197,7 +145,7 @@ class Manager:
         if name in ['draw', 'setup'] or name in self.built_in_func.keys() or name in self.user_func.keys():
             raise Exception("Can't create variable with the same name as declared function")
         
-        if not self.curr_scope.isAvailable(name):
+        if not self.curr_scope.is_available(name):
             return False
            
         return True
@@ -217,16 +165,48 @@ class Manager:
 
     def setVisitor(self, visitor):
         self.visitor = visitor
-
-    def addToHeap(self):
-        self.called_func +=1
-
-        if self.called_func > self.max_recursion:
-            return False
-        
-        return True
-
-    def deleteFromHeap(self):
-        self.called_func -=1
  
-        
+    def enter_setup(self):
+        if self.setup_func != None:
+            
+            oldScope = self.create_new_scope(False)
+
+            self.curr_function = self.setup_func
+            self.return_var = None
+
+            self.visitor.visit(self.setup_func.ctx)
+            self.curr_scope = oldScope
+
+    def enter_draw(self):
+        if self.draw_func != None:
+            oldScope = self.create_new_scope(False)
+
+            self.curr_function = self.draw_func
+            self.return_var = None
+
+            self.visitor.visit(self.draw_func.ctx)
+
+            self.curr_scope = oldScope 
+
+    def enter_user_functions(self):
+        self.return_var = None
+        for func in self.user_func.values():
+            self.enter_function(func)
+
+
+    def enter_function(self, func: Function):
+        self.curr_function = func
+
+        #create new scope
+        oldScope = self.create_new_scope(False)
+
+        self.curr_scope.fill_by_fun_params(self.curr_function.parameters)
+
+        self.visitor.visit(self.curr_function.ctx)
+
+        if self.return_var == None and self.curr_function.return_atom.type != Type.VOID:
+            self.visitor.errorstack.append(f"line {self.curr_function.ctx.start.line} Function {self.curr_function.name} returning non-void value doesn't have 'return' statement")
+
+        self.return_var = None
+
+        self.curr_scope = oldScope 

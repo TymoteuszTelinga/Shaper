@@ -11,53 +11,47 @@ from Manager import Manager
 # checks semantic correctness for whole file
 # gathers function declarations
 class CheckVisitor(ShaperVisitor):
+
     def __init__(self, manager: Manager) -> None:
         self.gatherFunctions = True
+        self.gatherGlobal = False
+
         self.manager = manager
+        self.manager.setVisitor(self)
+
+        # for semantic errors
         self.errorstack = []
 
 
     def checkFunctionsBody(self):
         self.manager.setVisitor(self)
 
-        if self.manager.setup_func != None:
-            oldScope = self.manager.createNewScope(False)
+        # enter setup function
+        self.manager.enter_setup()
+        
+        # enter draw function
+        self.manager.enter_draw()
 
-            self.manager.curr_function = self.manager.setup_func
-            self.manager.return_var = None
+        # enter user-defined functions
+        self.manager.enter_user_functions()
 
-            self.visit(self.manager.setup_func.ctx)
-            self.manager.curr_scope = oldScope
-
-        if self.manager.draw_func != None:
-            oldScope = self.manager.createNewScope(False)
-
-            self.manager.curr_function = self.manager.draw_func
-            self.manager.return_var = None
-
-            self.visit(self.manager.draw_func.ctx)
-
-            self.manager.curr_scope = oldScope
-
-        self.manager.curr_function = None
-        self.manager.return_var = None
-        for func in self.manager.user_func.values():
-            self.manager.enterFunction(func.name, func.parameters, None)
 
 # programm 
 #     : externalDeclarationList?
 #     ;
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):
         
-
         #file is not empty
         if ctx.externalDeclarationList() != None: 
             #gather functions
             self.visit(ctx.externalDeclarationList()) 
 
             self.gatherFunctions = False
+            self.gatherGlobal = True
             # gather global variables
             self.visit(ctx.externalDeclarationList())
+
+            self.gatherGlobal = False
 
 
 # externalDeclarationList
@@ -292,37 +286,54 @@ class CheckVisitor(ShaperVisitor):
             return self.visit(ctx.logicalORExpression())
         else:
             l = self.visit(ctx.scopeIdentifier())
+
+
             r = self.visit(ctx.assignmentExpression())
             op = ctx.assignmentOperator().getText()
+
+            channel = None
+
+            if ctx.channelIndex() != None:
+                channel = self.visit(ctx.channelIndex())
 
             if(type(l) is Constant):
                 self.errorstack.append(f"line {ctx.start.line} Can't assign value to a non-variable atom")
                 # raise Exception(f"line {ctx.start.line} Can't assign value to a non-variable atom")
+            
+            if channel != None and l.type != Type.COLOR:
+                self.errorstack.append(f"line {ctx.start.line} Can't assign channel value to a non-color variable")
+    
+            if channel != None and r.type not in [Type.INT, Type.LONG]:
+                self.errorstack.append(f"line {ctx.start.line} Channel value can be only an integer between 0 and 255")
 
-            if l.type != r.type :
-                self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
-                # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
 
-            if op == '+=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-            elif op == '-=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type)) 
-            elif op == '*=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-            elif op == '/=':
-                if l.type not in [Type.FLOAT, Type.INT]:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-            elif op == '%=':
-                if l.type not in [Type.INT]:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
-                    # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+
+
+            if channel == None:
+                if l.type != r.type :
+                    self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+                    # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+                
+                if op == '+=':
+                    if l.type not in [Type.FLOAT, Type.INT]:
+                        self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                        # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                elif op == '-=':
+                    if l.type not in [Type.FLOAT, Type.INT]:
+                        self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                        # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type)) 
+                elif op == '*=':
+                    if l.type not in [Type.FLOAT, Type.INT]:
+                        self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                        # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                elif op == '/=':
+                    if l.type not in [Type.FLOAT, Type.INT]:
+                        self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                        # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                elif op == '%=':
+                    if l.type not in [Type.INT]:
+                        self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
+                        # raise Exception(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
 
             return l
 
@@ -585,11 +596,25 @@ class CheckVisitor(ShaperVisitor):
                     gotVar = gotVar.elements[0]
             return gotVar
                     
-        
+
+        elif ctx.channelIndex() != None:
+            gotVar = self.visit(ctx.scopeIdentifier()) 
+            channel = self.visit(ctx.channelIndex())
+
+            if gotVar.type != Type.COLOR:
+                self.errorstack.append(f"line {ctx.start.line} Can't assign channel value to a non-color variable")
+
+            return Constant(Type.INT, None)
+
+
+
         elif ctx.expression() != None:
             return self.visit(ctx.expression())
         
         elif ctx.functionCall() != None:
+            if self.gatherGlobal:
+                self.errorstack.append(f"line {ctx.start.line} Can't call function outside another function")
+
             return self.visit(ctx.functionCall())
 
         else:
@@ -670,7 +695,7 @@ class CheckVisitor(ShaperVisitor):
             self.visit(ctx.paintStatement())
 
         elif ctx.compoundStatement() != None:
-            oldScope =  self.manager.createNewScope(True)
+            oldScope =  self.manager.create_new_scope(True)
 
             self.visit(ctx.compoundStatement())
 
@@ -895,7 +920,7 @@ class CheckVisitor(ShaperVisitor):
 
 
         for i in range(len(expressions)):
-            oldScope =  self.manager.createNewScope(True)
+            oldScope =  self.manager.create_new_scope(True)
             gotVar = self.visit(expressions[i])
             if gotVar.type != Type.BOOL:
                 self.errorstack.append(f"line {ctx.start.line} Excepted boolean value, instead got value of " + repr(gotVar.type)  + " type")
@@ -907,7 +932,7 @@ class CheckVisitor(ShaperVisitor):
             
 
         if len(compounds) > len(expressions):
-            oldScope =  self.manager.createNewScope(True)
+            oldScope =  self.manager.create_new_scope(True)
             self.visit(compounds[-1])
             self.manager.curr_scope = oldScope
 
@@ -926,7 +951,7 @@ class CheckVisitor(ShaperVisitor):
             # raise Exception(f"line {ctx.start.line} Excepted boolean value, instead got value of " + repr(gotVar.type)  + " type")
 
     
-        oldScope = self.manager.createNewScope(True)
+        oldScope = self.manager.create_new_scope(True)
         self.visit(ctx.compoundStatement())
         self.manager.curr_scope = oldScope
 
@@ -938,7 +963,7 @@ class CheckVisitor(ShaperVisitor):
         
         if ctx.condition == None:
             
-            oldScope = self.manager.createNewScope(True)
+            oldScope = self.manager.create_new_scope(True)
             self.visit(ctx.compoundStatement())
             self.manager.curr_scope = oldScope
                 
@@ -952,9 +977,12 @@ class CheckVisitor(ShaperVisitor):
                 self.errorstack.append(f"line {ctx.start.line} Excepted boolean value as condition, instead got value of " + repr(gotVar.type)  + " type")
                 # raise Exception(f"line {ctx.start.line} Excepted boolean value as condition, instead got value of " + repr(gotVar.type)  + " type")
             
-            oldScope = self.manager.createNewScope(True)
+            oldScope = self.manager.create_new_scope(True)
             self.visit(ctx.compoundStatement())
             self.manager.curr_scope = oldScope
                 
             if ctx.loopExpr != None:
                 self.visit(ctx.loopExpr)
+
+    def visitChannelIndex(self, ctx: ShaperParser.ChannelIndexContext):
+        return ctx.getText()

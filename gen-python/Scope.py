@@ -16,7 +16,7 @@ class Scope:
             return None
 
     # checks if variable was defined earlier in this scope
-    def isAvailable(self, name: str) -> bool:
+    def is_available(self, name: str) -> bool:
         if name in self.variables.keys():
             return False
         else:
@@ -25,4 +25,10 @@ class Scope:
     # adds new variable to scope
     def addVariable(self, var: Variable) -> None:
         self.variables[var.name] = var
+
+    def fill_by_fun_params(self, params):
+        for par in params:
+            var = Variable(par.name, par.type)
+            self.addVariable(var)
+
     

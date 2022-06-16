@@ -455,7 +455,6 @@ void VM::execute()
                 int chanel = next();
                 int value = pop();
                 char color = pop();
-                std::cout<<"VAl: "<<value<<'\n';
                 ((char*)&value)[chanel] = color;
                 push(value);
             }

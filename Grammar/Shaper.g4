@@ -1,4 +1,4 @@
-// antlr4 -Dlanguage=Python3 Shaper.g4 -visitor -o ..\gen-python\grammar
+// antlr4 -Dlanguage=Python3 Shaper.g4 -no-listener -visitor -o ..\gen-python\grammar
 
 grammar Shaper;
 
@@ -88,8 +88,8 @@ expression
     ;
 
 assignmentExpression
-    : logicalORExpression
-    | scopeIdentifier assignmentOperator assignmentExpression
+    : scopeIdentifier (DOT channelIndex)? assignmentOperator assignmentExpression
+    | logicalORExpression
     ;
 
 logicalORExpression
@@ -137,14 +137,15 @@ primaryExpression
     : scopeIdentifier
     | constant
     | scopeIdentifier arrayIndex
+    | scopeIdentifier DOT channelIndex
     | LEFTPAREN expression RIGHTPAREN                        
     | functionCall
     ;
 
 
 arrayIndex
-    : LEFTBRACKET (scopeIdentifier | constant) RIGHTBRACKET
-    | LEFTBRACKET (scopeIdentifier | constant) RIGHTBRACKET arrayIndex
+    : LEFTSQUARE (expression) RIGHTSQUARE
+    | LEFTSQUARE (expression) RIGHTSQUARE arrayIndex
     ;
 
 functionCall
@@ -303,6 +304,13 @@ constant
     | color = ColorConstant
     ;
 
+channelIndex
+    : R
+    | G
+    | B
+    | A
+    ;
+
 
 PAINT: 'paint';
 
@@ -333,6 +341,10 @@ RIGHTPAREN: ')';
 LEFTBRACKET: '{';
 
 RIGHTBRACKET: '}';
+
+LEFTSQUARE: '[';
+
+RIGHTSQUARE: ']';
 
 COMMA: ',';
 
@@ -424,6 +436,14 @@ RETURN: 'return';
 
 GLOBAL: 'global:';
 
+R: 'R';
+
+G: 'G';
+
+B: 'B';
+
+A: 'A';
+
 IntegerConstant
     : NonZeroDigit Digit*
     | [0]
@@ -461,6 +481,7 @@ Identifier
       | Digit
       )*
     ;
+
 
 fragment
 NonDigit

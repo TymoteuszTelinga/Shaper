@@ -294,5 +294,10 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#channelIndex.
+    def visitChannelIndex(self, ctx:ShaperParser.ChannelIndexContext):
+        return self.visitChildren(ctx)
+
+
 
 del ShaperParser

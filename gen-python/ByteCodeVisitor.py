@@ -1,4 +1,5 @@
 
+from calendar import c
 from multiprocessing.dummy import Manager
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
@@ -56,7 +57,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def lookSetupFunc(self):
         if self.manager.setup_func != None:
-            oldScope = self.manager.createNewScope(False)
+            oldScope = self.manager.create_new_scope(False)
             oldFP = self.maker.framePosition
             self.maker.framePosition = 1
 
@@ -71,7 +72,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def lookDrawFunc(self):
         if self.manager.draw_func != None:
-            oldScope = self.manager.createNewScope(False)
+            oldScope = self.manager.create_new_scope(False)
             oldFP = self.maker.framePosition
             self.maker.framePosition = 1
 
@@ -85,7 +86,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def lookUserDefinedFunc(self):
         for func in self.manager.user_func.values():
-            oldScope = self.manager.createNewScope(False)
+            oldScope = self.manager.create_new_scope(False)
             oldFP = self.maker.framePosition
             self.maker.framePosition = 1
 
@@ -192,7 +193,7 @@ class ByteCodeVisitor(ShaperVisitor):
             else:
                 var.address = self.maker.getIntFrameAddress()
 
-            print(var.address)
+
             self.maker.CONST_I(0)
             var.isGlobal = False
         
@@ -229,73 +230,183 @@ class ByteCodeVisitor(ShaperVisitor):
 
             l = self.visit(ctx.scopeIdentifier())
             op = ctx.assignmentOperator().getText()
-            
 
-        
-            if op == '=':
-                self.visit(ctx.assignmentExpression())
-                if l.isGlobal:
-                    self.maker.GSTORE(l.address)
-                else:
-                    self.maker.STORE(l.address)
+            if ctx.channelIndex() != None:
+                channel = self.visit(ctx.channelIndex())
 
-            elif op == '+=':
-                if l.isGlobal:
-                    self.maker.GLOAD(l.address) #save left to stack
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.ADD_I() # add 
-                    self.maker.GSTORE(l.address)
-                else:
-                    self.maker.LOAD(l.address)
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.ADD_I()
-                    self.maker.STORE(l.address)
+                if op == '=':
+                    self.visit(ctx.assignmentExpression())
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.STORE(l.address)
 
-            elif op == '-=':
-                if l.isGlobal:
-                    self.maker.GLOAD(l.address) #save left to stack
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.SUB_I() 
-                    self.maker.GSTORE(l.address)
-                else:
-                    self.maker.LOAD(l.address)
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.SUB_I()
-                    self.maker.STORE(l.address)
+                elif op == '+=':
+                    self.visit(ctx.assignmentExpression())
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)
+                        self.maker.LOAD_CH(channel)
+                        self.maker.ADD_I()
 
-            elif op == '*=':
-                if l.isGlobal:
-                    self.maker.GLOAD(l.address) #save left to stack
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.MUL_I() 
-                    self.maker.GSTORE(l.address)
-                else:
-                    self.maker.LOAD(l.address)
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.MUL_I()
-                    self.maker.STORE(l.address) 
-            elif op == '/=':
-                if l.isGlobal:
-                    self.maker.GLOAD(l.address) #save left to stack
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.DIV_I() 
-                    self.maker.GSTORE(l.address)
-                else:
-                    self.maker.LOAD(l.address)
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.DIV_I()
-                    self.maker.STORE(l.address)
-            elif op == '%=':
-                if l.isGlobal:
-                    self.maker.GLOAD(l.address) #save left to stack
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.MOD_I() 
-                    self.maker.GSTORE(l.address)
-                else:
-                    self.maker.LOAD(l.address)
-                    self.visit(ctx.assignmentExpression()) # save right value
-                    self.maker.MOD_I()
-                    self.maker.STORE(l.address)
+                        self.maker.GLOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address) 
+                        self.maker.LOAD_CH(channel)
+                        self.maker.ADD_I()
+
+                        self.maker.LOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.STORE(l.address)
+
+                elif op == '-=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.SUB_I()
+
+                        self.maker.GLOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address) 
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.SUB_I()
+
+                        self.maker.LOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.STORE(l.address)
+
+                elif op == '*=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.MUL_I()
+
+                        self.maker.GLOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address) 
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.MUL_I()
+
+                        self.maker.LOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.STORE(l.address)
+                elif op == '/=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.DIV_I()
+
+                        self.maker.GLOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address) 
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.DIV_I()
+
+                        self.maker.LOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.STORE(l.address)
+                elif op == '%=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.MOD_I()
+
+                        self.maker.GLOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address) 
+                        self.maker.LOAD_CH(channel)
+                        self.visit(ctx.assignmentExpression())
+                        self.maker.MOD_I()
+
+                        self.maker.LOAD(l.address)
+                        self.maker.STORE_CH(channel)
+                        self.maker.STORE(l.address)
+
+            else:
+                if op == '=':
+                    self.visit(ctx.assignmentExpression())
+                    if l.isGlobal:
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.STORE(l.address)
+
+                elif op == '+=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address) #save left to stack
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.ADD_I() # add 
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address)
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.ADD_I()
+                        self.maker.STORE(l.address)
+
+                elif op == '-=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address) #save left to stack
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.SUB_I() 
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address)
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.SUB_I()
+                        self.maker.STORE(l.address)
+
+                elif op == '*=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address) #save left to stack
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.MUL_I() 
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address)
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.MUL_I()
+                        self.maker.STORE(l.address) 
+                elif op == '/=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address) #save left to stack
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.DIV_I() 
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address)
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.DIV_I()
+                        self.maker.STORE(l.address)
+                elif op == '%=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address) #save left to stack
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.MOD_I() 
+                        self.maker.GSTORE(l.address)
+                    else:
+                        self.maker.LOAD(l.address)
+                        self.visit(ctx.assignmentExpression()) # save right value
+                        self.maker.MOD_I()
+                        self.maker.STORE(l.address)
 
             if l.isGlobal:
                 self.maker.GLOAD(l.address)
@@ -551,7 +662,27 @@ class ByteCodeVisitor(ShaperVisitor):
             return new_ret
 
     def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
-        if ctx.scopeIdentifier() != None: 
+        if ctx.constant() != None:
+            const = self.visit(ctx.constant())
+            self.maker.CONST_I(int(const.val))
+            return const
+
+        elif ctx.channelIndex() != None:
+            var = self.visit(ctx.scopeIdentifier())
+
+            if var.isGlobal:
+                self.maker.GLOAD(var.address)
+            else: 
+                self.maker.LOAD(var.address)
+
+            channel = self.visit(ctx.channelIndex())
+
+            self.maker.LOAD_CH(channel)
+
+            return Constant(Type.INT, None)
+
+
+        elif ctx.scopeIdentifier() != None: 
             var = self.visit(ctx.scopeIdentifier())
             
             if var.isGlobal:
@@ -561,10 +692,6 @@ class ByteCodeVisitor(ShaperVisitor):
 
             return var
 
-        elif ctx.constant() != None:
-            const = self.visit(ctx.constant())
-            self.maker.CONST_I(int(const.val))
-            return const
         
         elif ctx.expression() != None:
             return self.visit(ctx.expression())
@@ -605,7 +732,7 @@ class ByteCodeVisitor(ShaperVisitor):
             self.visit(ctx.paintStatement())
 
         elif ctx.compoundStatement() != None:
-            oldScope =  self.manager.createNewScope(True)
+            oldScope =  self.manager.create_new_scope(True)
             oldFP = self.maker.framePosition
             self.visit(ctx.compoundStatement())
             self.maker.framePosition = oldFP
@@ -760,7 +887,7 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.JMPF(-1)
 
             # make scope for visiting context
-            oldScope  =  self.manager.createNewScope(True)
+            oldScope  =  self.manager.create_new_scope(True)
             oldFP = self.maker.framePosition
 
             # visit context
@@ -794,7 +921,7 @@ class ByteCodeVisitor(ShaperVisitor):
         # if 'true' 'else' exists
         if len(compounds) > len(expressions):
             # make new scope
-            oldScope  =  self.manager.createNewScope(True)
+            oldScope  =  self.manager.create_new_scope(True)
             oldFP = self.maker.framePosition
 
             # visit context
@@ -836,7 +963,7 @@ class ByteCodeVisitor(ShaperVisitor):
         self.maker.JMPF(-1)
 
         # make new scope
-        oldScope  =  self.manager.createNewScope(True)
+        oldScope  =  self.manager.create_new_scope(True)
         oldFP = self.maker.framePosition
 
         # visit context
@@ -858,7 +985,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
         # make new scope
-        oldScope  =  self.manager.createNewScope(True)
+        oldScope  =  self.manager.create_new_scope(True)
         oldFP = self.maker.framePosition
 
         ret = None
@@ -941,3 +1068,15 @@ class ByteCodeVisitor(ShaperVisitor):
             const = Constant(Type.COLOR, Color.Color.getColor(ctx.getText()))
         
         return const
+
+    def visitChannelIndex(self, ctx: ShaperParser.ChannelIndexContext):
+        channel = ctx.getText()
+
+        if channel == 'R':
+            return 3
+        elif channel == 'G':
+            return 2
+        elif channel == 'B':
+            return 1
+        else:
+            return 0

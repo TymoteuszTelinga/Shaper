@@ -1,8 +1,8 @@
 int width = 800;
 int height = 600;
 
-int x = 400;
-int y = 300;
+int x;
+int y;
 
 int size = 40;
 
@@ -15,7 +15,8 @@ color col = RED;
 
 void setup()
 {
-
+    x = 400;
+    y = 300;
 }
 
 void draw()
@@ -69,7 +70,7 @@ void changeColor()
     }
     else
     {
-        col = RED;
+        col.B = 10;
     }
 
 }

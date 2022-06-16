@@ -11,9 +11,9 @@ from CheckVisitor import CheckVisitor
 
 from Manager import Manager
 
-from ByteCodeWriter import ByteCodeWriter
 from ShaperErrorListener import ShaperErrorListener
 
+from ByteCodeWriter import ByteCodeWriter
 from ParametersHandler import ParametersHandler
 
 def main(argv):
@@ -34,6 +34,9 @@ def main(argv):
 
     tree = parse_program(FileStream(programmParamsHand.inputName))
     
+    if  tree == None:
+        return
+
     errors, manager = check_tree(tree)
 
     if(len(errors) > 0):

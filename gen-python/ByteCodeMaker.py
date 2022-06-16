@@ -412,6 +412,13 @@ class ByteCodeMaker:
         self.commandCounter += 1 
         self.bytecodePosition += 1
 
+    def LOAD_CH(self, channel: int):
+        self.commandsQueue.append((Command.LOAD_CH, channel))
+
+        self.framePosition += 0
+        self.commandCounter += 1
+        self.bytecodePosition += 2
+
     def STORE(self, offset: int):
         self.commandsQueue.append( (Command.STORE , offset))
 
@@ -432,6 +439,13 @@ class ByteCodeMaker:
         self.framePosition -= 3
         self.commandCounter += 1 
         self.bytecodePosition += 1
+
+    def STORE_CH(self, channel: int):
+        self.commandsQueue.append((Command.STORE_CH, channel))
+
+        self.framePosition -= 1
+        self.commandCounter += 1
+        self.bytecodePosition += 2
 
     def PRINT_C(self):
         self.commandsQueue.append( (Command.PRINT_C ))

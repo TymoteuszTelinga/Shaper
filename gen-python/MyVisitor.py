@@ -285,7 +285,7 @@ class MyVisitor(ShaperVisitor):
         if ctx.functionParameterList() != None:
             params = self.visit(ctx.functionParameterList())
         
-        return self.manager.enterFunction(name, params, ctx)
+        return self.manager.enter_function(name, params, ctx)
 
     def visitFunctionParameterList(self, ctx: ShaperParser.FunctionParameterListContext):
 
@@ -302,7 +302,7 @@ class MyVisitor(ShaperVisitor):
             self.visit(ctx.paintStatement())
 
         elif ctx.compoundStatement() != None:
-            oldScope =  self.manager.createNewScope(True)
+            oldScope =  self.manager.create_new_scope(True)
 
             self.visit(ctx.compoundStatement())
 
@@ -447,7 +447,7 @@ class MyVisitor(ShaperVisitor):
         return const
 
     def visitSelectionStatement(self, ctx: ShaperParser.SelectionStatementContext):
-            oldScope =  self.manager.createNewScope(True)
+            oldScope =  self.manager.create_new_scope(True)
 
             expressions = ctx.expression()
             compounds = ctx.compoundStatement()
@@ -474,7 +474,7 @@ class MyVisitor(ShaperVisitor):
 
     def visitWhileLoopStatement(self, ctx: ShaperParser.WhileLoopStatementContext):
         while self.visit(ctx.expression()).val == True:
-            oldScope = self.manager.createNewScope(True)
+            oldScope = self.manager.create_new_scope(True)
             self.visit(ctx.compoundStatement())
             self.manager.curr_scope = oldScope
 
@@ -487,7 +487,7 @@ class MyVisitor(ShaperVisitor):
         
         if ctx.condition == None:
             while True:
-                oldScope = self.manager.createNewScope(True)
+                oldScope = self.manager.create_new_scope(True)
                 self.visit(ctx.compoundStatement())
                 self.manager.curr_scope = oldScope
                 
@@ -496,7 +496,7 @@ class MyVisitor(ShaperVisitor):
             
         else:
             while self.visit(ctx.condition).val == True:
-                oldScope = self.manager.createNewScope(True)
+                oldScope = self.manager.create_new_scope(True)
                 self.visit(ctx.compoundStatement())
                 self.manager.curr_scope = oldScope
                 
