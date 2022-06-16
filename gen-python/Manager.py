@@ -23,8 +23,7 @@ class Manager:
         self.draw_func: Function = None
         self.setup_func: Function = None
 
-        # for limiting recursion
-        self.called_func: int = 0
+        self.global_offset = 0 
 
         self.fillBuitInFunctions()
 
@@ -210,3 +209,15 @@ class Manager:
         self.return_var = None
 
         self.curr_scope = oldScope 
+
+    def clearScope(self, oldScope: Scope):
+        to_free = []
+
+        for var in self.curr_scope.variables.values():
+            if var.is_root:
+                to_free.append(var)
+
+        self.curr_scope = oldScope
+
+        return to_free
+            

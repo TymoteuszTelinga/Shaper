@@ -62,15 +62,18 @@ void changeColor()
 {
     if(col == RED)
     {
-        col = GREEN;
+        col.G = 255;
+        col.R = 0;
     }
     elif (col == GREEN)
     {
-        col = YELLOW;
+        col.B = 255;
+        col.G = 0;
     }
     else
     {
-        col.B = 10;
+        col.R = 255;
+        col.B = 0;
     }
 
 }

@@ -21,7 +21,6 @@ functionDefinition
     : typeSpecifier identifier declarator compoundStatement
     ;
 
-
 typeSpecifier
     : VOID
     | BOOL
@@ -32,7 +31,6 @@ typeSpecifier
     | FLOAT
     | DOUBLE
     | COLOR
-    | ARRAY typeSpecifier
     ;
 
 declarator
@@ -70,8 +68,12 @@ initDeclarator
     : declarationType identifier (assignmentOperator assignmentExpression)?
     ;
 
-
 declarationType
+    : atomicType
+    | ARRAY LEFTSQUARE (expression) RIGHTSQUARE atomicType
+    ;
+
+atomicType
     : BOOL
     | CHAR
     | SHORT
@@ -80,7 +82,6 @@ declarationType
     | FLOAT
     | DOUBLE
     | COLOR
-    | ARRAY LEFTPAREN (scopeIdentifier | constant)? RIGHTPAREN declarationType
     ;
 
 expression
@@ -88,7 +89,7 @@ expression
     ;
 
 assignmentExpression
-    : scopeIdentifier (DOT channelIndex)? assignmentOperator assignmentExpression
+    : scopeIdentifier ((DOT channelIndex) | arrayIndex)? assignmentOperator assignmentExpression
     | logicalORExpression
     ;
 
@@ -145,7 +146,6 @@ primaryExpression
 
 arrayIndex
     : LEFTSQUARE (expression) RIGHTSQUARE
-    | LEFTSQUARE (expression) RIGHTSQUARE arrayIndex
     ;
 
 functionCall

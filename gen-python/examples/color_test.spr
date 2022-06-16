@@ -1,8 +1,19 @@
 
+color rec_col = GREEN;
 
 void setup()
 {
-    color c = BLUE;
-    c.B = 0;
-    c.A += 1*4;
+    rec_col.R = 40;
+    rec_col.B = 98;
+}
+
+void draw()
+{
+    paint rectangle at (350,80) of (60) with rec_col;
+
+    rec_col.G -= 2;
+    rec_col.R += 3;
+    rec_col.B = rec_col.G/4;
+    
+    //rec_col.A -= 1;
 }

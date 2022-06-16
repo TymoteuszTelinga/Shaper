@@ -39,11 +39,14 @@ def main(argv):
 
     errors, manager = check_tree(tree)
 
+
+
     if(len(errors) > 0):
         for error in errors:
             print(error)
 
-    else:      
+    else:
+     #   print(manager.global_offset)      
         commandsQueue = generate_bytecode(tree, manager)
 
         if programmParamsHand.debug:

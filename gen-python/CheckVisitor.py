@@ -36,6 +36,12 @@ class CheckVisitor(ShaperVisitor):
         self.manager.enter_user_functions()
 
 
+    def fillTypesTree(self, var : Variable, types : list):
+        if len(types) > 0:
+            var.array_var = Variable(None, types[0])
+
+            self.fillTypesTree(var.array_var, types[1:])
+
 # programm 
 #     : externalDeclarationList?
 #     ;
@@ -193,23 +199,26 @@ class CheckVisitor(ShaperVisitor):
             self.visit(ctx.statement())
 
 
-    def fillTypesTree(self, var : Variable, types : list, sizes : list):
-        if len(types) > 0:
-            var.element_type = types[0]
-            var.elements = [Variable("unnamed", var.element_type)] 
-            self.fillTypesTree(var.elements[0], types[1:], sizes[1:])
 
 # initDeclarator
 #     : declarationType identifier ( assignmentOperator assignmentExpression)?
 #     ;
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
         name = ctx.identifier().getText() # name of declared variable
-        types, sizes = self.visit(ctx.declarationType()) # type of declared variable
+        types = self.visit(ctx.declarationType()) # type of declared variable
 
 
         var = Variable(name, types[0]) # create new variable
 
-        self.fillTypesTree(var, types[1:], sizes)
+        var.is_root = True
+
+        self.fillTypesTree(var, types[1:])
+
+        if self.gatherGlobal:
+            if var.type in [Type.DOUBLE, Type.LONG]:
+                self.manager.global_offset += 2
+            else:
+                self.manager.global_offset += 1
 
 
         # variable created earlier in current scope
@@ -219,6 +228,9 @@ class CheckVisitor(ShaperVisitor):
 
         # initializing value
         if ctx.assignmentExpression() != None:
+            if var.type == Type.ARRAY:
+                self.errorstack.append(f"line {ctx.start.line} Value can't be assigned to array during declaration")
+            
             r_value = self.visit(ctx.assignmentExpression())
             if var.type != r_value.type:
                 self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
@@ -227,49 +239,41 @@ class CheckVisitor(ShaperVisitor):
         self.manager.addVariable(var)
     
 
-        
-
-
 # declarationType
 #     : BOOL
+#     | CHAR
+#     | SHORT
 #     | INT
 #     | LONG
 #     | FLOAT
 #     | DOUBLE
 #     | COLOR
-#     | STRUCT identifier
-#     | ARRAY LEFTPAREN (identifier | constant)? RIGHTPAREN declarationType
-#     | LIST declarationType
+#     | ARRAY LEFTPAREN (expression | constant)? RIGHTPAREN declarationType
 #     ;
     def visitDeclarationType(self, ctx: ShaperParser.DeclarationTypeContext) -> Type:
         type_list = []
-        size_list = []
 
-        if ctx.declarationType() == None:
-            type_list.append(Type.getType(ctx.getText()))
+        if ctx.expression() == None:
+            type_list.append(self.visit(ctx.atomicType()))
              
         else: 
             type_list.append(Type.ARRAY)
-
-            gotVar = None
-            if (ctx.scopeIdentifier() != None):
-                gotVar = self.visit(ctx.scopeIdentifier())
-            else:
-                gotVar = self.visit(ctx.constant())
+            
+            gotVar = self.visit(ctx.expression())
             
             if gotVar.type not in [Type.CHAR, Type.SHORT, Type.INT, Type.LONG]:
                 self.errorstack.append(f"line {ctx.start.line} Array size must be an integer number, instead got value of type {repr(gotVar.type)} ")
             
-            size_list.append(gotVar)
              
-            ret = self.visit(ctx.declarationType())
+            ret = self.visit(ctx.atomicType())
 
-            type_list += ret[0]
-            size_list += ret[1]
+            type_list.append(ret)
 
-        return (type_list, size_list)
+        return type_list
 
-            
+    def visitAtomicType(self, ctx: ShaperParser.AtomicTypeContext):
+        return Type.getType(ctx.getText())
+
 # expression
 #     : assignmentExpression
 #     ;
@@ -286,17 +290,19 @@ class CheckVisitor(ShaperVisitor):
             return self.visit(ctx.logicalORExpression())
         else:
             l = self.visit(ctx.scopeIdentifier())
-
-
             r = self.visit(ctx.assignmentExpression())
             op = ctx.assignmentOperator().getText()
 
             channel = None
+            index = None
 
             if ctx.channelIndex() != None:
                 channel = self.visit(ctx.channelIndex())
 
-            if(type(l) is Constant):
+            if ctx.arrayIndex() != None:
+                index = self.visit(ctx.arrayIndex())
+
+            if l is Constant:
                 self.errorstack.append(f"line {ctx.start.line} Can't assign value to a non-variable atom")
                 # raise Exception(f"line {ctx.start.line} Can't assign value to a non-variable atom")
             
@@ -308,12 +314,22 @@ class CheckVisitor(ShaperVisitor):
 
 
 
+            if index != None and l.type != Type.ARRAY:
+                self.errorstack.append(f"line {ctx.start.line} Can't use index operator with a variable of type {repr(l.type)}")
+            elif index != None:
+                l = l.array_var
+            
+            
+
 
             if channel == None:
                 if l.type != r.type :
                     self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
                     # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
                 
+                if l.type == Type.ARRAY:
+                    self.errorstack.append(f"line {ctx.start.line} Can't change array-variable value")
+
                 if op == '+=':
                     if l.type not in [Type.FLOAT, Type.INT]:
                         self.errorstack.append(f"line {ctx.start.line} Can't use  assign operator \'{op}\' to type " + repr(l.type))
@@ -585,21 +601,18 @@ class CheckVisitor(ShaperVisitor):
         elif ctx.arrayIndex() != None:
             
             gotVar = self.visit(ctx.scopeIdentifier()) 
-            indexes = self.visit(ctx.arrayIndex())
+            index = self.visit(ctx.arrayIndex())
 
-            for _ in indexes:
-                
-                if gotVar.type != Type.ARRAY:
-                    self.errorstack.append(f"line {ctx.start.line} Can't use index operator with a variable of type {repr(gotVar.type)}")
-                    break
-                else:
-                    gotVar = gotVar.elements[0]
+            if gotVar.type != Type.ARRAY:
+                self.errorstack.append(f"line {ctx.start.line} Can't use index operator with a variable of type {repr(gotVar.type)}")
+            else:
+                gotVar = gotVar.array_var
+
             return gotVar
                     
 
         elif ctx.channelIndex() != None:
             gotVar = self.visit(ctx.scopeIdentifier()) 
-            channel = self.visit(ctx.channelIndex())
 
             if gotVar.type != Type.COLOR:
                 self.errorstack.append(f"line {ctx.start.line} Can't assign channel value to a non-color variable")
@@ -622,20 +635,13 @@ class CheckVisitor(ShaperVisitor):
             return var
 
     def visitArrayIndex(self, ctx: ShaperParser.ArrayIndexContext):
-        gotVar = None
-        if ctx.scopeIdentifier() != None:
-            gotVar = self.visit(ctx.scopeIdentifier())
-        else:
-            gotVar = self.visit(ctx.constant())
-        
+        gotVar = self.visit(ctx.expression())
+
         if gotVar.type not in [Type.CHAR, Type.SHORT, Type.INT, Type.LONG]:
                 self.errorstack.append(f"line {ctx.start.line} Array's element index must be an integer number, instead got value of type {repr(gotVar.type)} ")
 
-        if ctx.arrayIndex() != None:
-            return [gotVar] + self.visit(ctx.arrayIndex())
-
-        return [gotVar]
-        
+        return gotVar
+    
 
 # functionCall
 #     : identifier LEFTPAREN functionParameterList? RIGHTPAREN 

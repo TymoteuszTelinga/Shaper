@@ -1,6 +1,3 @@
-
-from calendar import c
-from multiprocessing.dummy import Manager
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
@@ -65,7 +62,7 @@ class ByteCodeVisitor(ShaperVisitor):
             self.visit(self.manager.setup_func.ctx)
 
             self.maker.framePosition = oldFP
-            self.manager.curr_scope = oldScope
+            self.freeMemory(self.manager.clearScope(oldScope))
 
             self.maker.CONST_I(0)
             self.maker.RET()
@@ -79,7 +76,7 @@ class ByteCodeVisitor(ShaperVisitor):
             self.manager.draw_func.address = self.maker.bytecodePosition
             self.visit(self.manager.draw_func.ctx)
             self.maker.framePosition = oldFP
-            self.manager.curr_scope = oldScope  
+            self.freeMemory(self.manager.clearScope(oldScope))  
 
             self.maker.CONST_I(0)
             self.maker.RET()
@@ -103,7 +100,7 @@ class ByteCodeVisitor(ShaperVisitor):
             self.visit(func.ctx)
 
             self.maker.framePosition = oldFP
-            self.manager.curr_scope = oldScope
+            self.freeMemory(self.manager.clearScope(oldScope))
 
             self.maker.CONST_I(0)
             self.maker.RET()
@@ -132,7 +129,15 @@ class ByteCodeVisitor(ShaperVisitor):
 
         var.type = Type.VOID
 
+    
+    def freeMemory(self, to_free):
+        for var in to_free:
+            if var.isGlobal:
+                self.maker.GLOAD(var.address)
+            else:
+                self.maker.LOAD(var.address)
         
+            self.maker.FREE()
 
 
 
@@ -176,8 +181,13 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
         name = ctx.identifier().getText()
-        type = self.visit(ctx.declarationType())
-        var = Variable(name, type)
+        types = self.visit(ctx.declarationType())
+
+        var = Variable(name, types[0])
+        var.is_root = True
+
+        if var.type == Type.ARRAY:
+            var.array_var = Constant(types[1], None)
 
 
         if self.isGlobal:
@@ -193,8 +203,8 @@ class ByteCodeVisitor(ShaperVisitor):
             else:
                 var.address = self.maker.getIntFrameAddress()
 
-
-            self.maker.CONST_I(0)
+            if var.type != Type.ARRAY:
+               self.maker.CONST_I(0)
             var.isGlobal = False
         
 
@@ -207,11 +217,37 @@ class ByteCodeVisitor(ShaperVisitor):
                 self.maker.GSTORE(var.address)
             else:
                 self.maker.STORE(var.address)
-            
+
+        if var.type == Type.ARRAY:
+            self.maker.NEWARR()
+
+            if self.isGlobal:
+                self.maker.GSTORE(var.address)
+            else:
+                self.maker.STORE(var.address)
 
 
+        
         self.manager.addVariable(var)
         return var
+
+    def visitDeclarationType(self, ctx: ShaperParser.DeclarationTypeContext) -> Type:
+        type_list = []
+
+        if ctx.expression() == None:
+            type_list.append(self.visit(ctx.atomicType()))
+             
+        else: 
+            type_list.append(Type.ARRAY)
+
+            self.visit(ctx.expression())
+              
+             
+            ret = self.visit(ctx.atomicType())
+
+            type_list.append(ret)
+
+        return type_list
 
     def visitExpression(self, ctx: ShaperParser.ExpressionContext) -> Variable:
         ret = self.visitChildren(ctx)
@@ -223,7 +259,6 @@ class ByteCodeVisitor(ShaperVisitor):
     def visitAssignmentExpression(self, ctx: ShaperParser.AssignmentExpressionContext):
         if ctx.scopeIdentifier() == None:
             ret = self.visit(ctx.logicalORExpression())
-
             return ret
 
         else:
@@ -231,7 +266,134 @@ class ByteCodeVisitor(ShaperVisitor):
             l = self.visit(ctx.scopeIdentifier())
             op = ctx.assignmentOperator().getText()
 
-            if ctx.channelIndex() != None:
+            if ctx.arrayIndex() != None:
+
+                if op == '=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)
+                    else:
+                        self.maker.LOAD(l.address)
+
+                    self.visit(ctx.arrayIndex())
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
+
+                    self.visit(ctx.assignmentExpression())
+
+                    self.maker.ASTORE_I()
+
+                elif op == '+=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)     # addr
+
+                    else:
+                        self.maker.LOAD(l.address)     # addr
+
+                    self.visit(ctx.arrayIndex()) # addr index
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
+
+                    self.maker.ALOAD_I() # addr index addr index val1
+                    self.visit(ctx.assignmentExpression()) # addr index addr index val1 val2
+
+                    self.maker.ADD_I() # addr index addr index val
+
+                    self.maker.ASTORE_I() # addr index _
+
+                elif op == '-=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)     # addr
+
+                    else:
+                        self.maker.LOAD(l.address)     # addr
+
+                    self.visit(ctx.arrayIndex()) # addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
+
+                    self.maker.ALOAD_I() # addr index val1
+                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+
+                    self.maker.SUB_I() # addr index val
+
+                    self.maker.ASTORE_I() # _
+
+                elif op == '*=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)     # addr
+
+                    else:
+                        self.maker.LOAD(l.address)     # addr
+
+                    self.visit(ctx.arrayIndex()) # addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
+
+                    self.maker.ALOAD_I() # addr index val1
+                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+
+                    self.maker.MUL_I() # addr index val
+
+                    self.maker.ASTORE_I() # _
+
+                elif op == '/=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)     # addr
+
+                    else:
+                        self.maker.LOAD(l.address)     # addr
+
+                    self.visit(ctx.arrayIndex()) # addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
+
+                    self.maker.ALOAD_I() # addr index val1
+                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+
+                    self.maker.DIV_I() # addr index val
+
+                    self.maker.ASTORE_I() # _
+
+                elif op == '%=':
+                    if l.isGlobal:
+                        self.maker.GLOAD(l.address)     # addr
+
+                    else:
+                        self.maker.LOAD(l.address)     # addr
+
+                    self.visit(ctx.arrayIndex()) # addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
+
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr
+                    self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
+
+                    self.maker.ALOAD_I() # addr index val1
+                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+
+                    self.maker.MOD_I() # addr index val
+
+                    self.maker.ASTORE_I() # _
+
+
+            elif ctx.channelIndex() != None:
                 channel = self.visit(ctx.channelIndex())
 
                 if op == '=':
@@ -303,6 +465,7 @@ class ByteCodeVisitor(ShaperVisitor):
                         self.maker.LOAD(l.address)
                         self.maker.STORE_CH(channel)
                         self.maker.STORE(l.address)
+
                 elif op == '/=':
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)
@@ -408,12 +571,17 @@ class ByteCodeVisitor(ShaperVisitor):
                         self.maker.MOD_I()
                         self.maker.STORE(l.address)
 
+
+            if ctx.arrayIndex() != None:
+                self.maker.ALOAD_I()
+                return l.array_var
+
+
             if l.isGlobal:
                 self.maker.GLOAD(l.address)
             else:
                 self.maker.LOAD(l.address)
             
-
             return l
 
 
@@ -681,6 +849,19 @@ class ByteCodeVisitor(ShaperVisitor):
 
             return Constant(Type.INT, None)
 
+        elif ctx.arrayIndex() != None:
+            var = self.visit(ctx.scopeIdentifier())
+
+            if var.isGlobal:
+                self.maker.GLOAD(var.address)
+            else: 
+                self.maker.LOAD(var.address)
+
+            self.visit(ctx.arrayIndex())
+
+            self.maker.ALOAD_I()
+
+            return var.array_var
 
         elif ctx.scopeIdentifier() != None: 
             var = self.visit(ctx.scopeIdentifier())
@@ -736,8 +917,10 @@ class ByteCodeVisitor(ShaperVisitor):
             oldFP = self.maker.framePosition
             self.visit(ctx.compoundStatement())
             self.maker.framePosition = oldFP
-            self.manager.curr_scope = oldScope
 
+
+            self.freeMemory(self.manager.clearScope(oldScope))
+        
 
         elif ctx.expression() != None:
             self.redundant_pop(self.visit(ctx.expression()))
@@ -895,7 +1078,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
             #restore scope and fp
             self.maker.framePosition = oldFP
-            self.manager.curr_scope = oldScope
+            self.freeMemory(self.manager.clearScope(oldScope))
 
 
             if com_len > exp_len or i <= exp_len - 2:
@@ -929,7 +1112,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
             # restore scope
             self.maker.framePosition = oldFP
-            self.manager.curr_scope = oldScope
+            self.freeMemory(self.manager.clearScope(oldScope))
 
             # end of if-clause
         
@@ -971,7 +1154,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
         # restore scope
         self.maker.framePosition = oldFP
-        self.manager.curr_scope = oldScope
+        self.freeMemory(self.manager.clearScope(oldScope))
 
         curr_address = self.maker.bytecodePosition
 
@@ -1033,7 +1216,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
         # restore scope
         self.maker.framePosition = oldFP
-        self.manager.curr_scope = oldScope
+        self.freeMemory(self.manager.clearScope(oldScope))
 
         if ret != None:
             self.redundant_pop(ret) 
@@ -1080,3 +1263,9 @@ class ByteCodeVisitor(ShaperVisitor):
             return 1
         else:
             return 0
+
+    def visitArrayIndex(self, ctx: ShaperParser.ArrayIndexContext):
+        gotVar = self.visit(ctx.expression())
+        return gotVar
+
+    

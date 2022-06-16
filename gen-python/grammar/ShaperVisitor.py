@@ -79,6 +79,11 @@ class ShaperVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ShaperParser#atomicType.
+    def visitAtomicType(self, ctx:ShaperParser.AtomicTypeContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ShaperParser#expression.
     def visitExpression(self, ctx:ShaperParser.ExpressionContext):
         return self.visitChildren(ctx)
