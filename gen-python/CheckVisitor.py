@@ -258,7 +258,7 @@ class CheckVisitor(ShaperVisitor):
              
         else: 
             type_list.append(Type.ARRAY)
-            
+
             gotVar = self.visit(ctx.expression())
             
             if gotVar.type not in [Type.CHAR, Type.SHORT, Type.INT, Type.LONG]:
@@ -822,19 +822,13 @@ class CheckVisitor(ShaperVisitor):
 #     : WITH (identifier|constant)
 #     ;
     def visitColorStatement(self, ctx: ShaperParser.ColorStatementContext):
-        if ctx.constant() != None:
-            const = self.visit(ctx.constant())
+        var = self.visit(ctx.expression())
 
-            if const.type != Type.COLOR:
-                self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(const.type))
-                # raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(const.type))
-        else:
-            var = self.visit(ctx.scopeIdentifier())
-
-
-            if var.type != Type.COLOR:
-                self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(var.type)) 
-                # raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(var.type))
+        if var.type != Type.COLOR:
+            self.errorstack.append(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(var.type))
+            # raise Exception(f"line {ctx.start.line} Incorrect type, expected 'color', got " + repr(const.type))
+       
+        return var
 
 
 # posSizeParent

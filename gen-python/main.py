@@ -52,7 +52,7 @@ def main(argv):
         if programmParamsHand.debug:
             print(commandsQueue)
                 
-        save_bytecode(programmParamsHand.outputName, commandsQueue)
+        save_bytecode(programmParamsHand.outputName, manager.global_offset, commandsQueue)
 
 
 
@@ -101,9 +101,9 @@ def generate_bytecode(tree, manager):
     byteCodeVisitor.generateCode(tree)
     return byteCodeVisitor.maker.commandsQueue
 
-def save_bytecode(outputfile, commands):
+def save_bytecode(outputfile, memory_offset ,commands):
     writer = ByteCodeWriter(outputfile)
-    writer.writeToFile(commands)
+    writer.writeToFile(memory_offset, commands)
 
 if __name__ == '__main__':
     main(sys.argv)

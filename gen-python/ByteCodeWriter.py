@@ -9,8 +9,10 @@ class ByteCodeWriter:
         self.filename = filename
         self.fileHandler = None
 
-    def writeToFile(self, commands):
+    def writeToFile(self, offset, commands):
         self.fileHandler = open(self.filename, "wb")
+
+        self.writeOffset(offset)
 
         for command in commands:
             if(type(command) == tuple):
@@ -23,11 +25,14 @@ class ByteCodeWriter:
             self.writeSingleByte(byte)
         
     def writeSingleByte(self, byte):
-            if self.fileHandler != None:
-                if type(byte) == Command:
-                    byte = byte.value
+        if self.fileHandler != None:
+            if type(byte) == Command:
+                byte = byte.value
                     
-                if byte < 0:
-                    byte = byte & 0xffffffff
+            if byte < 0:
+                byte = byte & 0xffffffff
                     
-                self.fileHandler.write(byte.to_bytes(4, byteorder="little"))
+            self.fileHandler.write(byte.to_bytes(4, byteorder="little"))
+
+    def writeOffset(self, offset):
+        self.writeSingleByte(offset)

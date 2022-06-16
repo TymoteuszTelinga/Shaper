@@ -253,7 +253,7 @@ toStatement
     ;
 
 colorStatement
-    : WITH ( scopeIdentifier|constant)
+    : WITH expression
     ;
 
 posSizeParent
