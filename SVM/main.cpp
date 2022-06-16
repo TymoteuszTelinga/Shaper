@@ -23,6 +23,7 @@ int* loadProgram(const string& src, Parameters &params)
         file.close();
         return (int*)buffer;
     }
+    std::cerr<<"error: unable to load file "<<src<<'\n';
     return nullptr;
 }
 
@@ -86,8 +87,6 @@ int main(int argc, char *argv[])
     int *program = loadProgram(src, params);
 
     VM svm(program,0,params);
-    // svm.showCode(142);
-    svm.showMemory();
     svm.execute();
     
     std::cout<<"END\n";
