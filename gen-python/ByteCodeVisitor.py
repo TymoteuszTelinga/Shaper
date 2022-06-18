@@ -134,12 +134,20 @@ class ByteCodeVisitor(ShaperVisitor):
     
     def freeMemory(self, to_free):
         for var in to_free:
-            if var.isGlobal:
-                self.maker.GLOAD(var.address)
+            if var.is_root:
+                if var.isGlobal:
+                    self.maker.GLOAD(var.address)
+                else:
+                    self.maker.LOAD(var.address)
+                self.maker.FREE()
+
+        for var in to_free:
+            print(var.name)
+            if var.type in [Type.LONG, Type.DOUBLE]:
+                self.maker.POP2()
             else:
-                self.maker.LOAD(var.address)
+                self.maker.POP()
         
-            self.maker.FREE()
 
 
     def convert_single(self, atom):
@@ -197,7 +205,7 @@ class ByteCodeVisitor(ShaperVisitor):
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
 
         if not self.isGlobal:
-            self.maker.CONST_I(0)
+                self.maker.CONST_I(0)
 
         name = ctx.identifier().getText() # gets variable name 
         types = self.visit(ctx.declarationType()) # end type (types if array is one of them)
@@ -232,7 +240,6 @@ class ByteCodeVisitor(ShaperVisitor):
 
             var.isGlobal = False
         
-        print(var.name, var.address)
 
         if ctx.assignmentExpression() != None:
 
@@ -1139,12 +1146,13 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def visitWhileLoopStatement(self, ctx: ShaperParser.WhileLoopStatementContext):
 
-        
         # get destination to condition jump
         cond_address = self.maker.bytecodePosition
 
+
         # check expression
         self.visit(ctx.expression())
+
 
         # make jump to end if condition is False:
         end_jump = (self.maker.commandCounter, self.maker.bytecodePosition)
@@ -1174,18 +1182,17 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
         # make new scope
-        oldScope  =  self.manager.create_new_scope(True)
-        oldFP = self.maker.framePosition
 
-        ret = None
 
         
         #visit init Expression/Declaration
         if ctx.initExpr != None:
             self.redundant_pop(self.visit(ctx.initExpr))
         elif ctx.initDec != None:
-            ret = self.visit(ctx.initDec)
+            self.visit(ctx.initDec)
         
+        oldScope  =  self.manager.create_new_scope(True)
+        oldFP = self.maker.framePosition
 
 
         # save address to this place for condition jump
@@ -1204,17 +1211,20 @@ class ByteCodeVisitor(ShaperVisitor):
         self.maker.JMPF(-1)
 
 
-        # visit contextF
+        # visit 'for' body
         self.visit(ctx.compoundStatement())
 
         # visit loop Expression
         if ctx.loopExpr != None:
             self.redundant_pop(self.visit(ctx.loopExpr))
 
-        curr_address = self.maker.bytecodePosition
 
+        self.freeMemory(self.manager.clearScope(oldScope))
+
+        curr_address = self.maker.bytecodePosition
         # make jump to condition
         self.maker.JMP(cond_address - curr_address - 2)
+
 
         # add out of for jump to stack 
         self.maker.jumpStack.append((end_jump[0], 
@@ -1222,10 +1232,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
         # restore scope
         self.maker.framePosition = oldFP
-        self.freeMemory(self.manager.clearScope(oldScope))
 
-        if ret != None:
-            self.redundant_pop(ret) 
         
 
 

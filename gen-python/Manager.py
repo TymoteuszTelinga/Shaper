@@ -211,11 +211,7 @@ class Manager:
         self.curr_scope = oldScope 
 
     def clearScope(self, oldScope: Scope):
-        to_free = []
-
-        for var in self.curr_scope.variables.values():
-            if var.is_root:
-                to_free.append(var)
+        to_free = self.curr_scope.variables.values()
 
         self.curr_scope = oldScope
 
