@@ -10,7 +10,7 @@ class ByteCodeMaker:
     def __init__(self) -> None:
 
 
-        # containts info about:
+        # contains info about:
         # * commandNumber where jump was initialized
         # * bytecodePosition of place where jump ends
         self.jumpStack = []

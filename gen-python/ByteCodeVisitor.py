@@ -888,6 +888,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
         if name == "print":
             self.maker.PRINT_I()
+            self.maker.CONST_I(0)
             return Constant(Type.VOID, None)
         else:
             ret = self.manager.findFunction(name)
