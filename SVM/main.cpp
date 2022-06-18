@@ -16,9 +16,7 @@ int* loadProgram(const string& src, Parameters &params)
         int length = file.tellg();
         file.seekg (0, std::ios::beg);
         char *buffer = new char[length-4];
-        // int offset;
         file.read((char*)&params.memOffset,4);
-        //  = offset;
         file.read(buffer,length);
         file.close();
         return (int*)buffer;
