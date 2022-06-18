@@ -6,6 +6,10 @@ bool sorted = false;
 int swap1 = -1;
 int swap2 = -1;
 
+int startIndex = 0;
+
+bool wasChanged = false;
+
 void setup()
 {
     values[0] = 6;
@@ -32,22 +36,37 @@ void draw()
 
 void sort()
 {
-    for(int i = 0; i<9; ++i)
+    for(int i = startIndex; i < 9; ++i)
     {
-        for(int j = i+1; j < 10; ++j)
+        if(values[i] > values[i+1])
         {
-            if(values[i] > values[j])
+            int temp = values[i];
+            values[i] = values[i+1];
+            values[i+1] = temp;
+
+            swap1 = i;
+            swap2 = i+1;
+
+            if (i == 8)
             {
-                int temp = values[i];
-                values[i] = values[j];
-                values[j] = temp;
-
-                swap1 = i;
-                swap2 = j;
-
-                return;
+                startIndex = 0;
             }
+            else
+            {
+                startIndex = i+1;
+            }
+            
+            wasChanged = true;
+
+             return;
         }
+    }
+
+    if(wasChanged)
+    {
+        wasChanged = false;
+        startIndex = 0;
+        return;
     }
 
     swap1 = -1;
@@ -60,7 +79,7 @@ void display()
 {
     for(int i = 0; i<10; ++i)
     {
-        color recPaint = WHITE;   
+        color recPaint = WHITE;
         if(i == swap1 | i == swap2)
         {
             recPaint = RED;
