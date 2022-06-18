@@ -1,3 +1,4 @@
+from click import pass_context
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
@@ -35,22 +36,23 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.CALL(-1, 0)
             self.maker.POP()
         
+        #enter 'draw'
         if self.manager.draw_func != None:
-            self.maker.CLEAR()
+            self.maker.CLEAR() # clear window
             self.maker.functionCallStack.append(('draw', self.maker.commandCounter))
-            self.maker.CALL(-1, 0)
-            self.maker.POP()
-            self.maker.DISPLAY()
-            self.maker.JMP(-8)
+            self.maker.CALL(-1, 0) # here we call endless function
+            self.maker.POP()   # delete `draw` return from stack 
+            self.maker.DISPLAY() # refresh widnow
+            self.maker.JMP(-8) # jump to `clear` command
         
-        self.maker.HALT()
+        self.maker.HALT() # ends programm
 
-        self.lookSetupFunc()
-        self.lookDrawFunc()
-        self.lookUserDefinedFunc()
+        self.lookSetupFunc()  # generate `setup` body
+        self.lookDrawFunc() # generate `draw` body
+        self.lookUserDefinedFunc() # generate user functions' bodies
 
-        self.fillFunctionsPosition()
-        self.fillJumpsPosition()
+        self.fillFunctionsPosition() # fill function's calls destinations
+        self.fillJumpsPosition() # fill jumps (loops and if) destinations
 
     def lookSetupFunc(self):
         if self.manager.setup_func != None:
@@ -140,6 +142,19 @@ class ByteCodeVisitor(ShaperVisitor):
             self.maker.FREE()
 
 
+    def convert_single(self, atom):
+        if atom.type == Type.FLOAT:
+            self.maker.I2F()
+        elif atom.type == Type.CHAR:
+            self.maker.I2C()
+        elif atom.type == Type.SHORT:
+            self.maker.I2S()
+        elif atom.type == Type.LONG:
+            self.maker.I2L()
+        elif atom.type == Type.DOUBLE:
+            self.maker.I2D()
+
+
 
     def visitProgramm(self, ctx: ShaperParser.ProgrammContext):   
         #file is not empty
@@ -180,13 +195,18 @@ class ByteCodeVisitor(ShaperVisitor):
             self.visit(ctx.statement())
 
     def visitInitDeclarator(self, ctx: ShaperParser.InitDeclaratorContext):
-        name = ctx.identifier().getText()
-        types = self.visit(ctx.declarationType())
 
-        var = Variable(name, types[0])
-        var.is_root = True
+        if not self.isGlobal:
+            self.maker.CONST_I(0)
 
+        name = ctx.identifier().getText() # gets variable name 
+        types = self.visit(ctx.declarationType()) # end type (types if array is one of them)
+
+        var = Variable(name, types[0]) 
+
+        # if array set array item 
         if var.type == Type.ARRAY:
+            var.is_root = True # for freeing table memory
             var.array_var = Constant(types[1], None)
 
 
@@ -203,10 +223,16 @@ class ByteCodeVisitor(ShaperVisitor):
             else:
                 var.address = self.maker.getIntFrameAddress()
 
-            if var.type != Type.ARRAY:
-               self.maker.CONST_I(0)
+
+
+            if var.type == Type.ARRAY:
+                var.address -= 2
+            else:
+                var.address -= 1
+
             var.isGlobal = False
         
+        print(var.name, var.address)
 
         if ctx.assignmentExpression() != None:
 
@@ -218,8 +244,9 @@ class ByteCodeVisitor(ShaperVisitor):
             else:
                 self.maker.STORE(var.address)
 
+
         if var.type == Type.ARRAY:
-            self.maker.NEWARR()
+            self.maker.NEWARR() # creates table in global memory
 
             if self.isGlobal:
                 self.maker.GSTORE(var.address)
@@ -240,6 +267,7 @@ class ByteCodeVisitor(ShaperVisitor):
         else: 
             type_list.append(Type.ARRAY)
 
+            # it writes size of array on top of stack
             self.visit(ctx.expression())
               
              
@@ -616,48 +644,44 @@ class ByteCodeVisitor(ShaperVisitor):
         if ctx.equalityExpression() == None:
             return self.visit(ctx.relationalExpression())
         else:
-            l = self.visit(ctx.equalityExpression())
-            r = self.visit(ctx.relationalExpression())
+            self.visit(ctx.equalityExpression()) # left
+            self.visit(ctx.relationalExpression()) # right
             op = ctx.equalityOperator().getText()
 
             self.maker.EQ()
 
             if op == '==':
-                ret = Constant(Type.BOOL, None)
-
+                pass_context
             elif op == '!=':
                 self.maker.NEG()    
-                ret = Constant(Type.BOOL, None)
 
-            return ret
+            return Constant(Type.BOOL,None)
 
 
     def visitRelationalExpression(self, ctx: ShaperParser.RelationalExpressionContext) -> Variable:
         if ctx.relationalExpression() == None:
             return self.visit(ctx.additiveExpression())
         else:
-            l = self.visit(ctx.relationalExpression())
-            r = self.visit(ctx.additiveExpression())
+            self.visit(ctx.relationalExpression()) # left
+            self.visit(ctx.additiveExpression()) ## right
             op = ctx.relationalOperator().getText()
 
             if op == '<':
                 self.maker.LT()
-                ret = Constant(Type.BOOL, None)
             elif op == '>':
                 self.maker.GT()
                 # self.maker.LE()
                 # self.maker.NEG()
-                ret = Constant(Type.BOOL, None)
             elif op == '<=':
                 self.maker.LE()
-                ret = Constant(Type.BOOL, None)
+
             elif op == '>=':
                 self.maker.GE()
                 # self.maker.LT()
                 # self.maker.NEG()
-                ret = Constant(Type.BOOL, None)
 
-            return ret
+
+            return Constant(Type.BOOL, None)
 
     def visitAdditiveExpression(self, ctx: ShaperParser.AdditiveExpressionContext) -> Variable:
         if ctx.additiveExpression() == None:
@@ -674,12 +698,11 @@ class ByteCodeVisitor(ShaperVisitor):
             
             if op == '+':
                 self.maker.ADD_I()
-                ret = Constant(ret_type, None)
             elif op == '-':
                 self.maker.SUB_I()
-                ret = Constant(ret_type, None)
 
-            return ret
+
+            return Constant(ret_type, None)
 
     def visitMultiplicativeExpression(self, ctx: ShaperParser.MultiplicativeExpressionContext) -> Variable:
         if ctx.multiplicativeExpression() == None:
@@ -697,15 +720,13 @@ class ByteCodeVisitor(ShaperVisitor):
             
             if op == '*':
                 self.maker.MUL_I()
-                ret = Constant(ret_type, None)
             elif op == '/':
                 self.maker.DIV_I()
-                ret = Constant(ret_type, None)
             elif op == '%':
                 self.maker.MOD_I()
-                ret = Constant(ret_type, None)
 
-            return ret
+
+            return Constant(ret_type, None)
 
     def visitUnaryExpression(self, ctx: ShaperParser.UnaryExpressionContext):
         if ctx.postfixExpression() != None:
@@ -719,14 +740,10 @@ class ByteCodeVisitor(ShaperVisitor):
                 self.maker.CONST_I(-1)
                 self.maker.MUL_I()
 
-                new_ret = Constant(ret.type, None)
-
-                return new_ret
+                return Constant(ret.type, None)
             elif op == '!':
                 self.maker.NEG()
-
-                new_ret = Constant(ret.type, None)
-                return new_ret    
+                return Constant(ret.type, None)  
 
 
             if type(ret) == Variable:  
@@ -736,8 +753,6 @@ class ByteCodeVisitor(ShaperVisitor):
                         self.maker.ADD_I()
                         self.maker.GSTORE(ret.address)
                         self.maker.GLOAD(ret.address)
-
-                        return ret
                     else:
                         # self.maker.INC(ret.address)
 
@@ -745,37 +760,30 @@ class ByteCodeVisitor(ShaperVisitor):
                         self.maker.ADD_I()
                         self.maker.STORE(ret.address)
                         self.maker.LOAD(ret.address)
-
-                        return ret
                 elif op == '--':
                     if ret.isGlobal:
                         self.maker.CONST_I(1)
                         self.maker.SUB_I()
                         self.maker.GSTORE(ret.address)
                         self.maker.GLOAD(ret.address)
-
-                        return ret
                     else:
                         # self.maker.DEC(ret.address)
-
                         self.maker.CONST_I(1)
-                        self.maker.ADD_I()
+                        self.maker.SUB_I()
                         self.maker.STORE(ret.address)
                         self.maker.LOAD(ret.address)
 
-                        return ret
+                return ret
             else: 
                 if op == '++':
                         self.maker.CONST_I(1)
-                        self.maker.ADD_I()
-
-                        new_ret = Constant(ret.type, None)
-                        return new_ret    
+                        self.maker.ADD_I()  
                 elif op == '--':
                         self.maker.CONST_I(1)
                         self.maker.SUB_I()
-                        new_ret = Constant(ret.type, None)
-                        return new_ret    
+                        
+                        
+                return  Constant(ret.type, None)
 
     def visitPostfixExpression(self, ctx: ShaperParser.PostfixExpressionContext):
         if ctx.primaryExpression() != None:
@@ -832,7 +840,12 @@ class ByteCodeVisitor(ShaperVisitor):
     def visitPrimaryExpression(self, ctx: ShaperParser.PrimaryExpressionContext):
         if ctx.constant() != None:
             const = self.visit(ctx.constant())
+            
             self.maker.CONST_I(int(const.val))
+
+            self.convert_single(const)
+
+
             return const
 
         elif ctx.channelIndex() != None:
