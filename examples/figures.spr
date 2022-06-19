@@ -1,8 +1,12 @@
 int x = 100;
-void setup()
+void draw()
 {
     paint rectangle at ((10*3.0), x) of (100,300) with RED;
-
+    paint triangle from (0,0) through (400,600) to (800,0) with GREEN;
+    paint line from (0,600) to (800,0) with WHITE;
+    paint rectangle at (350,80) of (60) with BLACK;
+    paint circle at (400,300) of (100,50) with BLUE;
     
     return;
+
 }

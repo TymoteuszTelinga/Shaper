@@ -232,7 +232,7 @@ class CheckVisitor(ShaperVisitor):
                 self.errorstack.append(f"line {ctx.start.line} Value can't be assigned to array during declaration")
             
             r_value = self.visit(ctx.assignmentExpression())
-            if var.type != r_value.type:
+            if var.type != r_value.type and not (var.type in [Type.INT, Type.FLOAT] and r_value.type in [Type.INT, Type.FLOAT]):
                 self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
                 # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'=\' to type " + repr(var.type) + " and type " + repr(r_value.type))
 
@@ -323,8 +323,8 @@ class CheckVisitor(ShaperVisitor):
 
 
             if channel == None:
-                if l.type != r.type :
-                    self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
+                if l.type != r.type and not (l.type in [Type.INT, Type.FLOAT] and r.type in [Type.INT, Type.FLOAT]):
+                    self.errorstack.append(f"line {ctx.start.line} Can't use binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
                     # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
                 
                 if l.type == Type.ARRAY:
@@ -422,7 +422,7 @@ class CheckVisitor(ShaperVisitor):
                 self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
                 # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(r.type))
 
-            if l.type != r.type and (Type.BOOL in [l.type, r.type] or Type.Color in [l.type, r.type]):
+            if l.type != r.type and (Type.BOOL in [l.type, r.type] or Type.COLOR in [l.type, r.type]):
                 self.errorstack.append(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
                 # raise Exception(f"line {ctx.start.line} Can't use  binary operator \'{op}\' to type " + repr(l.type) + " and type " + repr(r.type))
             
@@ -538,7 +538,7 @@ class CheckVisitor(ShaperVisitor):
                 if type(ret) == Constant:
                     self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
                     # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to a non-variable atom")
-                elif ret.type not in [Type.INT, Type.FLOAT]:
+                elif ret.type not in [Type.INT]:
                     self.errorstack.append(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
                     # raise Exception(f"line {ctx.start.line} Can't use operator \'++\' to type " + repr(ret.type))
 
@@ -546,7 +546,7 @@ class CheckVisitor(ShaperVisitor):
                 if type(ret) == Constant:
                     self.errorstack.append(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
                     # raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to a non-variable atom")
-                elif ret.type not in [Type.INT, Type.FLOAT]:
+                elif ret.type not in [Type.INT]:
                     self.errorstack.append(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
                     # raise Exception(f"line {ctx.start.line} Can't use operator \'--\' to type " + repr(ret.type))
 

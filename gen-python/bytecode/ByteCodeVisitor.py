@@ -10,12 +10,15 @@ from common.Types import Type
 
 from common.Color import Color
 
+from Converter import Converter
+
 
 class ByteCodeVisitor(ShaperVisitor):
 
     def __init__(self, manager: Manager) -> None:
         self.manager = manager
         self.maker = ByteCodeMaker()
+        self.converter = Converter(self.maker)
 
         self.manager.curr_scope = Scope()
         self.manager.global_scope = self.manager.curr_scope
@@ -242,7 +245,9 @@ class ByteCodeVisitor(ShaperVisitor):
 
         if ctx.assignmentExpression() != None:
 
-            self.visit(ctx.assignmentExpression())
+            right = self.visit(ctx.assignmentExpression())
+            
+            self.converter.ConvVarToType(right, var.type)
 
 
             if self.isGlobal:
@@ -269,6 +274,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
         if ctx.expression() == None:
             type_list.append(self.visit(ctx.atomicType()))
+
              
         else: 
             type_list.append(Type.ARRAY)
@@ -313,13 +319,16 @@ class ByteCodeVisitor(ShaperVisitor):
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
 
-                    self.visit(ctx.assignmentExpression())
+                    r = self.visit(ctx.assignmentExpression())
+                    self.converter.ConvVarToType(r, l.array_var.type)
+
 
                     self.maker.ASTORE_I()
 
                 elif op == '+=':
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)     # addr
+                    
 
                     else:
                         self.maker.LOAD(l.address)     # addr
@@ -332,9 +341,15 @@ class ByteCodeVisitor(ShaperVisitor):
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
 
                     self.maker.ALOAD_I() # addr index addr index val1
-                    self.visit(ctx.assignmentExpression()) # addr index addr index val1 val2
 
-                    self.maker.ADD_I() # addr index addr index val
+                    r = self.visit(ctx.assignmentExpression()) # addr index addr index val1 val2
+                    self.converter.ConvVarToType(r, l.array_var.type)
+
+                    if l.array_var.type == Type.FLOAT:
+                        self.maker.ADD_F() # addr index addr index val
+                    else:
+                        self.maker.ADD_I()
+                        
 
                     self.maker.ASTORE_I() # addr index _
 
@@ -354,9 +369,13 @@ class ByteCodeVisitor(ShaperVisitor):
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
 
                     self.maker.ALOAD_I() # addr index val1
-                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+                    r = self.visit(ctx.assignmentExpression()) # addr index val1 val2
+                    self.converter.ConvVarToType(r, l.array_var.type)
 
-                    self.maker.SUB_I() # addr index val
+                    if l.array_var.type == Type.FLOAT:
+                        self.maker.SUB_F() # addr index addr index val
+                    else:
+                        self.maker.SUB_F()
 
                     self.maker.ASTORE_I() # _
 
@@ -376,9 +395,13 @@ class ByteCodeVisitor(ShaperVisitor):
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
 
                     self.maker.ALOAD_I() # addr index val1
-                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+                    r = self.visit(ctx.assignmentExpression()) # addr index val1 val2
+                    self.converter.ConvVarToType(r, l.array_var.type)
 
-                    self.maker.MUL_I() # addr index val
+                    if l.array_var.type == Type.FLOAT:
+                        self.maker.MUL_L() # addr index addr index val
+                    else:
+                        self.maker.MUL_I()
 
                     self.maker.ASTORE_I() # _
 
@@ -398,9 +421,14 @@ class ByteCodeVisitor(ShaperVisitor):
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
 
                     self.maker.ALOAD_I() # addr index val1
-                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+                    r = self.visit(ctx.assignmentExpression()) # addr index val1 val2
 
-                    self.maker.DIV_I() # addr index val
+                    self.converter.ConvVarToType(r, l.array_var.type)
+
+                    if l.array_var.type == Type.FLOAT:
+                        self.maker.DIV_F() # addr index addr index val
+                    else:
+                        self.maker.DIV_I()
 
                     self.maker.ASTORE_I() # _
 
@@ -420,9 +448,12 @@ class ByteCodeVisitor(ShaperVisitor):
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr index addr index
 
                     self.maker.ALOAD_I() # addr index val1
-                    self.visit(ctx.assignmentExpression()) # addr index val1 val2
+                    r = self.visit(ctx.assignmentExpression()) # addr index val1 val2
+                    self.converter.ConvVarToType(r, l.array_var.type)
 
-                    self.maker.MOD_I() # addr index val
+                    if l.array_var.type == Type.INT:
+                        self.maker.MOD_I() # addr index addr index val
+
 
                     self.maker.ASTORE_I() # _
 
@@ -431,7 +462,8 @@ class ByteCodeVisitor(ShaperVisitor):
                 channel = self.visit(ctx.channelIndex())
 
                 if op == '=':
-                    self.visit(ctx.assignmentExpression())
+                    r = self.visit(ctx.assignmentExpression())
+                    self.converter.ConvVarToType(r, Type.INT)
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)
                         self.maker.STORE_CH(channel)
@@ -442,7 +474,8 @@ class ByteCodeVisitor(ShaperVisitor):
                         self.maker.STORE(l.address)
 
                 elif op == '+=':
-                    self.visit(ctx.assignmentExpression())
+                    r = self.visit(ctx.assignmentExpression())
+                    self.converter.ConvVarToType(r, Type.INT)
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)
                         self.maker.LOAD_CH(channel)
@@ -464,7 +497,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.SUB_I()
 
                         self.maker.GLOAD(l.address)
@@ -473,7 +507,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     else:
                         self.maker.LOAD(l.address) 
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.SUB_I()
 
                         self.maker.LOAD(l.address)
@@ -484,7 +519,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.MUL_I()
 
                         self.maker.GLOAD(l.address)
@@ -493,7 +529,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     else:
                         self.maker.LOAD(l.address) 
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.MUL_I()
 
                         self.maker.LOAD(l.address)
@@ -504,7 +541,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.DIV_I()
 
                         self.maker.GLOAD(l.address)
@@ -513,7 +551,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     else:
                         self.maker.LOAD(l.address) 
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.DIV_I()
 
                         self.maker.LOAD(l.address)
@@ -523,7 +562,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     if l.isGlobal:
                         self.maker.GLOAD(l.address)
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.MOD_I()
 
                         self.maker.GLOAD(l.address)
@@ -532,7 +572,8 @@ class ByteCodeVisitor(ShaperVisitor):
                     else:
                         self.maker.LOAD(l.address) 
                         self.maker.LOAD_CH(channel)
-                        self.visit(ctx.assignmentExpression())
+                        r = self.visit(ctx.assignmentExpression())
+                        self.converter.ConvVarToType(r, Type.INT)
                         self.maker.MOD_I()
 
                         self.maker.LOAD(l.address)
@@ -541,7 +582,7 @@ class ByteCodeVisitor(ShaperVisitor):
 
             else:
                 if op == '=':
-                    self.visit(ctx.assignmentExpression())
+                    r = self.visit(ctx.assignmentExpression())
                     if l.isGlobal:
                         self.maker.GSTORE(l.address)
                     else:
@@ -550,65 +591,121 @@ class ByteCodeVisitor(ShaperVisitor):
                 elif op == '+=':
                     if l.isGlobal:
                         self.maker.GLOAD(l.address) #save left to stack
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.ADD_I() # add 
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.ADD_F()
+                        else:
+                            self.maker.ADD_I()
+                        
                         self.maker.GSTORE(l.address)
                     else:
                         self.maker.LOAD(l.address)
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.ADD_I()
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.ADD_F()
+                        else:
+                            self.maker.ADD_I()
                         self.maker.STORE(l.address)
 
                 elif op == '-=':
                     if l.isGlobal:
                         self.maker.GLOAD(l.address) #save left to stack
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.SUB_I() 
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.SUB_F()
+                        else:
+                            self.maker.SUB_I()
+
                         self.maker.GSTORE(l.address)
                     else:
                         self.maker.LOAD(l.address)
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.SUB_I()
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.SUB_F()
+                        else:
+                            self.maker.SUB_I()
+                            
                         self.maker.STORE(l.address)
 
                 elif op == '*=':
                     if l.isGlobal:
                         self.maker.GLOAD(l.address) #save left to stack
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.MUL_I() 
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.MUL_F()
+                        else:
+                            self.maker.MUL_I()
+                            
                         self.maker.GSTORE(l.address)
                     else:
                         self.maker.LOAD(l.address)
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.MUL_I()
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.MUL_F()
+                        else:
+                            self.maker.MUL_I()
+                            
                         self.maker.STORE(l.address) 
                 elif op == '/=':
                     if l.isGlobal:
                         self.maker.GLOAD(l.address) #save left to stack
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.DIV_I() 
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.DIV_F()
+                        else:
+                            self.maker.DIV_I()
+                            
                         self.maker.GSTORE(l.address)
                     else:
                         self.maker.LOAD(l.address)
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.DIV_I()
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.FLOAT:
+                            self.maker.DIV_F()
+                        else:
+                            self.maker.DIV_I()
+                            
                         self.maker.STORE(l.address)
                 elif op == '%=':
                     if l.isGlobal:
                         self.maker.GLOAD(l.address) #save left to stack
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.MOD_I() 
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.INT:
+                            self.maker.MOD_I()
+
+                            
                         self.maker.GSTORE(l.address)
                     else:
                         self.maker.LOAD(l.address)
-                        self.visit(ctx.assignmentExpression()) # save right value
-                        self.maker.MOD_I()
+                        r = self.visit(ctx.assignmentExpression()) # save right value
+                        self.converter.ConvVarToType(r, l.type)
+
+                        if l.type == Type.INT:
+                            self.maker.MOD_I()
+
                         self.maker.STORE(l.address)
 
 
             if ctx.arrayIndex() != None:
                 self.maker.ALOAD_I()
-                return l.array_var
+                return Constant(l.array_var.type, None)
 
 
             if l.isGlobal:
@@ -616,7 +713,7 @@ class ByteCodeVisitor(ShaperVisitor):
             else:
                 self.maker.LOAD(l.address)
             
-            return l
+            return Constant(l.type, None)
 
 
     def visitLogicalORExpression(self, ctx: ShaperParser.LogicalORExpressionContext) -> Variable:
@@ -650,9 +747,11 @@ class ByteCodeVisitor(ShaperVisitor):
         if ctx.equalityExpression() == None:
             return self.visit(ctx.relationalExpression())
         else:
-            self.visit(ctx.equalityExpression()) # left
-            self.visit(ctx.relationalExpression()) # right
+            l = self.visit(ctx.equalityExpression()) # left
+            r = self.visit(ctx.relationalExpression()) # right
             op = ctx.equalityOperator().getText()
+
+            self.converter.ConvToBetter(l, r)
 
             self.maker.EQ()
 
@@ -668,9 +767,11 @@ class ByteCodeVisitor(ShaperVisitor):
         if ctx.relationalExpression() == None:
             return self.visit(ctx.additiveExpression())
         else:
-            self.visit(ctx.relationalExpression()) # left
-            self.visit(ctx.additiveExpression()) ## right
+            l = self.visit(ctx.relationalExpression()) # left
+            r = self.visit(ctx.additiveExpression()) ## right
             op = ctx.relationalOperator().getText()
+
+            self.converter.ConvToBetter(l, r)
 
             if op == '<':
                 self.maker.LT()
@@ -702,10 +803,18 @@ class ByteCodeVisitor(ShaperVisitor):
             if r.type == Type.FLOAT or l.type == Type.FLOAT:
                 ret_type = Type.FLOAT
             
+            self.converter.ConvToBetter(l, r)
+
             if op == '+':
-                self.maker.ADD_I()
+                if ret_type == Type.FLOAT:
+                    self.maker.ADD_F()
+                else:
+                    self.maker.ADD_I()
             elif op == '-':
-                self.maker.SUB_I()
+                if ret_type == Type.FLOAT:
+                    self.maker.SUB_F()
+                else:
+                    self.maker.SUB_I()
 
 
             return Constant(ret_type, None)
@@ -724,10 +833,18 @@ class ByteCodeVisitor(ShaperVisitor):
             if r.type == Type.FLOAT or l.type == Type.FLOAT:
                 ret_type = Type.FLOAT
             
+            self.converter.ConvToBetter(l, r)
+
             if op == '*':
-                self.maker.MUL_I()
+                if ret_type == Type.FLOAT:
+                    self.maker.MUL_F()
+                else:
+                    self.maker.MUL_I()
             elif op == '/':
-                self.maker.DIV_I()
+                if ret_type == Type.FLOAT:
+                    self.maker.DIV_F()
+                else:
+                    self.maker.DIV_I()
             elif op == '%':
                 self.maker.MOD_I()
 
@@ -744,7 +861,12 @@ class ByteCodeVisitor(ShaperVisitor):
 
             if op == '-':
                 self.maker.CONST_I(-1)
-                self.maker.MUL_I()
+
+                if ret.type == Type.INT:
+                    self.maker.MUL_I()
+                elif ret.type == Type.FLOAT:
+                    self.converter.ConvVarToType(Constant(Type.INT, None), Type.FLOAT)
+                    self.maker.MUL_F();
 
                 return Constant(ret.type, None)
             elif op == '!':
@@ -847,9 +969,11 @@ class ByteCodeVisitor(ShaperVisitor):
         if ctx.constant() != None:
             const = self.visit(ctx.constant())
             
-            self.maker.CONST_I(int(const.val))
+            if const.type == Type.COLOR:
+                self.maker.CONST_I(int(const.val))
+            else:
+                self.maker.CONST_I(const.val)
 
-            self.convert_single(const)
 
 
             return const
@@ -906,7 +1030,10 @@ class ByteCodeVisitor(ShaperVisitor):
             params = self.visit(ctx.functionParameterList())
 
         if name == "print":
-            self.maker.PRINT_I()
+            if params[0].type == Type.FLOAT:
+                self.maker.PRINT_F()
+            else:
+                self.maker.PRINT_I()
             self.maker.CONST_I(0)
             return Constant(Type.VOID, None)
         else:
@@ -1026,13 +1153,24 @@ class ByteCodeVisitor(ShaperVisitor):
     def visitPosSizeParent(self, ctx: ShaperParser.PosSizeParentContext):        
         if ctx.right != None:
 
-            self.visit(ctx.left)
-            self.visit(ctx.right)
+            l = self.visit(ctx.left)
+
+            if l.type == Type.FLOAT:
+                self.converter.ConvVarToType(l, Type.INT)
+
+            r = self.visit(ctx.right)
+            if r.type == Type.FLOAT:
+                self.converter.ConvVarToType(r, Type.INT)
 
         else:
-            self.visit(ctx.left)
+            l = self.visit(ctx.left)
+
+            if l.type == Type.FLOAT:
+                self.converter.ConvVarToType(l, Type.INT)
 
             self.maker.LOAD(self.maker.framePosition-1)
+
+
 
 
 
@@ -1251,6 +1389,7 @@ class ByteCodeVisitor(ShaperVisitor):
         const = None
         if ctx.integer != None:
             const = Constant(Type.INT, int(ctx.getText()))
+            
         elif ctx.floating != None:
             const = Constant(Type.FLOAT, float(ctx.getText()))
         elif ctx.logical != None:
@@ -1280,3 +1419,5 @@ class ByteCodeVisitor(ShaperVisitor):
         return gotVar
 
     
+    def visitAtomicType(self, ctx: ShaperParser.AtomicTypeContext):
+        return Type.getType(ctx.getText())

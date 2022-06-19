@@ -5,16 +5,16 @@ class Type(enum.Enum):
     VOID = 1
 
     BOOL = 2
+    COLOR = 3
 
-    CHAR = 3
-    SHORT = 4
-    INT = 5
-    LONG = 6
-
+    CHAR = 4
+    SHORT = 5
+    INT = 6
     FLOAT = 7
-    DOUBLE = 8
 
-    COLOR = 9
+    LONG = 8
+    DOUBLE = 9
+
     ARRAY = 10
 
     @staticmethod
@@ -24,17 +24,17 @@ class Type(enum.Enum):
         elif str =='bool':
             return Type.BOOL
         elif str == 'char':
-            return Type.CHAR
+            return Type.INT
         elif str == 'short':
-            return Type.SHORT
+            return Type.INT
         elif str == 'int':
             return Type.INT
         elif str == 'long':
-            return Type.LONG
+            return Type.INT
         elif str == 'float':
             return Type.FLOAT
         elif str == 'double':
-            return Type.DOUBLE
+            return Type.FLOAT
         elif str == 'color':
             return Type.COLOR
         elif str == 'array':

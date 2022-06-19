@@ -1,15 +1,10 @@
-array[10] int y;
-array[5] int x;
-
 
 
 void setup()
 { 
-
+float x = -6.0;
+print(x);
 }
 
 
-void draw()
-{
-   array[100] int g;
-}
+
