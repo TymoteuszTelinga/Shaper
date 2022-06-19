@@ -1,9 +1,9 @@
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
-from Function import Function
-from Types import Type
-from Atoms import Variable, Constant
+from common.Function import Function
+from common.Types import Type
+from common.Atoms import Variable, Constant
 
 from Manager import Manager
 

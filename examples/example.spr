@@ -2,7 +2,7 @@ void draw()
 {
     int x = 10;
     int y = 10;
-    paint rectangle at (x*10,y*10) of (sum(x,y)) with YELLOW;
+    paint rectangle at (x*10,y*10) of (sum(x, y)) with YELLOW;
 }
 
 // returns sum of two integers

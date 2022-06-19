@@ -1,15 +1,14 @@
-from click import pass_context
 from grammar.ShaperVisitor import ShaperVisitor
 from grammar.ShaperParser import ShaperParser
 
-from Atoms import *
+from common.Atoms import *
 from Manager import Manager
-from ByteCodeMaker import ByteCodeMaker
+from bytecode.ByteCodeMaker import ByteCodeMaker
 
-from Scope import Scope
-from Types import Type
+from common.Scope import Scope
+from common.Types import Type
 
-import Color
+from common.Color import Color
 
 
 class ByteCodeVisitor(ShaperVisitor):
@@ -657,9 +656,9 @@ class ByteCodeVisitor(ShaperVisitor):
 
             self.maker.EQ()
 
-            if op == '==':
-                pass_context
-            elif op == '!=':
+          #  if op == '==':
+                
+            if op == '!=':
                 self.maker.NEG()    
 
             return Constant(Type.BOOL,None)
@@ -1260,7 +1259,7 @@ class ByteCodeVisitor(ShaperVisitor):
             else:
                 const = Constant(Type.BOOL, False)
         elif ctx.color != None:
-            const = Constant(Type.COLOR, Color.Color.getColor(ctx.getText()))
+            const = Constant(Type.COLOR, Color.getColor(ctx.getText()))
         
         return const
 

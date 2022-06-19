@@ -1,5 +1,5 @@
-from Atoms import *
-from Types import Type
+from common.Atoms import *
+from common.Types import Type
 
 class Function:
     def __init__(self, f_name : str) -> None:

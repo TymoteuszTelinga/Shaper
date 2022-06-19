@@ -1,7 +1,7 @@
-from Types import Type
-from Scope import Scope
-from Function import Function
-from Atoms import *
+from common.Types import Type
+from common.Scope import Scope
+from common.Function import Function
+from common.Atoms import *
 
 class Manager:
 

@@ -1,5 +1,5 @@
 
-from Commands import Command
+from bytecode.Commands import Command
 
 """
 Writes commands to bytecode file

@@ -1,4 +1,4 @@
-from Types import Type
+from common.Types import Type
 
 class Variable:
     def __init__(self, v_name : str, v_type: Type) -> None : 

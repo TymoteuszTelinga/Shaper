@@ -1,4 +1,4 @@
-from Commands import Command
+from bytecode.Commands import Command
 
 '''
 Class below creates, a set of commands

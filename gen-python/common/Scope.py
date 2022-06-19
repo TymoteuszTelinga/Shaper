@@ -1,4 +1,4 @@
-from Atoms import Variable
+from common.Atoms import Variable
 
 class Scope:
     def __init__(self) -> None:

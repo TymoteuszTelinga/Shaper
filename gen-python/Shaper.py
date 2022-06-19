@@ -6,14 +6,14 @@ from antlr4 import *
 from grammar.ShaperLexer import ShaperLexer
 from grammar.ShaperParser import ShaperParser
 
-from ByteCodeVisitor import ByteCodeVisitor
+from bytecode.ByteCodeVisitor import ByteCodeVisitor
 from CheckVisitor import CheckVisitor
 
 from Manager import Manager
 
 from ShaperErrorListener import ShaperErrorListener
 
-from ByteCodeWriter import ByteCodeWriter
+from bytecode.ByteCodeWriter import ByteCodeWriter
 from ParametersHandler import ParametersHandler
 
 def main(argv):
