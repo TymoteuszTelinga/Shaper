@@ -956,33 +956,28 @@ class CheckVisitor(ShaperVisitor):
         self.manager.curr_scope = oldScope
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
+        oldScope = self.manager.create_new_scope(True)
         if ctx.initExpr != None:
             self.visit(ctx.initExpr)
         elif ctx.initDec != None:
             self.visit(ctx.initDec)
         
-        if ctx.condition == None:
+        if ctx.condition != None:
             
-            oldScope = self.manager.create_new_scope(True)
-            self.visit(ctx.compoundStatement())
-            self.manager.curr_scope = oldScope
-                
-            if ctx.loopExpr != None:
-                    self.visit(ctx.loopExpr)
-            
-        else:
             gotVar = self.visit(ctx.condition)
 
             if gotVar.type != Type.BOOL:
                 self.errorstack.append(f"line {ctx.start.line} Excepted boolean value as condition, instead got value of " + repr(gotVar.type)  + " type")
                 # raise Exception(f"line {ctx.start.line} Excepted boolean value as condition, instead got value of " + repr(gotVar.type)  + " type")
+
+
             
-            oldScope = self.manager.create_new_scope(True)
-            self.visit(ctx.compoundStatement())
-            self.manager.curr_scope = oldScope
+
+        self.visit(ctx.compoundStatement())
                 
-            if ctx.loopExpr != None:
-                self.visit(ctx.loopExpr)
+        if ctx.loopExpr != None:
+            self.visit(ctx.loopExpr)
+        self.manager.curr_scope = oldScope
 
     def visitChannelIndex(self, ctx: ShaperParser.ChannelIndexContext):
         return ctx.getText()

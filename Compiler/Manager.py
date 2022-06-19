@@ -161,6 +161,13 @@ class Manager:
 
         self.built_in_func[temp.name] = temp
 
+        temp = Function("rand")
+        temp.kind = 1
+        temp.setParameters([])
+        temp.setReturnVar(Type.INT)
+
+        self.built_in_func[temp.name] = temp
+
 
     def setVisitor(self, visitor):
         self.visitor = visitor

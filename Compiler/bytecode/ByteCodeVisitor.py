@@ -1036,6 +1036,10 @@ class ByteCodeVisitor(ShaperVisitor):
                 self.maker.PRINT_I()
             self.maker.CONST_I(0)
             return Constant(Type.VOID, None)
+        elif name == "rand":
+            self.maker.RANDOM()
+
+            return Constant(Type.INT, None)
         else:
             ret = self.manager.findFunction(name)
 
@@ -1318,8 +1322,8 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
         # make new scope
-
-
+        oldScope  =  self.manager.create_new_scope(True)
+        oldFP = self.maker.framePosition
         
         #visit init Expression/Declaration
         if ctx.initExpr != None:
@@ -1327,8 +1331,6 @@ class ByteCodeVisitor(ShaperVisitor):
         elif ctx.initDec != None:
             self.visit(ctx.initDec)
         
-        oldScope  =  self.manager.create_new_scope(True)
-        oldFP = self.maker.framePosition
 
 
         # save address to this place for condition jump
@@ -1355,12 +1357,12 @@ class ByteCodeVisitor(ShaperVisitor):
             self.redundant_pop(self.visit(ctx.loopExpr))
 
 
-        self.freeMemory(self.manager.clearScope(oldScope))
 
         curr_address = self.maker.bytecodePosition
         # make jump to condition
         self.maker.JMP(cond_address - curr_address - 2)
 
+        self.freeMemory(self.manager.clearScope(oldScope))
 
         # add out of for jump to stack 
         self.maker.jumpStack.append((end_jump[0], 

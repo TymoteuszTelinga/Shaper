@@ -2,8 +2,16 @@
 
 void setup()
 { 
-float x = -6.0;
-print(x);
+    
+    for(int i = 1; i < 10; ++i)
+    {
+        print(rand());
+    }
+
+    for(int i = 1; i>-10; --i)
+    {
+        print(i);
+    }
 }
 
 

@@ -519,6 +519,13 @@ class ByteCodeMaker:
         self.commandCounter += 1 
         self.bytecodePosition += 1
 
+    def RANDOM(self):
+        self.commandsQueue.append((Command.RANDOM))
+
+        self.framePosition += 1
+        self.commandCounter += 1
+        self.bytecodePosition += 1
+
     def NEWARR(self):
         self.commandsQueue.append( (Command.NEWARR ))
 
