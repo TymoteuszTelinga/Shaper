@@ -142,11 +142,11 @@ class ByteCodeVisitor(ShaperVisitor):
                 self.maker.FREE()
 
         for var in to_free:
-            print(var.name)
-            if var.type in [Type.LONG, Type.DOUBLE]:
-                self.maker.POP2()
-            else:
-                self.maker.POP()
+            if var.address > 0:
+                if var.type in [Type.LONG, Type.DOUBLE]:
+                    self.maker.POP2()
+                else:
+                    self.maker.POP()
         
 
 
@@ -921,8 +921,7 @@ class ByteCodeVisitor(ShaperVisitor):
     def visitFunctionParameterList(self, ctx: ShaperParser.FunctionParameterListContext):
 
         if ctx.functionParameterList() != None:
-            params = [None]
-            params.insert(0,self.visit(ctx.expression()))
+            params = [self.visit(ctx.expression())]
             params += self.visit(ctx.functionParameterList())
             return params
         else:
