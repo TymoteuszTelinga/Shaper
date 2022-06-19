@@ -16,13 +16,12 @@ int* loadProgram(const string& src, Parameters &params)
         int length = file.tellg();
         file.seekg (0, std::ios::beg);
         char *buffer = new char[length-4];
-        // int offset;
         file.read((char*)&params.memOffset,4);
-        //  = offset;
         file.read(buffer,length);
         file.close();
         return (int*)buffer;
     }
+    std::cerr<<"error: unable to load file "<<src<<'\n';
     return nullptr;
 }
 
@@ -86,8 +85,6 @@ int main(int argc, char *argv[])
     int *program = loadProgram(src, params);
 
     VM svm(program,0,params);
-    // svm.showCode(142);
-    svm.showMemory();
     svm.execute();
     
     std::cout<<"END\n";

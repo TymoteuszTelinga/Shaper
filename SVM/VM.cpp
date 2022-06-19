@@ -92,6 +92,12 @@ void VM::execute()
             {
                 int b = pop();
                 int a = pop();
+                if (b == 0)
+                {
+                    std::cerr<<"error: devision by zero\n";
+                    bDied = true;
+                    break;
+                }
                 push(a/b);
             }
             break;
@@ -99,6 +105,12 @@ void VM::execute()
             {
                 int b = pop();
                 int a = pop();
+                if (b == 0)
+                {
+                    std::cerr<<"error: modulo by zero\n";
+                    bDied = true;
+                    break;
+                }
                 push(a%b);
             }
             break;
@@ -139,6 +151,12 @@ void VM::execute()
                 x = pop();
                 float a = asfloat x;
                 float c = a/b;
+                if (b == 0)
+                {
+                    std::cerr<<"error: devision by zero\n";
+                    bDied = true;
+                    break;
+                }
                 push(asint c);
             }
             break;
@@ -167,6 +185,12 @@ void VM::execute()
             {
                 long long b = popL();
                 long long a = popL();
+                if (b == 0)
+                {
+                    std::cerr<<"error: devision by zero\n";
+                    bDied = true;
+                    break;
+                }
                 pushL(a/b);
             }
             break;
@@ -174,6 +198,12 @@ void VM::execute()
             {
                 long long b = popL();
                 long long a = popL();
+                if (b == 0)
+                {
+                    std::cerr<<"error: modulo by zero\n";
+                    bDied = true;
+                    break;
+                }
                 pushL(a%b);
             }
             break;
@@ -214,6 +244,12 @@ void VM::execute()
                 X = popL();
                 double a = asdouble X;
                 double c = a/b;
+                if (b == 0)
+                {
+                    std::cerr<<"error: devision by zero\n";
+                    bDied = true;
+                    break;
+                }
                 pushL(aslong c);
             }
             break;
@@ -418,7 +454,21 @@ void VM::execute()
             {
                 int index = pop();
                 int addr = pop();
-                push(memory[addr+index]);
+                int len = mmu.size(addr);
+                if(abs(index) >= len)
+                {
+                    std::cerr<<"error: index out of table\n";
+                    bDied = true;
+                }
+                
+                if (index > 0)
+                {
+                    push(memory[addr+index]);
+                }
+                else
+                {
+                    push(memory[addr+len+index]);
+                }
             }
             break;
         case LOAD_CH:
@@ -448,7 +498,21 @@ void VM::execute()
                 int val = pop();
                 int index = pop();
                 int addr = pop();
-                memory[addr+index] = val;
+                int len = mmu.size(addr);
+                if(abs(index) >= len)
+                {
+                    std::cerr<<"error: index out of table\n";
+                    bDied = true;
+                }
+
+                if (index > 0)
+                {
+                    memory[addr+index] = val;
+                }
+                else
+                {
+                    memory[addr+len+index] = val;
+                }
             }
             break;
         case STORE_CH:
@@ -534,7 +598,7 @@ void VM::execute()
                 int adr = mmu.lock(size);
                 if (adr < 0)
                 {
-                    std::cerr<<"not enough memory\n";
+                    std::cerr<<"error: not enough memory\n";
                     bDied = true;
                 }
                 push(adr);
@@ -608,7 +672,8 @@ void VM::execute()
             break;
         default:
             {
-                std::cerr<<"PC: "<<pc<<" unknown instruction: "<<instrucion<<'\n';
+                std::cerr<<"error: PC: "<<pc<<" unknown instruction: "<<instrucion<<'\n';
+                bDied = true;
             }
             return;
         }
@@ -625,7 +690,7 @@ void VM::execute()
         else
         {
             bDied = true;
-            std::cerr<<"window closed\n";
+            // std::cerr<<"window closed\n";
         }
 
         if (bDied)
@@ -652,7 +717,7 @@ void VM::push(int value)
 {
     if (sp >= (int)parameters.stackSize)
     {
-        std::cerr<<"stack overflow\n";
+        std::cerr<<"error: stack overflow\n";
         bDied = true;
         return;
     }
@@ -670,6 +735,7 @@ int VM::pop()
 {
     if(sp < 0)
     {
+        std::cerr<<"error: empty stack\n";
         bDied = true;
     }
     return stack[sp--];
