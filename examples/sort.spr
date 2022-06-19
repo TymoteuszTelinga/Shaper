@@ -1,0 +1,90 @@
+
+array[10] int values;
+
+bool sorted = false;
+
+int swap1 = -1;
+int swap2 = -1;
+
+int startIndex = 0;
+
+bool wasChanged = false;
+
+void setup()
+{
+    values[0] = 6;
+    values[1] = 9;
+    values[2] = 1;
+    values[3] = 7;
+    values[4] = 3;
+    values[5] = 2;
+    values[6] = 0;
+    values[7] = 8;
+    values[8] = 4;
+    values[9] = 5;
+}
+
+void draw()
+{
+    display();
+
+    if(!sorted)
+    {
+        sort();
+    }
+}
+
+void sort()
+{
+    for(int i = startIndex; i < 9; ++i)
+    {
+        if(values[i] > values[i+1])
+        {
+            int temp = values[i];
+            values[i] = values[i+1];
+            values[i+1] = temp;
+
+            swap1 = i;
+            swap2 = i+1;
+
+            if (i == 8)
+            {
+                startIndex = 0;
+            }
+            else
+            {
+                startIndex = i+1;
+            }
+            
+            wasChanged = true;
+
+             return;
+        }
+    }
+
+    if(wasChanged)
+    {
+        wasChanged = false;
+        startIndex = 0;
+        return;
+    }
+
+    swap1 = -1;
+    swap2 = -1;
+
+    global:sorted = true;
+}
+
+void display()
+{
+    for(int i = 0; i<10; ++i)
+    {
+        color recPaint = WHITE;
+        if(i == swap1 | i == swap2)
+        {
+            recPaint = RED;
+        }
+
+        paint rectangle at (i*20,0) of (20, values[i]*20+20) with recPaint;
+    }
+}
