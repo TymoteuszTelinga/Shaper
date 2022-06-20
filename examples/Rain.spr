@@ -1,0 +1,57 @@
+
+int length = 100;
+array[length] int values;
+array[length] int lengths;
+array[length] int speed;
+int seed = 120;
+
+void setup()
+{
+    for(int i = 0; i<length; ++i)
+    {
+        values[i] = random() % 400;
+        lengths[i] = random() % 20 + 3;
+        speed[i] = random() % 10;
+    }
+}
+
+void draw()
+{
+    display();
+    update();
+}
+
+void display()
+{
+    for(int i = 0; i<length; ++i)
+    {
+        paint rectangle at (i*(400/length),values[i]) of (3, lengths[i]) with GREEN;
+    }
+}
+
+void update()
+{
+    for(int i = 0; i < length; ++i)
+    {
+        values[i] -= seed[i];
+        if( values[i] + lengths[i] < 0 )
+        {
+            values[i] = 400;
+            lengths[i] = random() % 20 + 3;
+            speed[i] = random() % 10;
+        }
+    }
+    random();
+}
+
+int random()
+{
+    int ret = seed;
+    seed *= 1298356;
+    seed -= 381912;
+    if (seed < 0)
+    {
+        seed *= -1;
+    }
+    return ret;
+}
