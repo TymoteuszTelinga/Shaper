@@ -65,8 +65,8 @@ class ByteCodeVisitor(ShaperVisitor):
             self.manager.setup_func.address = self.maker.bytecodePosition
             self.visit(self.manager.setup_func.ctx)
 
-            self.maker.framePosition = oldFP
             self.freeMemory(self.manager.clearScope(oldScope))
+            self.maker.framePosition = oldFP
 
             self.maker.CONST_I(0)
             self.maker.RET()
@@ -79,8 +79,8 @@ class ByteCodeVisitor(ShaperVisitor):
 
             self.manager.draw_func.address = self.maker.bytecodePosition
             self.visit(self.manager.draw_func.ctx)
-            self.maker.framePosition = oldFP
             self.freeMemory(self.manager.clearScope(oldScope))  
+            self.maker.framePosition = oldFP
 
             self.maker.CONST_I(0)
             self.maker.RET()
@@ -103,8 +103,8 @@ class ByteCodeVisitor(ShaperVisitor):
 
             self.visit(func.ctx)
 
-            self.maker.framePosition = oldFP
             self.freeMemory(self.manager.clearScope(oldScope))
+            self.maker.framePosition = oldFP
 
             self.maker.CONST_I(0)
             self.maker.RET()
@@ -315,12 +315,12 @@ class ByteCodeVisitor(ShaperVisitor):
                         self.maker.LOAD(l.address)
 
                     self.visit(ctx.arrayIndex())
-
+                    
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr
                     self.maker.LOAD(self.maker.framePosition-2) # addr index addr index
 
                     r = self.visit(ctx.assignmentExpression())
-                    self.converter.ConvVarToType(r, l.array_var.type)
+                    self.converter.ConvVarToType(r, l.array_var.type)           
 
 
                     self.maker.ASTORE_I()
@@ -1066,10 +1066,10 @@ class ByteCodeVisitor(ShaperVisitor):
             oldScope =  self.manager.create_new_scope(True)
             oldFP = self.maker.framePosition
             self.visit(ctx.compoundStatement())
-            self.maker.framePosition = oldFP
 
 
             self.freeMemory(self.manager.clearScope(oldScope))
+            self.maker.framePosition = oldFP
         
 
         elif ctx.expression() != None:
@@ -1230,8 +1230,8 @@ class ByteCodeVisitor(ShaperVisitor):
             self.visit(compounds[i])
 
             #restore scope and fp
-            self.maker.framePosition = oldFP
             self.freeMemory(self.manager.clearScope(oldScope))
+            self.maker.framePosition = oldFP
 
 
             if com_len > exp_len or i <= exp_len - 2:
@@ -1264,8 +1264,8 @@ class ByteCodeVisitor(ShaperVisitor):
             self.visit(compounds[-1])
 
             # restore scope
-            self.maker.framePosition = oldFP
             self.freeMemory(self.manager.clearScope(oldScope))
+            self.maker.framePosition = oldFP
 
             # end of if-clause
         
@@ -1317,8 +1317,8 @@ class ByteCodeVisitor(ShaperVisitor):
         self.maker.jumpStack.append((end_jump[0], 
                                      self.maker.bytecodePosition - end_jump[1] - 2))
 
-        self.maker.framePosition = oldFP
         self.freeMemory(self.manager.clearScope(oldScope))
+        self.maker.framePosition = oldFP
 
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
@@ -1365,9 +1365,9 @@ class ByteCodeVisitor(ShaperVisitor):
         self.maker.jumpStack.append((end_jump[0], 
                                      self.maker.bytecodePosition - end_jump[1] - 2))
 
-        self.freeMemory(self.manager.clearScope(oldScope))
 
         # restore scope
+        self.freeMemory(self.manager.clearScope(oldScope))
         self.maker.framePosition = oldFP
 
 

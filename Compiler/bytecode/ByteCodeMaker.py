@@ -509,7 +509,9 @@ class ByteCodeMaker:
         # every CALL ends with RET, 
         # so we don't change position in stack
         # self.framePosition += 3
+        # only add position on frame for return value
 
+        self.framePosition += 1
         self.commandCounter += 1 
         self.bytecodePosition += 3
 
