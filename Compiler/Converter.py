@@ -1,6 +1,3 @@
-import imp
-
-from matplotlib.colors import to_rgb
 from bytecode.ByteCodeMaker import ByteCodeMaker
 
 from common.Types import Type
