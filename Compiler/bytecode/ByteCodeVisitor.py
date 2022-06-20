@@ -1286,11 +1286,14 @@ class ByteCodeVisitor(ShaperVisitor):
 
     def visitWhileLoopStatement(self, ctx: ShaperParser.WhileLoopStatementContext):
 
+        # make new scope
+        oldScope  =  self.manager.create_new_scope(True)
+        oldFP = self.maker.framePosition
+
         # get destination to condition jump
         cond_address = self.maker.bytecodePosition
 
-
-        # check expression
+        # check condition
         self.visit(ctx.expression())
 
 
@@ -1299,16 +1302,11 @@ class ByteCodeVisitor(ShaperVisitor):
 
         self.maker.JMPF(-1)
 
-        # make new scope
-        oldScope  =  self.manager.create_new_scope(True)
-        oldFP = self.maker.framePosition
 
         # visit context
         self.visit(ctx.compoundStatement())
 
         # restore scope
-        self.maker.framePosition = oldFP
-        self.freeMemory(self.manager.clearScope(oldScope))
 
         curr_address = self.maker.bytecodePosition
 
@@ -1318,6 +1316,9 @@ class ByteCodeVisitor(ShaperVisitor):
         # add out of while jump to stack 
         self.maker.jumpStack.append((end_jump[0], 
                                      self.maker.bytecodePosition - end_jump[1] - 2))
+
+        self.maker.framePosition = oldFP
+        self.freeMemory(self.manager.clearScope(oldScope))
 
 
     def visitForLoopStatement(self, ctx: ShaperParser.ForLoopStatementContext):
@@ -1331,7 +1332,6 @@ class ByteCodeVisitor(ShaperVisitor):
         elif ctx.initDec != None:
             self.visit(ctx.initDec)
         
-
 
         # save address to this place for condition jump
         cond_address = self.maker.bytecodePosition
@@ -1357,21 +1357,18 @@ class ByteCodeVisitor(ShaperVisitor):
             self.redundant_pop(self.visit(ctx.loopExpr))
 
 
-
         curr_address = self.maker.bytecodePosition
         # make jump to condition
         self.maker.JMP(cond_address - curr_address - 2)
-
-        self.freeMemory(self.manager.clearScope(oldScope))
 
         # add out of for jump to stack 
         self.maker.jumpStack.append((end_jump[0], 
                                      self.maker.bytecodePosition - end_jump[1] - 2))
 
+        self.freeMemory(self.manager.clearScope(oldScope))
+
         # restore scope
         self.maker.framePosition = oldFP
-
-        
 
 
 

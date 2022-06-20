@@ -315,6 +315,7 @@ class CheckVisitor(ShaperVisitor):
 
 
             if index != None and l.type != Type.ARRAY:
+                
                 self.errorstack.append(f"line {ctx.start.line} Can't use index operator with a variable of type {repr(l.type)}")
             elif index != None:
                 l = l.array_var
