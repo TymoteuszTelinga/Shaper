@@ -40,5 +40,5 @@ void domek2(int x,int y)
                     of (height/3) 
                     with BLUE;
                     
-    //domek(x+10, y+10);
+    domek(x+10, y+10);
 }
