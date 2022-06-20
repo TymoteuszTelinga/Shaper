@@ -1,0 +1,8 @@
+int x = 100;
+void setup()
+{
+    paint rectangle at ((10*3.0), x) of (100,300) with RED;
+
+    
+    return;
+}

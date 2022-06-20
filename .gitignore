@@ -34,8 +34,6 @@
 # python cache
 __pycache__
 
-#antlr cache
-.antlr
 
 # VSCode
 .vscode/*.*
@@ -43,3 +41,7 @@ __pycache__
 # out file
 out.txt
 
+
+# grammar files
+.antlr
+antlr4-runtime
