@@ -25,41 +25,71 @@ int* loadProgram(const string& src, Parameters &params)
     return nullptr;
 }
 
-// main filename [-w width | -h height | -fps fps | -d | -m memSize | -s stackSize] 
-// saving frames?
+// main filename [-w width | -h height | -fps fps | -d | -m memSize | -s stackSize]
+void ShowHelp()
+{
+    std::cerr<<"Usage: SVM file [options]\n"
+             <<"Options:\n"
+             <<"\t-w <arg>   Pass <arg> as window width.\n"
+             <<"\t-h <arg>   Pass <arg> as window heigh.\n"
+             <<"\t-fps <arg> Pass <arg> as window frame rate limit.\n"
+             <<"\t-d         Start program in debug mode.\n"
+             <<"\t-m <arg>   Pass <arg> as memory size.\n"
+             <<"\t-s <arg>   Pass <arg> as stack max size.\n";
+}
+
 int main(int argc, char *argv[])
 {
-
+    std::vector<string> options;
+    //no args
     if (argc <= 1)
     {
         std::cerr<<"fatal error: no input files\n";
         return -1;
     }
+
     string src(argv[1]);
 
-    std::vector<string> options;
+    if (src == "--help")
+    {
+        ShowHelp();
+        return 0;
+    }
 
+    if (src[0] == '-')
+    {
+        std::cerr<<"fatal error: no input files\n";
+        return -1;
+    }
+    
     for (size_t i = 2; i < argc; i++)
     {
         options.push_back(string(argv[i]));
     }
 
+    auto itr = std::find(options.begin(), options.end(), "--help");
+    if (itr != options.end())
+    {
+        ShowHelp();
+        return 0;
+    }
+
     Parameters params;
 
-    auto itr = std::find(options.begin(), options.end(), "-fps");
-    if (itr != options.end())
+    itr = std::find(options.begin(), options.end(), "-fps");
+    if (itr != options.end() && itr+1 != options.end())
     {
         params.fps = std::stoi(*(++itr));
     }
 
     itr = std::find(options.begin(), options.end(), "-w");
-    if (itr != options.end())
+    if (itr != options.end() && itr+1 != options.end())
     {
         params.width = std::stoi(*(++itr));
     }
 
     itr = std::find(options.begin(), options.end(), "-h");
-    if (itr != options.end())
+    if (itr != options.end() && itr+1 != options.end())
     {
         params.height = std::stoi(*(++itr));
     }
@@ -71,13 +101,13 @@ int main(int argc, char *argv[])
     }
 
     itr = std::find(options.begin(), options.end(), "-m");
-    if (itr != options.end())
+    if (itr != options.end() && itr+1 != options.end())
     {
         params.memSize = std::stoi(*(++itr));
     }
 
     itr = std::find(options.begin(), options.end(), "-s");
-    if (itr != options.end())
+    if (itr != options.end() && itr+1 != options.end())
     {
         params.stackSize = std::stoi(*(++itr));
     }
@@ -87,6 +117,6 @@ int main(int argc, char *argv[])
     VM svm(program,0,params);
     svm.execute();
     
-    std::cout<<"END\n";
+    std::cout<<"ENDL\n";
     return 0;
 }
